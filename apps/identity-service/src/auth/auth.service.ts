@@ -35,56 +35,36 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    console.log('[Register] Starting registration for email:', dto.email);
-    
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
-      throw new BadRequestException('Email already exists');
+      throw new BadRequestException('Email đã tồn tại');
     }
 
-    // Get ADMIN role by default (Admin có quyền tạo user với các role khác)
-    console.log('[Register] Looking for ADMIN role...');
     const adminRole = await this.usersService.findRoleByName(RoleName.ADMIN);
     if (!adminRole || !adminRole.id) {
-      console.error('[Register] ERROR: ADMIN role not found!');
-      throw new BadRequestException('ADMIN role not found. Please run seed first.');
+      throw new BadRequestException(
+        'Không tìm thấy quyền ADMIN. Vui lòng chạy seed dữ liệu trước.',
+      );
     }
-    
-    // Debug log to verify correct role
-    console.log('[Register] Found ADMIN role:', adminRole.name, 'ID:', adminRole.id);
 
     const hashed = await bcrypt.hash(dto.password, 10);
-    console.log('[Register] Calling createUser with ADMIN role...');
+    console.log('[Đăng ký] Gọi createUser với quyền ADMIN...');
     const user = await this.usersService.createUser({
       email: dto.email,
       password: hashed,
       fullName: dto.fullName,
       roles: [adminRole],
     });
-
-    console.log('[Register] User created, checking roles...');
-    console.log('[Register] User roles count:', user.roles?.length || 0);
-    console.log('[Register] User roles:', user.roles?.map(r => `${r.name} (ID: ${r.id})`) || 'none');
-
     // User đã được reload với relations trong createUser, nhưng đảm bảo roles được load
     if (!user.roles || user.roles.length === 0) {
-      console.warn('[Register] WARNING: User has no roles! Reloading...');
       // Nếu roles không được load, reload lại
       const userWithRoles = await this.usersService.findById(user.id);
       if (!userWithRoles) {
-        throw new BadRequestException('Failed to create user');
+        throw new BadRequestException('Tạo người dùng thất bại');
       }
-      
-      // Debug log to verify roles after reload
-      console.log('[Register] User reloaded with roles:', userWithRoles.roles?.map(r => `${r.name} (ID: ${r.id})`) || 'none');
-      
       const tokens = await this.issueTokens(userWithRoles);
       return { user: this.stripPassword(userWithRoles), ...tokens };
     }
-
-    // Debug log to verify roles
-    console.log('[Register] Final user roles:', user.roles?.map(r => `${r.name} (ID: ${r.id})`));
-
     const tokens = await this.issueTokens(user);
     return { user: this.stripPassword(user), ...tokens };
   }
@@ -92,12 +72,12 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
 
     const isValid = await bcrypt.compare(dto.password, user.password);
     if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
     }
 
     const tokens = await this.issueTokens(user);
@@ -111,17 +91,17 @@ export class AuthService {
     });
 
     if (!stored) {
-      throw new UnauthorizedException('Refresh token revoked');
+      throw new UnauthorizedException('Refresh token đã bị thu hồi');
     }
 
     if (stored.expiryDate.getTime() < Date.now()) {
       await this.refreshTokenRepository.delete({ id: stored.id });
-      throw new UnauthorizedException('Refresh token expired');
+      throw new UnauthorizedException('Refresh token đã hết hạn');
     }
 
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Không tìm thấy người dùng');
     }
 
     // Rotate refresh token: remove old, issue new
@@ -132,7 +112,7 @@ export class AuthService {
 
   async logout(dto: RefreshTokenDto) {
     await this.refreshTokenRepository.delete({ token: dto.refreshToken });
-    return { message: 'Logged out' };
+    return { message: 'Đã đăng xuất' };
   }
 
   private stripPassword(user: User) {
@@ -189,7 +169,7 @@ export class AuthService {
         secret: this.refreshSecret,
       });
     } catch (err) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Refresh token không hợp lệ');
     }
   }
 
