@@ -14,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { User } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { RoleName } from '../users/entities/role.entity';
 
 @Injectable()
 export class AuthService {
@@ -34,18 +35,55 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
+    console.log('[Register] Starting registration for email:', dto.email);
+    
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
       throw new BadRequestException('Email already exists');
     }
 
+    // Get ADMIN role by default (Admin có quyền tạo user với các role khác)
+    console.log('[Register] Looking for ADMIN role...');
+    const adminRole = await this.usersService.findRoleByName(RoleName.ADMIN);
+    if (!adminRole || !adminRole.id) {
+      console.error('[Register] ERROR: ADMIN role not found!');
+      throw new BadRequestException('ADMIN role not found. Please run seed first.');
+    }
+    
+    // Debug log to verify correct role
+    console.log('[Register] Found ADMIN role:', adminRole.name, 'ID:', adminRole.id);
+
     const hashed = await bcrypt.hash(dto.password, 10);
+    console.log('[Register] Calling createUser with ADMIN role...');
     const user = await this.usersService.createUser({
       email: dto.email,
       password: hashed,
       fullName: dto.fullName,
-      role: dto.role,
+      roles: [adminRole],
     });
+
+    console.log('[Register] User created, checking roles...');
+    console.log('[Register] User roles count:', user.roles?.length || 0);
+    console.log('[Register] User roles:', user.roles?.map(r => `${r.name} (ID: ${r.id})`) || 'none');
+
+    // User đã được reload với relations trong createUser, nhưng đảm bảo roles được load
+    if (!user.roles || user.roles.length === 0) {
+      console.warn('[Register] WARNING: User has no roles! Reloading...');
+      // Nếu roles không được load, reload lại
+      const userWithRoles = await this.usersService.findById(user.id);
+      if (!userWithRoles) {
+        throw new BadRequestException('Failed to create user');
+      }
+      
+      // Debug log to verify roles after reload
+      console.log('[Register] User reloaded with roles:', userWithRoles.roles?.map(r => `${r.name} (ID: ${r.id})`) || 'none');
+      
+      const tokens = await this.issueTokens(userWithRoles);
+      return { user: this.stripPassword(userWithRoles), ...tokens };
+    }
+
+    // Debug log to verify roles
+    console.log('[Register] Final user roles:', user.roles?.map(r => `${r.name} (ID: ${r.id})`));
 
     const tokens = await this.issueTokens(user);
     return { user: this.stripPassword(user), ...tokens };
@@ -104,10 +142,13 @@ export class AuthService {
   }
 
   private async issueTokens(user: User) {
+    // Get role names from user roles
+    const roleNames = user.roles?.map((role) => role.name) || [];
+    
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
-      role: user.role,
+      roles: roleNames,
     });
 
     const refreshToken = await this.jwtService.signAsync(

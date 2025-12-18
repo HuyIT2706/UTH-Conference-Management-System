@@ -5,14 +5,20 @@ import { IdentityServiceController } from './identity-service.controller';
 import { IdentityServiceService } from './identity-service.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedModule } from './seed/seed.module';
 import { User } from './users/entities/user.entity';
+import { Role } from './users/entities/role.entity';
 import { RefreshToken } from './auth/entities/refresh-token.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['apps/identity-service/.env', '.env'],
+      envFilePath: [
+        'apps/identity-service/.env.local', // Local development override
+        'apps/identity-service/.env',
+        '.env',
+      ],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -37,11 +43,12 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
           username,
           password,
           database,
-          entities: [User, RefreshToken],
+          entities: [User, Role, RefreshToken],
           synchronize: true, 
         };
       },
     }),
+    SeedModule,
     UsersModule,
     AuthModule,
   ],
