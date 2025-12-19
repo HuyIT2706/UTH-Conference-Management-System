@@ -11,7 +11,6 @@ import { SubmissionVersion } from '../entities/submission-version.entity';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { UpdateSubmissionDto } from './dto/update-submission.dto';
 import { SupabaseService } from '../supabase/supabase.config';
-import { Express } from 'express';
 
 @Injectable()
 export class SubmissionsService {
@@ -29,7 +28,7 @@ export class SubmissionsService {
    * @param file Express.Multer.File
    * @returns Public URL của file
    */
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File | undefined): Promise<string> {
     if (!file) {
       throw new BadRequestException('File không được để trống');
     }
@@ -130,10 +129,18 @@ export class SubmissionsService {
       await queryRunner.commitTransaction();
 
       // Load lại với relations
-      return await this.submissionRepository.findOne({
+      const result = await this.submissionRepository.findOne({
         where: { id: savedSubmission.id },
         relations: ['versions'],
       });
+
+      if (!result) {
+        throw new NotFoundException(
+          `Không tìm thấy submission sau khi tạo`,
+        );
+      }
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -218,10 +225,18 @@ export class SubmissionsService {
       await queryRunner.commitTransaction();
 
       // Load lại với relations
-      return await this.submissionRepository.findOne({
+      const result = await this.submissionRepository.findOne({
         where: { id: updatedSubmission.id },
         relations: ['versions'],
       });
+
+      if (!result) {
+        throw new NotFoundException(
+          `Không tìm thấy submission sau khi cập nhật`,
+        );
+      }
+
+      return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
