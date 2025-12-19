@@ -69,12 +69,12 @@ export class ConferencesController {
     const user = this.decodeUserFromAuthHeader(authHeader);
     this.ensureCanManageConference(user);
 
-    const conference = await this.conferencesService.createConference(
-      dto,
-      user!.id,
-    );
+    const conference = await this.conferencesService.createConference(dto, user!.id);
 
-    return conference;
+    return {
+      message: 'Tạo hội nghị thành công',
+      data: conference,
+    };
   }
 
   @Get()
@@ -96,7 +96,12 @@ export class ConferencesController {
     const user = this.decodeUserFromAuthHeader(authHeader);
     this.ensureCanManageConference(user);
 
-    return this.conferencesService.addTrack(id, body.name);
+    const track = await this.conferencesService.addTrack(id, body.name);
+
+    return {
+      message: 'Thêm track thành công',
+      data: track,
+    };
   }
 
   @Post(':id/cfp')
@@ -108,6 +113,11 @@ export class ConferencesController {
     const user = this.decodeUserFromAuthHeader(authHeader);
     this.ensureCanManageConference(user);
 
-    return this.conferencesService.setCfpSettings(id, dto);
+    const cfp = await this.conferencesService.setCfpSettings(id, dto);
+
+    return {
+      message: 'Cập nhật mốc thời gian CFP thành công',
+      data: cfp,
+    };
   }
 }
