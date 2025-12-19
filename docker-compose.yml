@@ -51,6 +51,44 @@ services:
     networks:
       - uth-net
 
+  review-service:
+    build:
+      context: .
+      dockerfile: ./apps/review-service/Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=admin
+      - DB_PASSWORD=admin123
+      - DB_DATABASE=db_review
+    depends_on:
+      - postgres
+    networks:
+      - uth-net
+
+  submission-service:
+    build:
+      context: .
+      dockerfile: ./apps/submission-service/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=admin
+      - DB_PASSWORD=admin123
+      - DB_DATABASE=db_submission
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    depends_on:
+      - postgres
+    networks:
+      - uth-net
+
 networks:
   uth-net:
     driver: bridge

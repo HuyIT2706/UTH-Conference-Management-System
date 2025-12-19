@@ -7,7 +7,7 @@ import { Submission } from './entities/submission.entity';
 import { SubmissionVersion } from './entities/submission-version.entity';
 import { SubmissionsController } from './submissions/submissions.controller';
 import { SubmissionsService } from './submissions/submissions.service';
-import { FirebaseStorageService } from './storage/firebase-storage.service';
+import { SupabaseService } from './supabase/supabase.config';
 
 @Module({
   imports: [
@@ -51,6 +51,6 @@ import { FirebaseStorageService } from './storage/firebase-storage.service';
     }),
   ],
   controllers: [SubmissionsController],
-  providers: [SubmissionsService, FirebaseStorageService],
+  providers: [SubmissionsService, SupabaseService],
 })
 export class SubmissionServiceModule {}
