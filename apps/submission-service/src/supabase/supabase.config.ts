@@ -12,7 +12,7 @@ export class SupabaseService {
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error(
-        'SUPABASE_URL và SUPABASE_KEY phải đang sai',
+        'SUPABASE_URL và SUPABASE_KEY phải được cấu hình trong file .env',
       );
     }
 
