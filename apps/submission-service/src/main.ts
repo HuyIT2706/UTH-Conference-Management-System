@@ -23,6 +23,6 @@ async function bootstrap() {
       forbidUnknownValues: true,
     }),
   );
-  await app.listen(process.env.port ?? 3003);
+  await app.listen(process.env.PORT ?? 3003, '0.0.0.0');
 }
 bootstrap();

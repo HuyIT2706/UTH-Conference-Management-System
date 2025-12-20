@@ -39,3 +39,4 @@ export class CreateReviewDto {
   @IsNotEmpty()
   recommendation: RecommendationType;
 }
+

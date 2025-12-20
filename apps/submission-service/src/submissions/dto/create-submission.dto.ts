@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsInt, IsOptional, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateSubmissionDto {
   @IsString()
@@ -15,7 +16,9 @@ export class CreateSubmissionDto {
   @MaxLength(500)
   keywords?: string;
 
+  @Type(() => Number)
   @IsInt()
   @IsNotEmpty()
   trackId: number;
 }
+

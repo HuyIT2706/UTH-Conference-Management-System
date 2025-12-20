@@ -17,16 +17,16 @@ export class SubmissionVersion {
   submissionId: string;
 
   @Column({ type: 'int' })
-  versionNumber: number; // Tăng dần 1, 2, 3...
+  versionNumber: number; 
 
   @Column({ type: 'varchar', length: 500 })
-  title: string; // Snapshot dữ liệu cũ
+  title: string; 
 
   @Column({ type: 'text' })
-  abstract: string; // Snapshot dữ liệu cũ
+  abstract: string; 
 
   @Column({ type: 'text' })
-  fileUrl: string; // Snapshot file URL cũ
+  fileUrl: string; 
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   keywords: string | null;
@@ -40,3 +40,4 @@ export class SubmissionVersion {
   @JoinColumn({ name: 'submissionId' })
   submission: Submission;
 }
+

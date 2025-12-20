@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateSubmissionDto {
   @IsString()
@@ -15,7 +16,9 @@ export class UpdateSubmissionDto {
   @MaxLength(500)
   keywords?: string;
 
+  @Type(() => Number)
   @IsInt()
   @IsOptional()
   trackId?: number;
 }
+

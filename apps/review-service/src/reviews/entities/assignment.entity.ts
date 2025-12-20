@@ -48,3 +48,4 @@ export class Assignment {
   @OneToOne(() => Review, (review) => review.assignment)
   review: Review | null;
 }
+

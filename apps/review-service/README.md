@@ -359,3 +359,4 @@ Authorization: Bearer <token>
 - Review Service không chứa bảng User hay Submission, chỉ lưu ID tham chiếu
 - Cần tích hợp với Identity Service để verify user/role (hiện tại dùng JWT decode)
 - Cần tích hợp với Submission Service để verify submission tồn tại (hiện tại chỉ validate ID > 0)
+

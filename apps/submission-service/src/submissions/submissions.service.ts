@@ -33,21 +33,17 @@ export class SubmissionsService {
       throw new BadRequestException('File không được để trống');
     }
 
-    // Validate file phải là PDF
     if (file.mimetype !== 'application/pdf') {
       throw new BadRequestException('Chỉ chấp nhận file PDF');
     }
 
     const supabase = this.supabaseService.getClient();
     const bucketName = 'submissions';
-
-    // Tạo tên file unique: timestamp-uuid.pdf
     const timestamp = Date.now();
     const uuid = crypto.randomUUID();
     const fileName = `${timestamp}-${uuid}.pdf`;
 
     try {
-      // Upload file lên Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucketName)
         .upload(fileName, file.buffer, {
@@ -60,8 +56,6 @@ export class SubmissionsService {
           `Lỗi khi upload file: ${error.message}`,
         );
       }
-
-      // Lấy Public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from(bucketName).getPublicUrl(fileName);
@@ -113,9 +107,7 @@ export class SubmissionsService {
       });
 
       const savedSubmission = await queryRunner.manager.save(submission);
-
-      // 3. Tạo bản ghi đầu tiên vào SubmissionVersion (Version 1)
-      const version = this.submissionVersionRepository.create({
+      await queryRunner.manager.insert(SubmissionVersion, {
         submissionId: savedSubmission.id,
         versionNumber: 1,
         title: savedSubmission.title,
@@ -124,11 +116,8 @@ export class SubmissionsService {
         keywords: savedSubmission.keywords,
       });
 
-      await queryRunner.manager.save(version);
-
       await queryRunner.commitTransaction();
 
-      // Load lại với relations
       const result = await this.submissionRepository.findOne({
         where: { id: savedSubmission.id },
         relations: ['versions'],
@@ -168,10 +157,8 @@ export class SubmissionsService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Tìm submission hiện tại
       const submission = await queryRunner.manager.findOne(Submission, {
         where: { id },
-        relations: ['versions'],
       });
 
       if (!submission) {
@@ -184,17 +171,17 @@ export class SubmissionsService {
           'Bạn không có quyền cập nhật submission này',
         );
       }
-
-      // 3. Versioning: Copy dữ liệu hiện tại sang SubmissionVersion
-      // Tìm version number cao nhất
-      const maxVersion = submission.versions?.length
-        ? Math.max(...submission.versions.map((v) => v.versionNumber))
+      const existingVersions = await queryRunner.manager.find(SubmissionVersion, {
+        where: { submissionId: id },
+        select: ['versionNumber'],
+      });
+      
+      const maxVersion = existingVersions.length
+        ? Math.max(...existingVersions.map((v) => v.versionNumber))
         : 0;
 
       const newVersionNumber = maxVersion + 1;
-
-      // Tạo version backup
-      const version = this.submissionVersionRepository.create({
+      await queryRunner.manager.insert(SubmissionVersion, {
         submissionId: submission.id,
         versionNumber: newVersionNumber,
         title: submission.title,
@@ -203,15 +190,12 @@ export class SubmissionsService {
         keywords: submission.keywords,
       });
 
-      await queryRunner.manager.save(version);
-
       // 4. Upload file mới nếu có, nếu không thì giữ URL cũ
       let newFileUrl = submission.fileUrl;
       if (file) {
         newFileUrl = await this.uploadFile(file);
       }
 
-      // 5. Cập nhật submission với dữ liệu mới
       Object.assign(submission, {
         title: updateDto.title ?? submission.title,
         abstract: updateDto.abstract ?? submission.abstract,
@@ -223,8 +207,6 @@ export class SubmissionsService {
       const updatedSubmission = await queryRunner.manager.save(submission);
 
       await queryRunner.commitTransaction();
-
-      // Load lại với relations
       const result = await this.submissionRepository.findOne({
         where: { id: updatedSubmission.id },
         relations: ['versions'],
@@ -232,7 +214,7 @@ export class SubmissionsService {
 
       if (!result) {
         throw new NotFoundException(
-          `Không tìm thấy submission sau khi cập nhật`,
+          `Không tìm thấy bài dự thi sau khi cập nhật`,
         );
       }
 
@@ -271,7 +253,7 @@ export class SubmissionsService {
     });
 
     if (!submission) {
-      throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
+      throw new NotFoundException(`Bài dự thi với ID ${id} không tồn tại`);
     }
 
     // Kiểm tra quyền: Chỉ author mới được xem
@@ -281,7 +263,6 @@ export class SubmissionsService {
       );
     }
 
-    // Sắp xếp versions theo versionNumber giảm dần (mới nhất trước)
     if (submission.versions) {
       submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
     }
@@ -289,3 +270,4 @@ export class SubmissionsService {
     return submission;
   }
 }
+

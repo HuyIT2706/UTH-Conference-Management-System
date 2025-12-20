@@ -62,3 +62,4 @@ export class Review {
   @JoinColumn({ name: 'assignmentId' })
   assignment: Assignment;
 }
+

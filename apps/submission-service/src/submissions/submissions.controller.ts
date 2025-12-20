@@ -59,10 +59,6 @@ export class SubmissionsController {
     }
   }
 
-  /**
-   * POST /submissions
-   * Upload file (bắt buộc) + Body (title, abstract, trackId)
-   */
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async create(
@@ -75,17 +71,17 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
-    return await this.submissionsService.create(
+    const submission = await this.submissionsService.create(
       createDto,
       file,
       user.id,
     );
-  }
 
-  /**
-   * PUT /submissions/:id
-   * Upload file (tùy chọn) + Body update
-   */
+    return {
+      message: 'Nộp bài dự thi thành công',
+      data: submission,
+    };
+  }
   @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
   async update(
@@ -99,13 +95,18 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
-    return await this.submissionsService.update(id, updateDto, file, user.id);
-  }
+    const submission = await this.submissionsService.update(
+      id,
+      updateDto,
+      file,
+      user.id,
+    );
 
-  /**
-   * GET /submissions
-   * Lấy danh sách bài của user
-   */
+    return {
+      message: 'Cập nhật bài nộp dự thi thành công',
+      data: submission,
+    };
+  }
   @Get()
   async findAll(@Headers('authorization') authHeader?: string) {
     const user = this.decodeUserFromAuthHeader(authHeader);
@@ -113,13 +114,13 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
-    return await this.submissionsService.findAllByAuthor(user.id);
-  }
+    const submissions = await this.submissionsService.findAllByAuthor(user.id);
 
-  /**
-   * GET /submissions/:id
-   * Xem chi tiết (kèm lịch sử versions)
-   */
+    return {
+      message: 'Lấy danh sách các bài dự thi thành công',
+      data: submissions,
+    };
+  }
   @Get(':id')
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
@@ -130,6 +131,12 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
-    return await this.submissionsService.findOne(id, user.id);
+    const submission = await this.submissionsService.findOne(id, user.id);
+
+    return {
+      message: 'Lấy chi tiết bài dự thi thành công',
+      data: submission,
+    };
   }
 }
+

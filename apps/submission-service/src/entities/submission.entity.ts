@@ -31,7 +31,7 @@ export class Submission {
   keywords: string | null;
 
   @Column({ type: 'text' })
-  fileUrl: string; // Link file PDF trên Supabase
+  fileUrl: string; 
 
   @Column({
     type: 'enum',
@@ -41,10 +41,10 @@ export class Submission {
   status: SubmissionStatus;
 
   @Column({ type: 'int' })
-  authorId: number; // Lấy từ Token User
+  authorId: number; 
 
   @Column({ type: 'int' })
-  trackId: number; // ID Track hội nghị
+  trackId: number; 
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -52,9 +52,9 @@ export class Submission {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  // Quan hệ: 1 Submission có nhiều SubmissionVersion
   @OneToMany(() => SubmissionVersion, (version) => version.submission, {
     cascade: true,
   })
   versions: SubmissionVersion[];
 }
+

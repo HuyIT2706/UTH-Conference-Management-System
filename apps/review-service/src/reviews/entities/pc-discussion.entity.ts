@@ -22,3 +22,4 @@ export class PcDiscussion {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
+

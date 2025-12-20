@@ -39,3 +39,4 @@ export class ReviewPreference {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
+
