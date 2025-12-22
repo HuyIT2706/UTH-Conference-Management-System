@@ -107,15 +107,72 @@ http://localhost:3002/api
 - Cập nhật: `PATCH /conferences/:id` (body tùy chọn các trường `name`, `startDate`, `endDate`, `venue`)
 - Xóa: `DELETE /conferences/:id`
 
-### 5.4 Track
-- Thêm track:  
-  - `POST /conferences/:id/tracks`  
+### 5.4 Track - Phân ban/Chủ đề của Hội nghị
+
+**Mục đích:** Phân loại submissions theo chủ đề/phân ban (ví dụ: AI, Machine Learning, Database, etc.)
+
+**Giải thích:**
+- **Track = Phân ban/Chủ đề** của hội nghị, KHÔNG phải người
+- Mỗi hội nghị có thể có nhiều tracks (ví dụ: "AI Track", "ML Track", "Database Track")
+- **Authors** chọn track khi submit paper (trong submission-service)
+- **CHAIR** có thể phân công reviewers theo track (reviewers chuyên về track đó)
+- Dùng để **phân loại và báo cáo** submissions theo chủ đề
+
+**Sự khác biệt với Conference Members:**
+- **Tracks** = Chủ đề/phân ban (AI, ML, Database...) → Phân loại **papers**
+- **Members** = Người tham gia (CHAIR, PC_MEMBER) → Quản lý **người**
+
+**Ví dụ thực tế:**
+```
+Conference: "International UTH Conference 2025"
+├── Tracks (Chủ đề):
+│   ├── Track 1: "Artificial Intelligence"
+│   ├── Track 2: "Machine Learning"
+│   └── Track 3: "Database Systems"
+│
+└── Members (Người):
+    ├── CHAIR: Bùi Văn Huy
+    ├── PC_MEMBER: Nguyễn Văn A (chuyên AI)
+    └── PC_MEMBER: Trần Thị B (chuyên ML)
+```
+
+**Workflow:**
+1. CHAIR tạo conference
+2. CHAIR tạo các tracks (AI, ML, Database...)
+3. Authors submit papers và chọn track phù hợp
+4. CHAIR phân công reviewers theo track (người chuyên về track đó)
+5. Báo cáo: Xem có bao nhiêu papers mỗi track, acceptance rate theo track
+
+**Endpoints:**
+
+- **Thêm track:** `POST /conferences/:id/tracks`
+  - Headers: `Authorization: Bearer <token>` (phải là CHAIR hoặc ADMIN)
   - Body:
   ```json
-  { "name": "AI Track" }
+  { "name": "Artificial Intelligence" }
   ```
-- Cập nhật track: `PATCH /conferences/:conferenceId/tracks/:trackId` (body: `{ "name": "New Name" }`)
-- Xóa track: `DELETE /conferences/:conferenceId/tracks/:trackId`
+
+- **Cập nhật track:** `PATCH /conferences/:conferenceId/tracks/:trackId`
+  - Body: `{ "name": "New Track Name" }`
+
+- **Xóa track:** `DELETE /conferences/:conferenceId/tracks/:trackId`
+
+**Ví dụ sử dụng:**
+```bash
+# 1. CHAIR tạo track "AI" cho conference ID 1
+POST http://localhost:3002/api/conferences/1/tracks
+Authorization: Bearer <token_của_CHAIR>
+Body: { "name": "Artificial Intelligence" }
+
+# 2. CHAIR tạo thêm track "ML"
+POST http://localhost:3002/api/conferences/1/tracks
+Authorization: Bearer <token_của_CHAIR>
+Body: { "name": "Machine Learning" }
+
+# 3. Xem danh sách tracks của conference
+GET http://localhost:3002/api/conferences/1
+# Response sẽ có field "tracks": [{"id": 1, "name": "AI"}, {"id": 2, "name": "ML"}]
+```
 
 ### 5.5 CFP (deadline)
 - `POST /conferences/:id/cfp`
@@ -129,20 +186,74 @@ http://localhost:3002/api
 }
 ```
 
-### 5.6 Conference Members (PC/Chair)
-- Lấy danh sách member: `GET /conferences/:id/members`
-- Thêm member:  
-  - `POST /conferences/:id/members`  
+### 5.6 Conference Members (PC/Chair) - Quản lý Ban Chương trình
+
+**Mục đích:** Quản lý thành viên Ban Chương trình (Program Committee) của hội nghị.
+
+**Giải thích:**
+- **CHAIR (Chủ tịch Ban Chương trình):** Người quản lý hội nghị, có quyền:
+  - Mời/thêm PC members vào hội nghị
+  - Phân công papers cho reviewers (trong review-service)
+  - Ra quyết định Accept/Reject papers
+  - Xem tất cả submissions và reviews
+- **PC_MEMBER (Thành viên Ban Chương trình):** Người review papers, có quyền:
+  - Xem papers được phân công (trong review-service)
+  - Submit reviews và scores
+  - Thảo luận nội bộ với PC khác
+
+**Workflow thực tế:**
+1. User tạo conference → Tự động trở thành CHAIR của conference đó
+2. CHAIR mời PC Members → Dùng `POST /conferences/:id/members` để thêm reviewers
+3. PC Members nhận assignments → Trong review-service, họ được gán papers để review
+4. CHAIR theo dõi progress và ra quyết định → Dựa trên reviews từ PC members
+
+**Ví dụ:**
+```
+Conference ID 1: "International UTH Conference 2025"
+├── CHAIR: User ID 15 (Bùi Văn Huy) - Tạo conference
+├── PC_MEMBER: User ID 5 (Nguyễn Văn A) - Được mời review
+└── PC_MEMBER: User ID 6 (Trần Thị B) - Được mời review
+```
+
+**Endpoints:**
+
+- **Lấy danh sách members:** `GET /conferences/:id/members`
+  - Trả về tất cả CHAIR và PC_MEMBER của conference
+  - Chỉ CHAIR hoặc ADMIN mới xem được
+
+- **Thêm member:** `POST /conferences/:id/members`
+  - Headers: `Authorization: Bearer <token>` (phải là CHAIR hoặc ADMIN)
   - Body:
   ```json
   {
     "userId": 5,
-    "role": "PC_MEMBER" // hoặc "CHAIR"
+    "role": "PC_MEMBER"  // hoặc "CHAIR" (nếu muốn thêm CHAIR khác)
   }
   ```
-- Xóa member: `DELETE /conferences/:id/members/:userId`
+  - **Lưu ý:** `userId` phải là ID của user đã tồn tại trong identity-service
+
+- **Xóa member:** `DELETE /conferences/:id/members/:userId`
+  - Xóa user khỏi PC của conference
+  - Chỉ CHAIR hoặc ADMIN mới xóa được
+
+**Ví dụ sử dụng:**
+```bash
+# 1. CHAIR xem danh sách PC members
+GET http://localhost:3002/api/conferences/1/members
+Authorization: Bearer <token_của_CHAIR>
+
+# 2. CHAIR mời PC member mới
+POST http://localhost:3002/api/conferences/1/members
+Authorization: Bearer <token_của_CHAIR>
+Body: { "userId": 5, "role": "PC_MEMBER" }
+
+# 3. CHAIR xóa PC member
+DELETE http://localhost:3002/api/conferences/1/members/5
+Authorization: Bearer <token_của_CHAIR>
+```
 
 ### 5.7 Lưu ý quyền
 - Yêu cầu token hợp lệ từ identity-service.
-- ADMIN: thao tác được tất cả conference.
-- CHAIR: chỉ quản lý conference mà mình là member (role CHAIR).
+- **ADMIN:** Thao tác được tất cả conference (không cần là member).
+- **CHAIR:** Chỉ quản lý conference mà mình là member với role CHAIR.
+- **PC_MEMBER:** Không có quyền quản lý conference, chỉ review papers được phân công.
