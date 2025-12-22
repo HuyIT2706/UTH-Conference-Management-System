@@ -22,9 +22,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
-          // jose types prefer number; default 15 minutes
           expiresIn:
-            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 3600,
         },
       }),
     }),
