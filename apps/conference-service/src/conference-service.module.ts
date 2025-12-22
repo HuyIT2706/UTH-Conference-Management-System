@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
 import { Conference } from './conferences/entities/conference.entity';
 import { Track } from './conferences/entities/track.entity';
 import { ConferenceMember } from './conferences/entities/conference-member.entity';
 import { CfpSetting } from './cfp/entities/cfp-setting.entity';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -47,8 +50,19 @@ import { CfpSetting } from './cfp/entities/cfp-setting.entity';
       },
     }),
     TypeOrmModule.forFeature([Conference, Track, ConferenceMember, CfpSetting]),
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
+        signOptions: {
+          expiresIn: Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+        },
+      }),
+    }),
   ],
   controllers: [ConferencesController],
-  providers: [ConferencesService],
+  providers: [ConferencesService, JwtStrategy],
 })
 export class ConferenceServiceModule {}

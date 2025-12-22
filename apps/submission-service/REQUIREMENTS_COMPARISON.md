@@ -245,3 +245,4 @@ Tài liệu này so sánh các **yêu cầu từ đề tài UTH-ConfMS** với *
 - Audit logging
 
 **Điểm số phù hợp:** 9.5/10 - Các nhận xét đều đúng và phù hợp với yêu cầu đề tài.
+

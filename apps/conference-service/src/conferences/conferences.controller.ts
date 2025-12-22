@@ -2,74 +2,35 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseIntPipe,
   Post,
-  ForbiddenException,
+  Patch,
+  Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ConferencesService } from './conferences.service';
 import { CreateConferenceDto } from './dto/create-conference.dto';
 import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
-
-class CreateTrackDto {
-  name: string;
-}
-
-interface AuthUser {
-  id: number;
-  roles: string[];
-}
+import { UpdateConferenceDto } from './dto/update-conference.dto';
+import { CreateTrackDto } from './dto/create-track.dto';
+import { UpdateTrackDto } from './dto/update-track.dto';
+import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { JwtPayload } from '../auth/jwt.strategy';
 
 @Controller('conferences')
+@UseGuards(JwtAuthGuard)
 export class ConferencesController {
   constructor(private readonly conferencesService: ConferencesService) {}
 
-  private decodeUserFromAuthHeader(header?: string): AuthUser | undefined {
-    if (!header?.startsWith('Bearer ')) {
-      return undefined;
-    }
-    const token = header.substring('Bearer '.length).trim();
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return undefined;
-    }
-
-    try {
-      const payloadJson = Buffer.from(
-        parts[1].replace(/-/g, '+').replace(/_/g, '/'),
-        'base64',
-      ).toString('utf8');
-      const payload = JSON.parse(payloadJson) as {
-        sub?: number;
-        roles?: string[];
-      };
-
-      return {
-        id: payload.sub ?? 0,
-        roles: payload.roles ?? [],
-      };
-    } catch {
-      return undefined;
-    }
-  }
-
-  private ensureCanManageConference(user?: AuthUser) {
-    const roles = user?.roles || [];
-    if (!roles.includes('ADMIN') && !roles.includes('CHAIR')) {
-      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
-    }
-  }
-
   @Post()
   async create(
-    @Headers('authorization') authHeader: string | undefined,
+    @CurrentUser() user: JwtPayload,
     @Body() dto: CreateConferenceDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    const conference = await this.conferencesService.createConference(dto, user!.id);
+    const conference = await this.conferencesService.createConference(dto, user.sub);
 
     return {
       message: 'Tạo hội nghị thành công',
@@ -89,14 +50,14 @@ export class ConferencesController {
 
   @Post(':id/tracks')
   async addTrack(
-    @Headers('authorization') authHeader: string | undefined,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateTrackDto,
+    @CurrentUser() user: JwtPayload,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    const track = await this.conferencesService.addTrack(id, body.name);
+    const track = await this.conferencesService.addTrack(id, body.name, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
 
     return {
       message: 'Thêm track thành công',
@@ -106,18 +67,118 @@ export class ConferencesController {
 
   @Post(':id/cfp')
   async setCfp(
-    @Headers('authorization') authHeader: string | undefined,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: SetCfpSettingDto,
+    @CurrentUser() user: JwtPayload,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    const cfp = await this.conferencesService.setCfpSettings(id, dto);
+    const cfp = await this.conferencesService.setCfpSettings(id, dto, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
 
     return {
       message: 'Cập nhật mốc thời gian CFP thành công',
       data: cfp,
     };
+  }
+
+  @Patch(':id')
+  async updateConference(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateConferenceDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const updated = await this.conferencesService.updateConference(id, dto, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return {
+      message: 'Cập nhật hội nghị thành công',
+      data: updated,
+    };
+  }
+
+  @Delete(':id')
+  async deleteConference(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    await this.conferencesService.deleteConference(id, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return {
+      message: 'Xóa hội nghị thành công',
+    };
+  }
+
+  @Patch(':conferenceId/tracks/:trackId')
+  async updateTrack(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @Body() dto: UpdateTrackDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const updated = await this.conferencesService.updateTrack(
+      conferenceId,
+      trackId,
+      dto,
+      { id: user.sub, roles: user.roles ?? [] },
+    );
+    return {
+      message: 'Cập nhật người chấm bài thành công',
+      data: updated,
+    };
+  }
+
+  @Delete(':conferenceId/tracks/:trackId')
+  async deleteTrack(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    await this.conferencesService.deleteTrack(conferenceId, trackId, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Xóa người chấm bài thành công' };
+  }
+
+  @Get(':id/members')
+  async listMembers(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const members = await this.conferencesService.listMembers(id, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Lấy danh sách thành viên thành công', data: members };
+  }
+
+  @Post(':id/members')
+  async addMember(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: AddConferenceMemberDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const member = await this.conferencesService.addMember(id, dto, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Thêm thành viên thành công', data: member };
+  }
+
+  @Delete(':id/members/:userId')
+  async removeMember(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    await this.conferencesService.removeMember(id, userId, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Xóa thành viên thành công' };
   }
 }

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Conference } from './entities/conference.entity';
@@ -8,8 +13,11 @@ import {
   ConferenceMemberRole,
 } from './entities/conference-member.entity';
 import { CreateConferenceDto } from './dto/create-conference.dto';
+import { UpdateConferenceDto } from './dto/update-conference.dto';
 import { CfpSetting } from '../cfp/entities/cfp-setting.entity';
 import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
+import { UpdateTrackDto } from './dto/update-track.dto';
+import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
 
 @Injectable()
 export class ConferencesService {
@@ -28,6 +36,8 @@ export class ConferencesService {
     dto: CreateConferenceDto,
     organizerId: number,
   ): Promise<Conference> {
+    this.ensureValidDateRange(dto.startDate, dto.endDate);
+
     const conference = this.conferenceRepository.create({
       name: dto.name,
       startDate: new Date(dto.startDate),
@@ -49,13 +59,13 @@ export class ConferencesService {
   }
 
   async findAll(): Promise<Conference[]> {
-    return this.conferenceRepository.find({ relations: ['tracks'] });
+    return this.conferenceRepository.find({ relations: ['tracks', 'members'] });
   }
 
   async findOne(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
       where: { id },
-      relations: ['tracks'],
+      relations: ['tracks', 'members', 'cfpSetting'],
     });
 
     if (!conference) {
@@ -65,15 +75,13 @@ export class ConferencesService {
     return conference;
   }
 
-  async addTrack(conferenceId: number, name: string): Promise<Track> {
-    const conference = await this.conferenceRepository.findOne({
-      where: { id: conferenceId },
-    });
-
-    if (!conference) {
-      throw new NotFoundException('Conference not found');
-    }
-
+  async addTrack(
+    conferenceId: number,
+    name: string,
+    user: { id: number; roles: string[] },
+  ): Promise<Track> {
+    await this.ensureCanManageConference(conferenceId, user);
+    const conference = await this.getConferenceOrThrow(conferenceId);
     const track = this.trackRepository.create({
       name,
       conferenceId: conferenceId,
@@ -86,14 +94,11 @@ export class ConferencesService {
   async setCfpSettings(
     conferenceId: number,
     dto: SetCfpSettingDto,
+    user: { id: number; roles: string[] },
   ): Promise<CfpSetting> {
-    const conference = await this.conferenceRepository.findOne({
-      where: { id: conferenceId },
-    });
-
-    if (!conference) {
-      throw new NotFoundException('Conference not found');
-    }
+    await this.ensureCanManageConference(conferenceId, user);
+    const conference = await this.getConferenceOrThrow(conferenceId);
+    this.ensureValidCfpDates(dto);
 
     let setting = await this.cfpSettingRepository.findOne({
       where: { conferenceId },
@@ -112,5 +117,186 @@ export class ConferencesService {
     setting.cameraReadyDeadline = new Date(dto.cameraReadyDeadline);
 
     return this.cfpSettingRepository.save(setting);
+  }
+
+  async updateConference(
+    id: number,
+    dto: UpdateConferenceDto,
+    user: { id: number; roles: string[] },
+  ): Promise<Conference> {
+    await this.ensureCanManageConference(id, user);
+    const conference = await this.getConferenceOrThrow(id);
+
+    const nextStart = dto.startDate ?? conference.startDate.toISOString();
+    const nextEnd = dto.endDate ?? conference.endDate.toISOString();
+    this.ensureValidDateRange(nextStart, nextEnd);
+
+    Object.assign(conference, {
+      name: dto.name ?? conference.name,
+      startDate: dto.startDate ? new Date(dto.startDate) : conference.startDate,
+      endDate: dto.endDate ? new Date(dto.endDate) : conference.endDate,
+      venue: dto.venue ?? conference.venue,
+    });
+
+    return this.conferenceRepository.save(conference);
+  }
+
+  async deleteConference(
+    id: number,
+    user: { id: number; roles: string[] },
+  ): Promise<void> {
+    await this.ensureCanManageConference(id, user);
+    const conference = await this.getConferenceOrThrow(id);
+    await this.conferenceRepository.remove(conference);
+  }
+
+  async updateTrack(
+    conferenceId: number,
+    trackId: number,
+    dto: UpdateTrackDto,
+    user: { id: number; roles: string[] },
+  ): Promise<Track> {
+    await this.ensureCanManageConference(conferenceId, user);
+    const track = await this.trackRepository.findOne({
+      where: { id: trackId, conferenceId },
+    });
+    if (!track) {
+      throw new NotFoundException('Track not found');
+    }
+    Object.assign(track, {
+      name: dto.name ?? track.name,
+    });
+    return this.trackRepository.save(track);
+  }
+
+  async deleteTrack(
+    conferenceId: number,
+    trackId: number,
+    user: { id: number; roles: string[] },
+  ): Promise<void> {
+    await this.ensureCanManageConference(conferenceId, user);
+    const track = await this.trackRepository.findOne({
+      where: { id: trackId, conferenceId },
+    });
+    if (!track) {
+      throw new NotFoundException('Track not found');
+    }
+    await this.trackRepository.remove(track);
+  }
+
+  async listMembers(
+    conferenceId: number,
+    user: { id: number; roles: string[] },
+  ): Promise<ConferenceMember[]> {
+    await this.ensureCanManageConference(conferenceId, user);
+    await this.getConferenceOrThrow(conferenceId);
+    return this.conferenceMemberRepository.find({
+      where: { conferenceId },
+    });
+  }
+
+  async addMember(
+    conferenceId: number,
+    dto: AddConferenceMemberDto,
+    user: { id: number; roles: string[] },
+  ): Promise<ConferenceMember> {
+    await this.ensureCanManageConference(conferenceId, user);
+    await this.getConferenceOrThrow(conferenceId);
+
+    const existing = await this.conferenceMemberRepository.findOne({
+      where: { conferenceId, userId: dto.userId },
+    });
+    if (existing) {
+      throw new BadRequestException('User already a member of this conference');
+    }
+
+    const member = this.conferenceMemberRepository.create({
+      conferenceId,
+      userId: dto.userId,
+      role: dto.role,
+    });
+    return this.conferenceMemberRepository.save(member);
+  }
+
+  async removeMember(
+    conferenceId: number,
+    memberUserId: number,
+    user: { id: number; roles: string[] },
+  ): Promise<void> {
+    await this.ensureCanManageConference(conferenceId, user);
+    const member = await this.conferenceMemberRepository.findOne({
+      where: { conferenceId, userId: memberUserId },
+    });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+    await this.conferenceMemberRepository.remove(member);
+  }
+
+  private ensureValidDateRange(start: string, end: string) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      throw new BadRequestException('Ngày bắt đầu/kết thúc không hợp lệ');
+    }
+    if (startDate >= endDate) {
+      throw new BadRequestException('startDate phải trước endDate');
+    }
+  }
+
+  private ensureValidCfpDates(dto: SetCfpSettingDto) {
+    const submissionDeadline = new Date(dto.submissionDeadline);
+    const reviewDeadline = new Date(dto.reviewDeadline);
+    const notificationDate = new Date(dto.notificationDate);
+    const cameraReadyDeadline = new Date(dto.cameraReadyDeadline);
+
+    if (
+      [
+        submissionDeadline,
+        reviewDeadline,
+        notificationDate,
+        cameraReadyDeadline,
+      ].some((d) => Number.isNaN(d.getTime()))
+    ) {
+      throw new BadRequestException('Mốc thời gian CFP không hợp lệ');
+    }
+
+    if (
+      !(
+        submissionDeadline <= reviewDeadline &&
+        reviewDeadline <= notificationDate &&
+        notificationDate <= cameraReadyDeadline
+      )
+    ) {
+      throw new BadRequestException(
+        'Thứ tự mốc thời gian CFP không hợp lệ (submission <= review <= notification <= camera ready)',
+      );
+    }
+  }
+
+  private async ensureCanManageConference(
+    conferenceId: number,
+    user: { id: number; roles: string[] },
+  ) {
+    const roles = user?.roles || [];
+    if (roles.includes('ADMIN')) {
+      return;
+    }
+    const membership = await this.conferenceMemberRepository.findOne({
+      where: { conferenceId, userId: user.id },
+    });
+    if (!membership || membership.role !== ConferenceMemberRole.CHAIR) {
+      throw new ForbiddenException('Bạn không có quyền quản lý hội nghị này');
+    }
+  }
+
+  private async getConferenceOrThrow(id: number): Promise<Conference> {
+    const conference = await this.conferenceRepository.findOne({
+      where: { id },
+    });
+    if (!conference) {
+      throw new NotFoundException('Conference not found');
+    }
+    return conference;
   }
 }

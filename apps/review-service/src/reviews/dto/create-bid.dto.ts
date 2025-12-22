@@ -11,3 +11,4 @@ export class CreateBidDto {
   preference: PreferenceType;
 }
 
+

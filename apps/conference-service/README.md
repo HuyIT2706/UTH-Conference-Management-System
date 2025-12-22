@@ -72,66 +72,54 @@ docker exec -it uth_postgres psql -U admin -d db_conference
 ```
 ## 5. Test API bằng Postman
 
-Base URL cho `conference-service`:
+### 5.1 Lấy access token (từ identity-service)
+- Base URL identity-service: `http://localhost:3001/api`
+- Đăng nhập: `POST /api/auth/login`
+  - Body:
+  ```json
+  {
+    "email": "admin@example.com",
+    "password": "admin123"
+  }
+  ```
+  - Lấy `accessToken` trong response, dùng cho tất cả yêu cầu dưới (`Authorization: Bearer <accessToken>`).
 
-```text
+### 5.2 Base URL conference-service
+```
 http://localhost:3002/api
 ```
 
-### 6.1 Tạo Conference
+### 5.3 Conference
+- Tạo conference  
+  - `POST /conferences`  
+  - Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`  
+  - Body:
+  ```json
+  {
+    "name": "International UTH Conference 2025",
+    "startDate": "2025-06-01T09:00:00Z",
+    "endDate": "2025-06-03T18:00:00Z",
+    "venue": "HCMC University of Transport"
+  }
+  ```
+- Danh sách: `GET /conferences`
+- Chi tiết: `GET /conferences/:id`
+- Cập nhật: `PATCH /conferences/:id` (body tùy chọn các trường `name`, `startDate`, `endDate`, `venue`)
+- Xóa: `DELETE /conferences/:id`
 
-- Method: `POST`
-- URL: `http://localhost:3002/api/conferences`
-- Headers:
-  - `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-  - `Content-Type: application/json`
-- Body (JSON):
+### 5.4 Track
+- Thêm track:  
+  - `POST /conferences/:id/tracks`  
+  - Body:
+  ```json
+  { "name": "AI Track" }
+  ```
+- Cập nhật track: `PATCH /conferences/:conferenceId/tracks/:trackId` (body: `{ "name": "New Name" }`)
+- Xóa track: `DELETE /conferences/:conferenceId/tracks/:trackId`
 
-```json
-{
-  "name": "International UTH Conference 2025",
-  "startDate": "2025-06-01T09:00:00Z",
-  "endDate": "2025-06-03T18:00:00Z",
-  "venue": "HCMC University of Transport"
-}
-```
-
-### 6.2 Danh sách Conference
-
-- Method: `GET`
-- URL: `http://localhost:3002/api/conferences`
-
-Trả về mảng các conference (kèm `tracks`).
-
-### 6.3 Lấy chi tiết 1 Conference
-
-- Method: `GET`
-- URL: `http://localhost:3002/api/conferences/:id`
-
-### 6.4 Thêm Track vào Conference
-
-- Method: `POST`
-- URL: `http://localhost:3002/api/conferences/:id/tracks`
-- Headers:
-  - `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-  - `Content-Type: application/json`
-- Body (JSON):
-
-```json
-{
-  "name": "AI Track"
-}
-```
-
-### 6.5 Thiết lập CFP (Deadline) cho Conference
-
-- Method: `POST`
-- URL: `http://localhost:3002/api/conferences/:id/cfp`
-- Headers:
-  - `Authorization: Bearer <JWT_ACCESS_TOKEN>`
-  - `Content-Type: application/json`
-- Body (JSON):
-
+### 5.5 CFP (deadline)
+- `POST /conferences/:id/cfp`
+- Body (thứ tự phải hợp lệ: submission ≤ review ≤ notification ≤ cameraReady):
 ```json
 {
   "submissionDeadline": "2025-03-01T23:59:59Z",
@@ -140,3 +128,21 @@ Trả về mảng các conference (kèm `tracks`).
   "cameraReadyDeadline": "2025-04-15T23:59:59Z"
 }
 ```
+
+### 5.6 Conference Members (PC/Chair)
+- Lấy danh sách member: `GET /conferences/:id/members`
+- Thêm member:  
+  - `POST /conferences/:id/members`  
+  - Body:
+  ```json
+  {
+    "userId": 5,
+    "role": "PC_MEMBER" // hoặc "CHAIR"
+  }
+  ```
+- Xóa member: `DELETE /conferences/:id/members/:userId`
+
+### 5.7 Lưu ý quyền
+- Yêu cầu token hợp lệ từ identity-service.
+- ADMIN: thao tác được tất cả conference.
+- CHAIR: chỉ quản lý conference mà mình là member (role CHAIR).

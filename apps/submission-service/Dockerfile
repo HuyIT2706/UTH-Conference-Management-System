@@ -8,3 +8,4 @@ RUN npm run build submission-service
 EXPOSE 3003
 CMD ["node", "dist/apps/submission-service/main"]
 
+
