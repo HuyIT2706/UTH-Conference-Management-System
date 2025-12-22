@@ -163,10 +163,24 @@ export class ConferencesService {
     if (!track) {
       throw new NotFoundException('Track not found');
     }
-    Object.assign(track, {
-      name: dto.name ?? track.name,
+    
+    // Update name nếu có trong DTO (kể cả empty string)
+    if (dto.name !== undefined && dto.name !== null) {
+      track.name = dto.name;
+    }
+    
+    await this.trackRepository.save(track);
+    
+    // Reload từ DB để đảm bảo trả về dữ liệu mới nhất
+    const updated = await this.trackRepository.findOne({
+      where: { id: trackId, conferenceId },
     });
-    return this.trackRepository.save(track);
+    
+    if (!updated) {
+      throw new NotFoundException('Track not found after update');
+    }
+    
+    return updated;
   }
 
   async deleteTrack(
