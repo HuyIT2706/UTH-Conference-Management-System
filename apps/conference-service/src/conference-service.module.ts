@@ -5,10 +5,24 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
+import { TemplatesController } from './templates/templates.controller';
+import { TemplatesService } from './templates/templates.service';
+import { NotificationsController } from './notifications/notifications.controller';
+import { NotificationsService } from './notifications/notifications.service';
+import { PublicController } from './public/public.controller';
+import { ReportingController } from './reporting/reporting.controller';
+import { ReportingService } from './reporting/reporting.service';
+import { AuditController } from './audit/audit.controller';
+import { AuditService } from './audit/audit.service';
+import { ValidationController } from './validation/validation.controller';
 import { Conference } from './conferences/entities/conference.entity';
 import { Track } from './conferences/entities/track.entity';
 import { ConferenceMember } from './conferences/entities/conference-member.entity';
 import { CfpSetting } from './cfp/entities/cfp-setting.entity';
+import { EmailTemplate } from './templates/entities/email-template.entity';
+import { FormTemplate } from './templates/entities/form-template.entity';
+import { CfpTemplate } from './templates/entities/cfp-template.entity';
+import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
@@ -44,12 +58,30 @@ import { JwtStrategy } from './auth/jwt.strategy';
           username,
           password,
           database,
-          entities: [Conference, Track, ConferenceMember, CfpSetting],
+          entities: [
+            Conference,
+            Track,
+            ConferenceMember,
+            CfpSetting,
+            EmailTemplate,
+            FormTemplate,
+            CfpTemplate,
+            AuditLog,
+          ],
           synchronize: true,
         };
       },
     }),
-    TypeOrmModule.forFeature([Conference, Track, ConferenceMember, CfpSetting]),
+    TypeOrmModule.forFeature([
+      Conference,
+      Track,
+      ConferenceMember,
+      CfpSetting,
+      EmailTemplate,
+      FormTemplate,
+      CfpTemplate,
+      AuditLog,
+    ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -62,7 +94,22 @@ import { JwtStrategy } from './auth/jwt.strategy';
       }),
     }),
   ],
-  controllers: [ConferencesController],
-  providers: [ConferencesService, JwtStrategy],
+  controllers: [
+    ConferencesController,
+    TemplatesController,
+    NotificationsController,
+    PublicController,
+    ReportingController,
+    AuditController,
+    ValidationController,
+  ],
+  providers: [
+    ConferencesService,
+    TemplatesService,
+    NotificationsService,
+    ReportingService,
+    AuditService,
+    JwtStrategy,
+  ],
 })
 export class ConferenceServiceModule {}

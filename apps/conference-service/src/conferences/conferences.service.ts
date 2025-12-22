@@ -161,7 +161,7 @@ export class ConferencesService {
       where: { id: trackId, conferenceId },
     });
     if (!track) {
-      throw new NotFoundException('Track not found');
+      throw new NotFoundException('Không tìm thấy chủ đề');
     }
     
     if (dto.name !== undefined && dto.name !== null) {
@@ -175,7 +175,7 @@ export class ConferencesService {
     });
     
     if (!updated) {
-      throw new NotFoundException('Track not found after update');
+      throw new NotFoundException('Không tìm thấy chủ đề sau khi cập nhật');
     }
     
     return updated;
@@ -191,7 +191,7 @@ export class ConferencesService {
       where: { id: trackId, conferenceId },
     });
     if (!track) {
-      throw new NotFoundException('Track not found');
+      throw new NotFoundException('Chủ đề không tồn tại');
     }
     await this.trackRepository.remove(track);
   }
@@ -219,7 +219,7 @@ export class ConferencesService {
       where: { conferenceId, userId: dto.userId },
     });
     if (existing) {
-      throw new BadRequestException('User already a member of this conference');
+      throw new BadRequestException('Người dùng đã là thành viên của hội nghị này');
     }
 
     const member = this.conferenceMemberRepository.create({
@@ -240,7 +240,7 @@ export class ConferencesService {
       where: { conferenceId, userId: memberUserId },
     });
     if (!member) {
-      throw new NotFoundException('Member not found');
+      throw new NotFoundException('Không tìm thấy thành viên này');
     }
     await this.conferenceMemberRepository.remove(member);
   }
@@ -302,12 +302,25 @@ export class ConferencesService {
     }
   }
 
+  async findAllTracks(conferenceId: number): Promise<Track[]> {
+    return await this.trackRepository.find({
+      where: { conferenceId },
+      order: { id: 'ASC' },
+    });
+  }
+
+  async getCfpSetting(conferenceId: number): Promise<CfpSetting | null> {
+    return await this.cfpSettingRepository.findOne({
+      where: { conferenceId },
+    });
+  }
+
   private async getConferenceOrThrow(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
       where: { id },
     });
     if (!conference) {
-      throw new NotFoundException('Conference not found');
+      throw new NotFoundException('Không tìm thấy hội nghị');
     }
     return conference;
   }

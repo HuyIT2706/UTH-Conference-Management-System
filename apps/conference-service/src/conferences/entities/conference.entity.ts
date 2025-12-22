@@ -2,6 +2,10 @@ import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typ
 import { Track } from './track.entity';
 import { ConferenceMember } from './conference-member.entity';
 import { CfpSetting } from '../../cfp/entities/cfp-setting.entity';
+import { EmailTemplate } from '../../templates/entities/email-template.entity';
+import { FormTemplate } from '../../templates/entities/form-template.entity';
+import { CfpTemplate } from '../../templates/entities/cfp-template.entity';
+import { AuditLog } from '../../audit/entities/audit-log.entity';
 
 @Entity({ name: 'conferences' })
 export class Conference {
@@ -34,4 +38,16 @@ export class Conference {
 
   @OneToOne(() => CfpSetting, (cfp) => cfp.conference)
   cfpSetting: CfpSetting | null;
+
+  @OneToMany(() => EmailTemplate, (template) => template.conference)
+  emailTemplates: EmailTemplate[];
+
+  @OneToMany(() => FormTemplate, (template) => template.conference)
+  formTemplates: FormTemplate[];
+
+  @OneToOne(() => CfpTemplate, (template) => template.conference)
+  cfpTemplate: CfpTemplate | null;
+
+  @OneToMany(() => AuditLog, (log) => log.conference)
+  auditLogs: AuditLog[];
 }

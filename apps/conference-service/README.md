@@ -63,6 +63,10 @@ TypeORM đang bật `synchronize: true` nên khi service start lần đầu sẽ
 - `tracks`
 - `conference_members`
 - `cfp_settings`
+- `email_templates`
+- `form_templates`
+- `cfp_templates`
+- `audit_logs`
 
 Bạn có thể kiểm tra trong Postgres:
 
@@ -107,72 +111,15 @@ http://localhost:3002/api
 - Cập nhật: `PATCH /conferences/:id` (body tùy chọn các trường `name`, `startDate`, `endDate`, `venue`)
 - Xóa: `DELETE /conferences/:id`
 
-### 5.4 Track - Phân ban/Chủ đề của Hội nghị
-
-**Mục đích:** Phân loại submissions theo chủ đề/phân ban (ví dụ: AI, Machine Learning, Database, etc.)
-
-**Giải thích:**
-- **Track = Phân ban/Chủ đề** của hội nghị, KHÔNG phải người
-- Mỗi hội nghị có thể có nhiều tracks (ví dụ: "AI Track", "ML Track", "Database Track")
-- **Authors** chọn track khi submit paper (trong submission-service)
-- **CHAIR** có thể phân công reviewers theo track (reviewers chuyên về track đó)
-- Dùng để **phân loại và báo cáo** submissions theo chủ đề
-
-**Sự khác biệt với Conference Members:**
-- **Tracks** = Chủ đề/phân ban (AI, ML, Database...) → Phân loại **papers**
-- **Members** = Người tham gia (CHAIR, PC_MEMBER) → Quản lý **người**
-
-**Ví dụ thực tế:**
-```
-Conference: "International UTH Conference 2025"
-├── Tracks (Chủ đề):
-│   ├── Track 1: "Artificial Intelligence"
-│   ├── Track 2: "Machine Learning"
-│   └── Track 3: "Database Systems"
-│
-└── Members (Người):
-    ├── CHAIR: Bùi Văn Huy
-    ├── PC_MEMBER: Nguyễn Văn A (chuyên AI)
-    └── PC_MEMBER: Trần Thị B (chuyên ML)
-```
-
-**Workflow:**
-1. CHAIR tạo conference
-2. CHAIR tạo các tracks (AI, ML, Database...)
-3. Authors submit papers và chọn track phù hợp
-4. CHAIR phân công reviewers theo track (người chuyên về track đó)
-5. Báo cáo: Xem có bao nhiêu papers mỗi track, acceptance rate theo track
-
-**Endpoints:**
-
-- **Thêm track:** `POST /conferences/:id/tracks`
-  - Headers: `Authorization: Bearer <token>` (phải là CHAIR hoặc ADMIN)
+### 5.4 Track
+- Thêm track:  
+  - `POST /conferences/:id/tracks`  
   - Body:
   ```json
-  { "name": "Artificial Intelligence" }
+  { "name": "AI Track" }
   ```
-
-- **Cập nhật track:** `PATCH /conferences/:conferenceId/tracks/:trackId`
-  - Body: `{ "name": "New Track Name" }`
-
-- **Xóa track:** `DELETE /conferences/:conferenceId/tracks/:trackId`
-
-**Ví dụ sử dụng:**
-```bash
-# 1. CHAIR tạo track "AI" cho conference ID 1
-POST http://localhost:3002/api/conferences/1/tracks
-Authorization: Bearer <token_của_CHAIR>
-Body: { "name": "Artificial Intelligence" }
-
-# 2. CHAIR tạo thêm track "ML"
-POST http://localhost:3002/api/conferences/1/tracks
-Authorization: Bearer <token_của_CHAIR>
-Body: { "name": "Machine Learning" }
-
-# 3. Xem danh sách tracks của conference
-GET http://localhost:3002/api/conferences/1
-# Response sẽ có field "tracks": [{"id": 1, "name": "AI"}, {"id": 2, "name": "ML"}]
-```
+- Cập nhật track: `PATCH /conferences/:conferenceId/tracks/:trackId` (body: `{ "name": "New Name" }`)
+- Xóa track: `DELETE /conferences/:conferenceId/tracks/:trackId`
 
 ### 5.5 CFP (deadline)
 - `POST /conferences/:id/cfp`
@@ -186,74 +133,211 @@ GET http://localhost:3002/api/conferences/1
 }
 ```
 
-### 5.6 Conference Members (PC/Chair) - Quản lý Ban Chương trình
-
-**Mục đích:** Quản lý thành viên Ban Chương trình (Program Committee) của hội nghị.
-
-**Giải thích:**
-- **CHAIR (Chủ tịch Ban Chương trình):** Người quản lý hội nghị, có quyền:
-  - Mời/thêm PC members vào hội nghị
-  - Phân công papers cho reviewers (trong review-service)
-  - Ra quyết định Accept/Reject papers
-  - Xem tất cả submissions và reviews
-- **PC_MEMBER (Thành viên Ban Chương trình):** Người review papers, có quyền:
-  - Xem papers được phân công (trong review-service)
-  - Submit reviews và scores
-  - Thảo luận nội bộ với PC khác
-
-**Workflow thực tế:**
-1. User tạo conference → Tự động trở thành CHAIR của conference đó
-2. CHAIR mời PC Members → Dùng `POST /conferences/:id/members` để thêm reviewers
-3. PC Members nhận assignments → Trong review-service, họ được gán papers để review
-4. CHAIR theo dõi progress và ra quyết định → Dựa trên reviews từ PC members
-
-**Ví dụ:**
-```
-Conference ID 1: "International UTH Conference 2025"
-├── CHAIR: User ID 15 (Bùi Văn Huy) - Tạo conference
-├── PC_MEMBER: User ID 5 (Nguyễn Văn A) - Được mời review
-└── PC_MEMBER: User ID 6 (Trần Thị B) - Được mời review
-```
-
-**Endpoints:**
-
-- **Lấy danh sách members:** `GET /conferences/:id/members`
-  - Trả về tất cả CHAIR và PC_MEMBER của conference
-  - Chỉ CHAIR hoặc ADMIN mới xem được
-
-- **Thêm member:** `POST /conferences/:id/members`
-  - Headers: `Authorization: Bearer <token>` (phải là CHAIR hoặc ADMIN)
+### 5.6 Conference Members (PC/Chair)
+- Lấy danh sách member: `GET /conferences/:id/members`
+- Thêm member:  
+  - `POST /conferences/:id/members`  
   - Body:
   ```json
   {
     "userId": 5,
-    "role": "PC_MEMBER"  // hoặc "CHAIR" (nếu muốn thêm CHAIR khác)
+    "role": "PC_MEMBER" // hoặc "CHAIR"
   }
   ```
-  - **Lưu ý:** `userId` phải là ID của user đã tồn tại trong identity-service
+- Xóa member: `DELETE /conferences/:id/members/:userId`
 
-- **Xóa member:** `DELETE /conferences/:id/members/:userId`
-  - Xóa user khỏi PC của conference
-  - Chỉ CHAIR hoặc ADMIN mới xóa được
+### 5.7 Template Management
 
-**Ví dụ sử dụng:**
-```bash
-# 1. CHAIR xem danh sách PC members
-GET http://localhost:3002/api/conferences/1/members
-Authorization: Bearer <token_của_CHAIR>
+#### Email Templates
+- Tạo email template:
+  - `POST /conferences/:conferenceId/templates/email`
+  - Body:
+  ```json
+  {
+    "name": "Decision Accepted Email",
+    "type": "DECISION_ACCEPTED",
+    "subject": "Congratulations! Your submission has been accepted",
+    "body": "Dear {{authorName}},\n\nYour submission '{{submissionTitle}}' has been accepted for {{conferenceName}}.\n\nBest regards,\n{{conferenceName}} Committee",
+    "variables": {
+      "authorName": "Tên tác giả",
+      "submissionTitle": "Tiêu đề bài nộp",
+      "conferenceName": "Tên hội nghị"
+    }
+  }
+  ```
+  - Các type có sẵn: `DECISION_ACCEPTED`, `DECISION_REJECTED`, `REMINDER_REVIEW`, `INVITATION_PC`, `NOTIFICATION_DEADLINE`
+- Lấy danh sách: `GET /conferences/:conferenceId/templates/email`
+- Lấy chi tiết: `GET /conferences/:conferenceId/templates/email/:templateId`
+- Cập nhật: `PATCH /conferences/:conferenceId/templates/email/:templateId`
+- Xóa: `DELETE /conferences/:conferenceId/templates/email/:templateId`
 
-# 2. CHAIR mời PC member mới
-POST http://localhost:3002/api/conferences/1/members
-Authorization: Bearer <token_của_CHAIR>
-Body: { "userId": 5, "role": "PC_MEMBER" }
+#### Form Templates
+- Tạo form template:
+  - `POST /conferences/:conferenceId/templates/form`
+  - Body:
+  ```json
+  {
+    "type": "SUBMISSION_FORM",
+    "name": "Submission Form Template",
+    "fields": [
+      {
+        "name": "title",
+        "label": "Title",
+        "type": "text",
+        "required": true,
+        "validation": { "maxLength": 500 }
+      },
+      {
+        "name": "abstract",
+        "label": "Abstract",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "name": "keywords",
+        "label": "Keywords",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "description": "Template for submission form"
+  }
+  ```
+  - Các type có sẵn: `SUBMISSION_FORM`, `REVIEW_FORM`, `CFP_FORM`
+- Lấy danh sách: `GET /conferences/:conferenceId/templates/form`
+- Lấy chi tiết: `GET /conferences/:conferenceId/templates/form/:templateId`
+- Cập nhật: `PATCH /conferences/:conferenceId/templates/form/:templateId`
+- Xóa: `DELETE /conferences/:conferenceId/templates/form/:templateId`
 
-# 3. CHAIR xóa PC member
-DELETE http://localhost:3002/api/conferences/1/members/5
-Authorization: Bearer <token_của_CHAIR>
-```
+#### CFP Templates
+- Tạo/Cập nhật CFP template:
+  - `POST /conferences/:conferenceId/templates/cfp`
+  - Body:
+  ```json
+  {
+    "htmlContent": "<html><body><h1>{{conferenceName}}</h1><p>Welcome to our conference!</p></body></html>",
+    "customStyles": {
+      "primaryColor": "#007bff",
+      "fontFamily": "Arial"
+    }
+  }
+  ```
+- Lấy CFP template: `GET /conferences/:conferenceId/templates/cfp`
+- Cập nhật: `PATCH /conferences/:conferenceId/templates/cfp`
 
-### 5.7 Lưu ý quyền
-- Yêu cầu token hợp lệ từ identity-service.
-- **ADMIN:** Thao tác được tất cả conference (không cần là member).
-- **CHAIR:** Chỉ quản lý conference mà mình là member với role CHAIR.
-- **PC_MEMBER:** Không có quyền quản lý conference, chỉ review papers được phân công.
+### 5.8 Bulk Notifications
+- Gửi email hàng loạt:
+  - `POST /conferences/:conferenceId/notifications/bulk`
+  - Body:
+  ```json
+  {
+    "recipientType": "PC_MEMBERS",
+    "templateId": 1,
+    "variables": {
+      "deadline": "2025-03-15",
+      "conferenceName": "International UTH Conference 2025"
+    },
+    "subject": "Reminder: Review Deadline Approaching",
+    "body": "Custom email body (optional if using template)"
+  }
+  ```
+  - Các recipientType: `PC_MEMBERS`, `AUTHORS`, `REVIEWERS`, `CHAIRS`
+- Preview email trước khi gửi:
+  - `POST /conferences/:conferenceId/notifications/preview`
+  - Body: Giống như bulk notification
+
+### 5.9 Public CFP Page (Không cần authentication)
+- Lấy thông tin CFP công khai:
+  - `GET /public/conferences/:id/cfp`
+  - Không cần `Authorization` header
+  - Response bao gồm: thông tin conference, tracks, deadlines, CFP template
+- Lấy danh sách tracks công khai:
+  - `GET /public/conferences/:id/tracks`
+  - Không cần `Authorization` header
+
+### 5.10 Reporting & Analytics
+- Thống kê tổng quan:
+  - `GET /conferences/:conferenceId/stats`
+  - Response: tổng số tracks, members, members theo role
+- Thống kê submissions:
+  - `GET /conferences/:conferenceId/stats/submissions`
+  - Lưu ý: Cần tích hợp với submission-service để lấy dữ liệu thực tế
+- Tỷ lệ chấp nhận:
+  - `GET /conferences/:conferenceId/stats/acceptance-rate`
+  - Lưu ý: Cần tích hợp với submission-service để lấy dữ liệu thực tế
+- Thống kê tracks:
+  - `GET /conferences/:conferenceId/stats/tracks`
+
+### 5.11 Audit Logs
+- Lấy audit logs của conference:
+  - `GET /conferences/:conferenceId/audit-logs`
+  - Response: danh sách các thao tác đã được log (CREATE, UPDATE, DELETE, etc.)
+
+### 5.12 Validation Helpers
+- Validate track thuộc conference:
+  - `GET /conferences/:conferenceId/tracks/:trackId/validate`
+  - Response: `{ "valid": true/false, "track": {...} }`
+- Lấy deadlines của conference:
+  - `GET /conferences/:conferenceId/cfp/deadlines`
+  - Response: `{ "deadlines": {...} }`
+- Check deadline hợp lệ:
+  - `GET /conferences/:conferenceId/cfp/check-deadline?type=submission`
+  - Các type: `submission`, `review`, `notification`, `camera-ready`
+  - Response: `{ "valid": true/false, "deadline": "...", "message": "..." }`
+
+---
+
+## 6. Lưu ý quyền
+
+- **ADMIN**: Có thể quản lý tất cả conferences
+- **CHAIR**: Chỉ có thể quản lý conference mà họ là CHAIR
+- **PC_MEMBER**: Không có quyền quản lý (chỉ review)
+- **Public endpoints** (`/public/*`): Không cần authentication
+
+---
+
+## 7. Workflow Test Đề Xuất
+
+### Bước 1: Setup cơ bản
+1. Đăng nhập và lấy token (ADMIN hoặc CHAIR)
+2. Tạo conference
+3. Tạo tracks
+4. Thiết lập CFP deadlines
+5. Thêm PC members
+
+### Bước 2: Template Management
+1. Tạo email templates (decision, reminder, invitation)
+2. Tạo form templates (submission, review)
+3. Tạo CFP template
+
+### Bước 3: Bulk Notifications
+1. Preview email với template
+2. Gửi email hàng loạt cho PC members
+
+### Bước 4: Public CFP Page
+1. Test public endpoints (không cần token)
+2. Kiểm tra hiển thị thông tin đúng
+
+### Bước 5: Reporting & Analytics
+1. Xem thống kê tổng quan
+2. Xem thống kê tracks và members
+
+### Bước 6: Validation Helpers
+1. Validate track ID
+2. Check deadline hợp lệ
+
+---
+
+## 8. Tích hợp với Services khác
+
+### Submission Service
+- Cần tích hợp để lấy dữ liệu submissions cho Reporting
+- Cần tích hợp để lấy danh sách authors cho Bulk Notifications
+
+### Review Service
+- Cần tích hợp để lấy dữ liệu reviews cho Reporting
+- Cần tích hợp để lấy danh sách reviewers cho Bulk Notifications
+
+### Email Service
+- Cần tích hợp email provider (SMTP, SendGrid, AWS SES) để gửi email thực tế trong Bulk Notifications
+
