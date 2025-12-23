@@ -37,15 +37,16 @@ export class UsersController {
   @Post('forgot-password')
   async forgotPassword(@Body('email') email: string) {
     await this.usersService.forgotPassword(email);
-    return { message: 'Khởi tạo quy trình reset mật khẩu' };
+    return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
   }
 
   @Post('reset-password')
   async resetPassword(
     @Body('email') email: string,
+    @Body('code') code: string,
     @Body('newPassword') newPassword: string,
   ) {
-    await this.usersService.resetPassword(email, newPassword);
+    await this.usersService.resetPassword(email, code, newPassword);
     return { message: 'Reset mật khẩu thành công' };
   }
 

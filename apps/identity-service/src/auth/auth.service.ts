@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +15,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { User } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { RoleName } from '../users/entities/role.entity';
 
 @Injectable()
@@ -27,6 +29,8 @@ export class AuthService {
     private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(EmailVerificationToken)
+    private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
   ) {
     this.refreshSecret =
       this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh_secret';
@@ -55,24 +59,54 @@ export class AuthService {
       fullName: dto.fullName,
       roles: [adminRole],
     });
-    // User đã được reload với relations trong createUser, nhưng đảm bảo roles được load
-    if (!user.roles || user.roles.length === 0) {
-      // Nếu roles không được load, reload lại
-      const userWithRoles = await this.usersService.findById(user.id);
-      if (!userWithRoles) {
-        throw new BadRequestException('Tạo người dùng thất bại');
-      }
-      const tokens = await this.issueTokens(userWithRoles);
-      return { user: this.stripPassword(userWithRoles), ...tokens };
-    }
-    const tokens = await this.issueTokens(user);
-    return { user: this.stripPassword(user), ...tokens };
+
+    // Sau khi tạo user, tạo token verify email
+    await this.createAndSendEmailVerificationToken(user);
+
+    // Không tự động login, yêu cầu xác minh email trước (tùy bạn có thể đổi)
+    return {
+      user: this.stripPassword(user),
+      message: 'Vui lòng kiểm tra email để xác minh tài khoản',
+    };
+  }
+
+  private async createAndSendEmailVerificationToken(user: User) {
+    const token = await bcrypt.genSalt(10); // dùng chuỗi random, không liên quan password
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+    const entity = this.emailVerificationTokenRepository.create({
+      token,
+      userId: user.id,
+      expiresAt,
+      used: false,
+    });
+    await this.emailVerificationTokenRepository.save(entity);
+
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') ||
+      'http://localhost:3000';
+    const verifyUrl = `${appUrl}/verify-email?token=${encodeURIComponent(
+      token,
+    )}`;
+
+    // TODO: gửi email thật qua SMTP/notification-service
+    // Tạm thời log ra server để dev kiểm tra
+    // eslint-disable-next-line no-console
+    console.log(
+      `[EmailVerification] Send verify link to ${user.email}: ${verifyUrl} (expires at ${expiresAt.toISOString()})`,
+    );
   }
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
+    }
+
+    if (!user.isVerified) {
+      throw new UnauthorizedException(
+        'Tài khoản chưa được xác minh email. Vui lòng kiểm tra email.',
+      );
     }
 
     const isValid = await bcrypt.compare(dto.password, user.password);
@@ -113,6 +147,27 @@ export class AuthService {
   async logout(dto: RefreshTokenDto) {
     await this.refreshTokenRepository.delete({ token: dto.refreshToken });
     return { message: 'Đã đăng xuất' };
+  }
+
+  async verifyEmail(token: string) {
+    const record = await this.emailVerificationTokenRepository.findOne({
+      where: { token, used: false },
+    });
+
+    if (!record) {
+      throw new NotFoundException('Token xác minh không hợp lệ');
+    }
+
+    if (record.expiresAt.getTime() < Date.now()) {
+      throw new UnauthorizedException('Token xác minh đã hết hạn');
+    }
+
+    const user = await this.usersService.markEmailVerified(record.userId);
+
+    record.used = true;
+    await this.emailVerificationTokenRepository.save(record);
+
+    return { message: 'Xác minh email thành công' };
   }
 
   private stripPassword(user: User) {

@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Role, RoleName } from './entities/role.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,8 +19,20 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(PasswordResetToken)
+    private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
     private readonly dataSource: DataSource,
   ) {}
+
+  // Cho phép các service khác (vd: AuthService) cập nhật user an toàn
+  async markEmailVerified(userId: number): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.isVerified = true;
+    return this.usersRepository.save(user);
+  }
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
@@ -199,18 +212,63 @@ export class UsersService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    // Khung xử lý - tùy chỉnh sau (gửi email / tạo token)
     const user = await this.findByEmail(email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      // Không tiết lộ thông tin tồn tại của email cho client
+      return;
     }
+
+    // Tạo mã 6 chữ số
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+
+    const resetToken = this.passwordResetTokenRepository.create({
+      token: code,
+      userId: user.id,
+      expiresAt,
+      used: false,
+    });
+    await this.passwordResetTokenRepository.save(resetToken);
+
+    // TODO: Tích hợp SMTP / notification-service để gửi email
+    // Tạm thời log ra server để dev test
+    // eslint-disable-next-line no-console
+    console.log(
+      `[ForgotPassword] Sent reset code ${code} to email ${user.email} (expires at ${expiresAt.toISOString()})`,
+    );
   }
 
-  async resetPassword(email: string, newPassword: string): Promise<void> {
+  async resetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<void> {
     const user = await this.findByEmail(email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    const token = await this.passwordResetTokenRepository.findOne({
+      where: {
+        userId: user.id,
+        token: code,
+        used: false,
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (!token) {
+      throw new UnauthorizedException('Mã reset mật khẩu không hợp lệ');
+    }
+
+    if (token.expiresAt.getTime() < Date.now()) {
+      throw new UnauthorizedException('Mã reset mật khẩu đã hết hạn');
+    }
+
+    token.used = true;
+    await this.passwordResetTokenRepository.save(token);
+
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
     await this.usersRepository.save(user);

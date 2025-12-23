@@ -9,6 +9,8 @@ import { SeedModule } from './seed/seed.module';
 import { User } from './users/entities/user.entity';
 import { Role } from './users/entities/role.entity';
 import { RefreshToken } from './auth/entities/refresh-token.entity';
+import { EmailVerificationToken } from './auth/entities/email-verification-token.entity';
+import { PasswordResetToken } from './users/entities/password-reset-token.entity';
 
 @Module({
   imports: [
@@ -43,7 +45,7 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
           username,
           password,
           database,
-          entities: [User, Role, RefreshToken],
+          entities: [User, Role, RefreshToken, PasswordResetToken, EmailVerificationToken],
           synchronize: true, 
         };
       },
