@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { ReviewServiceController } from './review-service.controller';
 import { ReviewServiceService } from './review-service.service';
 import { ReviewsController } from './reviews/reviews.controller';
@@ -9,6 +11,9 @@ import { ReviewPreference } from './reviews/entities/review-preference.entity';
 import { Assignment } from './reviews/entities/assignment.entity';
 import { Review } from './reviews/entities/review.entity';
 import { PcDiscussion } from './reviews/entities/pc-discussion.entity';
+import { Decision } from './reviews/entities/decision.entity';
+import { Rebuttal } from './reviews/entities/rebuttal.entity';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
@@ -19,6 +24,18 @@ import { PcDiscussion } from './reviews/entities/pc-discussion.entity';
         'apps/review-service/.env',
         '.env',
       ],
+    }),
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
+        signOptions: {
+          expiresIn:
+            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+        },
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -42,7 +59,14 @@ import { PcDiscussion } from './reviews/entities/pc-discussion.entity';
           username,
           password,
           database,
-          entities: [ReviewPreference, Assignment, Review, PcDiscussion],
+          entities: [
+            ReviewPreference,
+            Assignment,
+            Review,
+            PcDiscussion,
+            Decision,
+            Rebuttal,
+          ],
           synchronize: true,
         };
       },
@@ -52,9 +76,11 @@ import { PcDiscussion } from './reviews/entities/pc-discussion.entity';
       Assignment,
       Review,
       PcDiscussion,
+      Decision,
+      Rebuttal,
     ]),
   ],
   controllers: [ReviewServiceController, ReviewsController],
-  providers: [ReviewServiceService, ReviewsService],
+  providers: [ReviewServiceService, ReviewsService, JwtStrategy],
 })
 export class ReviewServiceModule {}

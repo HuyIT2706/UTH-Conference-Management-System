@@ -31,3 +31,4 @@ export class CreateEmailTemplateDto {
   variables?: Record<string, string>;
 }
 
+

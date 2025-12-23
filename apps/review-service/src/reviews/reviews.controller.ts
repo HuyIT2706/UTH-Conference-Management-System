@@ -2,66 +2,43 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseIntPipe,
   Post,
   Put,
   ForbiddenException,
   BadRequestException,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+  Query,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { ReviewsService } from './reviews.service';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { AssignmentStatus } from './entities/assignment.entity';
-
-interface AuthUser {
-  id: number;
-  roles: string[];
-}
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { JwtPayload } from '../auth/jwt.strategy';
+import { CreateDecisionDto } from './dto/create-decision.dto';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
+import { CreateRebuttalDto } from './dto/create-rebuttal.dto';
+import { CreateAutoAssignmentDto } from './dto/create-auto-assignment.dto';
 
 @Controller('reviews')
+@UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  private decodeUserFromAuthHeader(header?: string): AuthUser | undefined {
-    if (!header?.startsWith('Bearer ')) {
-      return undefined;
-    }
-    const token = header.substring('Bearer '.length).trim();
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return undefined;
-    }
-
-    try {
-      const payloadJson = Buffer.from(
-        parts[1].replace(/-/g, '+').replace(/_/g, '/'),
-        'base64',
-      ).toString('utf8');
-      const payload = JSON.parse(payloadJson) as {
-        sub?: number;
-        roles?: string[];
-      };
-
-      return {
-        id: payload.sub ?? 0,
-        roles: payload.roles ?? [],
-      };
-    } catch {
-      return undefined;
-    }
-  }
-
-  private ensureCanManageConference(user?: AuthUser) {
+  private ensureCanManageConference(user?: JwtPayload) {
     const roles = user?.roles || [];
     if (!roles.includes('ADMIN') && !roles.includes('CHAIR')) {
       throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
     }
   }
 
-  private ensureIsReviewer(user?: AuthUser) {
+  private ensureIsReviewer(user?: JwtPayload) {
     const roles = user?.roles || [];
     if (
       !roles.includes('ADMIN') &&
@@ -80,17 +57,15 @@ export class ReviewsController {
    */
   @Post('bids')
   async submitBid(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Body() dto: CreateBidDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureIsReviewer(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
-    const bid = await this.reviewsService.submitBid(user.id, dto);
+    this.ensureIsReviewer(user);
+    const bid = await this.reviewsService.submitBid(user.sub, dto);
 
     return {
       message: 'Đánh giá quan tâm bài báo thành công',
@@ -104,16 +79,19 @@ export class ReviewsController {
    */
   @Get('assignments/me')
   async getMyAssignments(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
+    @Query() query: PaginationQueryDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureIsReviewer(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
-    const assignments = await this.reviewsService.getMyAssignments(user.id);
+    this.ensureIsReviewer(user);
+    const assignments = await this.reviewsService.getMyAssignments(
+      user.sub,
+      query.page,
+      query.limit,
+    );
 
     return {
       message: 'Lấy danh sách assignments thành công',
@@ -127,19 +105,17 @@ export class ReviewsController {
    */
   @Put('assignments/:id/accept')
   async acceptAssignment(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureIsReviewer(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
+    this.ensureIsReviewer(user);
     const assignment = await this.reviewsService.updateAssignmentStatus(
       id,
-      user.id,
+      user.sub,
       AssignmentStatus.ACCEPTED,
     );
 
@@ -155,19 +131,17 @@ export class ReviewsController {
    */
   @Put('assignments/:id/reject')
   async rejectAssignment(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureIsReviewer(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
+    this.ensureIsReviewer(user);
     const assignment = await this.reviewsService.updateAssignmentStatus(
       id,
-      user.id,
+      user.sub,
       AssignmentStatus.REJECTED,
     );
 
@@ -183,17 +157,15 @@ export class ReviewsController {
    */
   @Post()
   async submitReview(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Body() dto: CreateReviewDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureIsReviewer(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
-    const review = await this.reviewsService.submitReview(user.id, dto);
+    this.ensureIsReviewer(user);
+    const review = await this.reviewsService.submitReview(user.sub, dto);
 
     return {
       message: 'Nộp bài chấm thành công',
@@ -209,18 +181,16 @@ export class ReviewsController {
    */
   @Post('assignments')
   async createAssignment(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Body() dto: CreateAssignmentDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
+    this.ensureCanManageConference(user);
     const assignment = await this.reviewsService.createAssignment(
-      user.id,
+      user.sub,
       dto,
     );
 
@@ -231,27 +201,73 @@ export class ReviewsController {
   }
 
   /**
+   * POST /reviews/assignments/auto
+   * Simple auto-assignment: assign one submission to multiple reviewers
+   */
+  @Post('assignments/auto')
+  async autoAssign(
+    @Req() req: Request,
+    @Body() dto: CreateAutoAssignmentDto,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const result = await this.reviewsService.autoAssignSubmission(
+      user.sub,
+      dto.submissionId,
+      dto.conferenceId,
+      dto.reviewerIds,
+    );
+
+    return {
+      message: 'Tự động gán bài cho nhiều Reviewer (đơn giản) thành công',
+      data: result,
+    };
+  }
+
+  /**
    * GET /reviews/submission/:id
    * Chair view all reviews for a submission
    */
   @Get('submission/:id')
   async getReviewsBySubmission(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
+    @Query() query: PaginationQueryDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
-
+    this.ensureCanManageConference(user);
     const reviews = await this.reviewsService.getReviewsBySubmission(
       submissionId,
+      query.page,
+      query.limit,
     );
 
     return {
       message: 'Lấy danh sách reviews thành công',
+      data: reviews,
+    };
+  }
+
+  /**
+   * GET /reviews/submission/:id/anonymized
+   * Anonymized reviews for authors (single-blind)
+   */
+  @Get('submission/:id/anonymized')
+  async getAnonymizedReviews(
+    @Param('id', ParseIntPipe) submissionId: number,
+  ) {
+    const reviews =
+      await this.reviewsService.getAnonymizedReviewsBySubmission(submissionId);
+
+    return {
+      message: 'Lấy danh sách reviews ẩn danh thành công',
       data: reviews,
     };
   }
@@ -262,17 +278,21 @@ export class ReviewsController {
    */
   @Get('bids/submission/:id')
   async getBidsBySubmission(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
+    @Query() query: PaginationQueryDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
     this.ensureCanManageConference(user);
 
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
-    }
-
-    const bids = await this.reviewsService.getBidsBySubmission(submissionId);
+    const bids = await this.reviewsService.getBidsBySubmission(
+      submissionId,
+      query.page,
+      query.limit,
+    );
 
     return {
       message: 'Lấy danh sách bids thành công',
@@ -286,22 +306,21 @@ export class ReviewsController {
    */
   @Post('discussions')
   async createDiscussion(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Body() body: { submissionId: number; message: string },
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
+    this.ensureCanManageConference(user);
 
     if (!body.submissionId || !body.message) {
       throw new BadRequestException('submissionId và message là bắt buộc');
     }
 
     const discussion = await this.reviewsService.createDiscussion(
-      user.id,
+      user.sub,
       body.submissionId,
       body.message,
     );
@@ -312,24 +331,79 @@ export class ReviewsController {
     };
   }
 
+  // ========== REBUTTAL APIs ==========
+
+  /**
+   * POST /reviews/rebuttals
+   * Author submit rebuttal for a submission
+   */
+  @Post('rebuttals')
+  async createRebuttal(
+    @Req() req: Request,
+    @Body() dto: CreateRebuttalDto,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+
+    const rebuttal = await this.reviewsService.createRebuttal(
+      user.sub,
+      dto.submissionId,
+      dto.conferenceId ?? null,
+      dto.message,
+    );
+
+    return {
+      message: 'Gửi rebuttal thành công',
+      data: rebuttal,
+    };
+  }
+
+  /**
+   * GET /reviews/rebuttals/submission/:id
+   * Get all rebuttals for a submission (Chair/Admin)
+   */
+  @Get('rebuttals/submission/:id')
+  async getRebuttalsBySubmission(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) submissionId: number,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const rebuttals =
+      await this.reviewsService.getRebuttalsBySubmission(submissionId);
+
+    return {
+      message: 'Lấy danh sách rebuttal thành công',
+      data: rebuttals,
+    };
+  }
+
   /**
    * GET /reviews/discussions/submission/:id
    * Get PC Discussion for a submission
    */
   @Get('discussions/submission/:id')
   async getDiscussionsBySubmission(
-    @Headers('authorization') authHeader: string | undefined,
+    @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
+    @Query() query: PaginationQueryDto,
   ) {
-    const user = this.decodeUserFromAuthHeader(authHeader);
-    this.ensureCanManageConference(user);
-
-    if (!user) {
-      throw new ForbiddenException('Bạn cần đăng nhập để thực hiện thao tác này');
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
     }
+    this.ensureCanManageConference(user);
 
     const discussions = await this.reviewsService.getDiscussionsBySubmission(
       submissionId,
+      query.page,
+      query.limit,
     );
 
     return {
@@ -337,7 +411,120 @@ export class ReviewsController {
       data: discussions,
     };
   }
+
+  // ========== DECISION & AGGREGATION (CHAIR) ==========
+
+  /**
+   * GET /reviews/decisions/submission/:id
+   * Get aggregated review stats + current decision for a submission
+   */
+  @Get('decisions/submission/:id')
+  async getDecisionSummary(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) submissionId: number,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const summary =
+      await this.reviewsService.getDecisionSummaryBySubmission(submissionId);
+
+    return {
+      message: 'Lấy tổng hợp review và quyết định thành công',
+      data: summary,
+    };
+  }
+
+  /**
+   * POST /reviews/decisions
+   * Chair/Admin set or update final decision for a submission
+   */
+  @Post('decisions')
+  async setDecision(
+    @Req() req: Request,
+    @Body() dto: CreateDecisionDto,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const decision = await this.reviewsService.upsertDecisionForSubmission(
+      dto.submissionId,
+      user.sub,
+      dto.decision,
+      dto.note,
+    );
+
+    const summary =
+      await this.reviewsService.getDecisionSummaryBySubmission(
+        dto.submissionId,
+      );
+
+    return {
+      message: 'Cập nhật quyết định cuối cùng thành công',
+      data: {
+        decision,
+        summary,
+      },
+    };
+  }
+
+  // ========== PROGRESS TRACKING (CHAIR) ==========
+
+  /**
+   * GET /reviews/progress/submission/:id
+   * Basic progress metrics for a single submission
+   */
+  @Get('progress/submission/:id')
+  async getSubmissionProgress(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) submissionId: number,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const progress =
+      await this.reviewsService.getSubmissionProgress(submissionId);
+
+    return {
+      message: 'Lấy tiến độ review của bài báo thành công',
+      data: progress,
+    };
+  }
+
+  /**
+   * GET /reviews/progress/conference/:id
+   * Basic progress metrics for a conference
+   */
+  @Get('progress/conference/:id')
+  async getConferenceProgress(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) conferenceId: number,
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureCanManageConference(user);
+
+    const progress =
+      await this.reviewsService.getConferenceProgress(conferenceId);
+
+    return {
+      message: 'Lấy tiến độ review của hội nghị thành công',
+      data: progress,
+    };
+  }
 }
+
 
 
 

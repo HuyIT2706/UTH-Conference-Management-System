@@ -26,6 +26,9 @@ export class ReviewPreference {
   @Column({ type: 'int' })
   submissionId: number;
 
+  @Column({ type: 'int', nullable: true })
+  conferenceId: number | null;
+
   @Column({
     type: 'enum',
     enum: PreferenceType,
@@ -39,6 +42,7 @@ export class ReviewPreference {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
+
 
 
 

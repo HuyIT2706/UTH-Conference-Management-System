@@ -1,23 +1,23 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
 } from 'typeorm';
 
-@Entity({ name: 'pc_discussions' })
-export class PcDiscussion {
+@Entity({ name: 'rebuttals' })
+export class Rebuttal {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'int' })
   submissionId: number;
 
+  @Column({ type: 'int' })
+  authorId: number;
+
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
-
-  @Column({ type: 'int' })
-  userId: number;
 
   @Column({ type: 'text' })
   message: string;
@@ -25,7 +25,5 @@ export class PcDiscussion {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
-
-
 
 

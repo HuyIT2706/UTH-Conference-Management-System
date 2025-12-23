@@ -30,6 +30,9 @@ export class Review {
   @Column({ type: 'int', unique: true })
   assignmentId: number;
 
+  @Column({ type: 'int', nullable: true })
+  conferenceId: number | null;
+
   @Column({ type: 'int' })
   score: number; // 0-100
 
@@ -62,6 +65,7 @@ export class Review {
   @JoinColumn({ name: 'assignmentId' })
   assignment: Assignment;
 }
+
 
 
 

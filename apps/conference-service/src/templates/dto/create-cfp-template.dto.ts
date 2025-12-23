@@ -10,3 +10,4 @@ export class CreateCfpTemplateDto {
   customStyles?: Record<string, any>;
 }
 
+

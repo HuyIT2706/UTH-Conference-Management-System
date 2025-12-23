@@ -26,6 +26,9 @@ export class Assignment {
   @Column({ type: 'int' })
   submissionId: number;
 
+  @Column({ type: 'int', nullable: true })
+  conferenceId: number | null;
+
   @Column({
     type: 'enum',
     enum: AssignmentStatus,
@@ -48,6 +51,7 @@ export class Assignment {
   @OneToOne(() => Review, (review) => review.assignment)
   review: Review | null;
 }
+
 
 
 

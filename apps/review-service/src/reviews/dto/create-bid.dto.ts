@@ -6,10 +6,15 @@ export class CreateBidDto {
   @IsNotEmpty()
   submissionId: number;
 
+  @IsInt()
+  @IsNotEmpty()
+  conferenceId: number;
+
   @IsEnum(PreferenceType)
   @IsNotEmpty()
   preference: PreferenceType;
 }
+
 
 
 

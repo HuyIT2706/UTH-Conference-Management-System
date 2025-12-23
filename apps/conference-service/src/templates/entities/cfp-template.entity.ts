@@ -38,3 +38,4 @@ export class CfpTemplate {
   conference: Conference;
 }
 
+

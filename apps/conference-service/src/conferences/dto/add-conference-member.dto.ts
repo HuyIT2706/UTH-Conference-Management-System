@@ -13,3 +13,4 @@ export class AddConferenceMemberDto {
   role: ConferenceMemberRole;
 }
 
+

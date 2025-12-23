@@ -9,10 +9,15 @@ export class CreateAssignmentDto {
   @IsNotEmpty()
   submissionId: number;
 
+  @IsInt()
+  @IsNotEmpty()
+  conferenceId: number;
+
   @IsDateString()
   @IsOptional()
   dueDate?: string;
 }
+
 
 
 

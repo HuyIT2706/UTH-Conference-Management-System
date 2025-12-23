@@ -357,8 +357,341 @@ Authorization: Bearer <token>
 ## 8. Lưu ý
 
 - Review Service không chứa bảng User hay Submission, chỉ lưu ID tham chiếu
-- Cần tích hợp với Identity Service để verify user/role (hiện tại dùng JWT decode)
+- Cần tích hợp với Identity Service để verify user/role (hiện tại decode JWT và dùng roles trong payload)
 - Cần tích hợp với Submission Service để verify submission tồn tại (hiện tại chỉ validate ID > 0)
 
+## 9. Kịch bản test end-to-end bằng Postman
 
+### 9.1. Chuẩn bị chung
 
+- **Base URL**: `http://localhost:3004/api` (hoặc đúng port bạn map cho review-service trong Docker).
+- Tất cả endpoint đều yêu cầu header:
+
+```text
+Authorization: Bearer <JWT>
+Content-Type: application/json
+```
+
+- JWT payload tối thiểu:
+
+```json
+{
+  "sub": 1,
+  "roles": ["CHAIR"],   // hoặc ADMIN / REVIEWER / AUTHOR
+  "email": "user@example.com"
+}
+```
+
+- ID giả định để test nhanh:
+  - `conferenceId = 1`
+  - `submissionId = 1`
+  - `chairId = 1` (token có role `CHAIR` hoặc `ADMIN`)
+  - `reviewerId1 = 2`, `reviewerId2 = 3` (token có role `REVIEWER`)
+  - `authorId = 4` (token đại diện tác giả)
+
+> Bạn có thể dùng Identity Service để sinh JWT thật, hoặc tạm thời dùng JWT giả có `sub`, `roles` đúng như trên để test luồng.
+
+---
+
+### 9.2. Flow 1 – Reviewer bidding + COI
+
+**Bước 1 – Reviewer gửi bidding cho bài báo**
+
+- Method: `POST`
+- URL: `/api/reviews/bids`
+- JWT: của **reviewer** (`roles` chứa `REVIEWER`)
+- Body:
+
+```json
+{
+  "submissionId": 1,
+  "conferenceId": 1,
+  "preference": "INTERESTED"
+}
+```
+
+**Bước 2 – Reviewer báo xung đột lợi ích (COI)**
+
+- Gửi lại request với:
+
+```json
+{
+  "submissionId": 1,
+  "conferenceId": 1,
+  "preference": "CONFLICT"
+}
+```
+
+> Sau đó nếu Chair auto-assign trùng reviewer này, API sẽ trả 400 với thông báo CONFLICT.
+
+---
+
+### 9.3. Flow 2 – Chair gán bài (manual + auto)
+
+**Bước 1 – Chair gán 1 bài cho 1 reviewer (manual)**
+
+- Method: `POST`
+- URL: `/api/reviews/assignments`
+- JWT: của **chair** (`roles` chứa `CHAIR` hoặc `ADMIN`)
+- Body:
+
+```json
+{
+  "reviewerId": 2,
+  "submissionId": 1,
+  "conferenceId": 1,
+  "dueDate": "2025-01-31T23:59:59.000Z"
+}
+```
+
+**Bước 2 – Chair auto-assign 1 bài cho nhiều reviewer (đơn giản)**
+
+- Method: `POST`
+- URL: `/api/reviews/assignments/auto`
+- JWT: **chair**
+- Body:
+
+```json
+{
+  "submissionId": 1,
+  "conferenceId": 1,
+  "reviewerIds": [2, 3]
+}
+```
+
+Kết quả:
+
+```json
+{
+  "message": "Tự động gán bài cho nhiều Reviewer (đơn giản) thành công",
+  "data": {
+    "created": [
+      { "id": 10, "reviewerId": 2, "submissionId": 1, "conferenceId": 1 },
+      { "id": 11, "reviewerId": 3, "submissionId": 1, "conferenceId": 1 }
+    ],
+    "failed": [
+      {
+        "reviewerId": 5,
+        "reason": "Không thể gán bài này vì Reviewer đã báo cáo xung đột lợi ích (CONFLICT)"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 9.4. Flow 3 – Reviewer nhận assignment, accept và nộp review
+
+**Bước 1 – Reviewer xem assignments của mình**
+
+- Method: `GET`
+- URL: `/api/reviews/assignments/me?page=1&limit=10`
+- JWT: reviewer (`sub = 2`)
+
+**Bước 2 – Reviewer accept assignment**
+
+- Method: `PUT`
+- URL: `/api/reviews/assignments/10/accept` (thay `10` bằng `id` thật)
+- JWT: reviewer (`sub = 2`)
+
+**Bước 3 – Reviewer nộp review**
+
+- Method: `POST`
+- URL: `/api/reviews`
+- JWT: reviewer (`sub = 2`)
+- Body:
+
+```json
+{
+  "assignmentId": 10,
+  "score": 85,
+  "confidence": "HIGH",
+  "commentForAuthor": "Bài viết tốt, nên chỉnh sửa phần hình vẽ.",
+  "commentForPC": "Nên hỏi thêm về phần methodology.",
+  "recommendation": "ACCEPT"
+}
+```
+
+> Sau khi nộp, `assignment.status` sẽ là `COMPLETED`.
+
+---
+
+### 9.5. Flow 4 – Chair xem reviews, bids, discussions
+
+**1. Xem toàn bộ reviews của 1 submission**
+
+- Method: `GET`
+- URL: `/api/reviews/submission/1?page=1&limit=10`
+- JWT: chair
+
+**2. Xem tất cả bids cho 1 submission**
+
+- Method: `GET`
+- URL: `/api/reviews/bids/submission/1?page=1&limit=10`
+- JWT: chair
+
+**3. Tạo thảo luận PC cho submission**
+
+- Method: `POST`
+- URL: `/api/reviews/discussions`
+- JWT: chair
+- Body:
+
+```json
+{
+  "submissionId": 1,
+  "message": "Tôi nghĩ cần thêm 1 reviewer nữa cho chủ đề này."
+}
+```
+
+**4. Xem danh sách thảo luận**
+
+- Method: `GET`
+- URL: `/api/reviews/discussions/submission/1?page=1&limit=20`
+- JWT: chair
+
+---
+
+### 9.6. Flow 5 – Quyết định cuối cùng & tổng hợp review (Decision & Aggregation)
+
+**1. Chair xem tổng hợp review + quyết định hiện tại**
+
+- Method: `GET`
+- URL: `/api/reviews/decisions/submission/1`
+- JWT: chair
+
+Response mẫu:
+
+```json
+{
+  "message": "Lấy tổng hợp review và quyết định thành công",
+  "data": {
+    "submissionId": 1,
+    "stats": {
+      "reviewCount": 2,
+      "averageScore": 82.5,
+      "minScore": 80,
+      "maxScore": 85,
+      "recommendationCounts": {
+        "ACCEPT": 1,
+        "WEAK_ACCEPT": 1
+      }
+    },
+    "decision": null
+  }
+}
+```
+
+**2. Chair đặt quyết định cuối cùng (Accept/Reject/BORDERLINE)**
+
+- Method: `POST`
+- URL: `/api/reviews/decisions`
+- JWT: chair
+- Body:
+
+```json
+{
+  "submissionId": 1,
+  "decision": "ACCEPT",
+  "note": "Điểm trung bình cao, đồng thuận tốt."
+}
+```
+
+---
+
+### 9.7. Flow 6 – Anonymized reviews cho tác giả (single-blind cơ bản)
+
+Endpoint này được `submission-service` gọi để hiện kết quả review cho tác giả.
+
+- Method: `GET`
+- URL: `/api/reviews/submission/1/anonymized`
+- JWT: có thể là token của tác giả, hệ thống submission-service sẽ kiểm soát quyền.
+
+Response:
+
+```json
+{
+  "message": "Lấy danh sách reviews ẩn danh thành công",
+  "data": [
+    {
+      "score": 85,
+      "commentForAuthor": "Bài viết tốt, nên chỉnh sửa phần hình vẽ.",
+      "recommendation": "ACCEPT",
+      "createdAt": "2025-01-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 9.8. Flow 7 – Rebuttal (tác giả phản hồi)
+
+**1. Tác giả gửi rebuttal cho bài báo**
+
+- Method: `POST`
+- URL: `/api/reviews/rebuttals`
+- JWT: **author** (`sub = 4`)
+- Body:
+
+```json
+{
+  "submissionId": 1,
+  "conferenceId": 1,
+  "message": "Chúng tôi đã cập nhật phần thí nghiệm như góp ý."
+}
+```
+
+**2. Chair xem toàn bộ rebuttal của submission**
+
+- Method: `GET`
+- URL: `/api/reviews/rebuttals/submission/1`
+- JWT: chair
+
+---
+
+### 9.9. Flow 8 – Progress Tracking
+
+**1. Tiến độ review cho 1 submission**
+
+- Method: `GET`
+- URL: `/api/reviews/progress/submission/1`
+- JWT: chair
+
+Ví dụ:
+
+```json
+{
+  "message": "Lấy tiến độ review của bài báo thành công",
+  "data": {
+    "submissionId": 1,
+    "totalAssignments": 3,
+    "completedAssignments": 2,
+    "pendingAssignments": 1,
+    "reviewsSubmitted": 2,
+    "lastReviewAt": "2025-01-01T10:00:00.000Z"
+  }
+}
+```
+
+**2. Tiến độ review cho 1 conference**
+
+- Method: `GET`
+- URL: `/api/reviews/progress/conference/1`
+- JWT: chair
+
+```json
+{
+  "message": "Lấy tiến độ review của hội nghị thành công",
+  "data": {
+    "conferenceId": 1,
+    "totalAssignments": 50,
+    "completedAssignments": 40,
+    "pendingAssignments": 10,
+    "reviewsSubmitted": 40
+  }
+}
+```
+
+Với các flow trên, bạn có thể dùng Postman (hoặc Newman) để demo trọn luồng: **Bidding → Assignment (manual/auto) → Review → Discussion → Rebuttal → Decision → Anonymized Reviews → Progress Tracking** cho `review-service`.
