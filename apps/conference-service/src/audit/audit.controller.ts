@@ -27,8 +27,7 @@ export class AuditController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const logs = await this.auditService.findAll(conferenceId);

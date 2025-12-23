@@ -26,8 +26,7 @@ export class ReportingController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const stats = await this.reportingService.getConferenceStats(conferenceId);
@@ -45,8 +44,7 @@ export class ReportingController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const stats = await this.reportingService.getSubmissionStats(conferenceId);
@@ -64,8 +62,7 @@ export class ReportingController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const stats = await this.reportingService.getAcceptanceRate(conferenceId);
@@ -83,8 +80,7 @@ export class ReportingController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const stats = await this.reportingService.getConferenceStats(conferenceId);

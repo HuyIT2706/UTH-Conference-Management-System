@@ -38,8 +38,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.createEmailTemplate(
@@ -60,8 +59,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const templates = await this.templatesService.findAllEmailTemplates(
@@ -82,8 +80,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.findOneEmailTemplate(
@@ -106,8 +103,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.updateEmailTemplate(
@@ -130,8 +126,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     await this.templatesService.deleteEmailTemplate(conferenceId, templateId);
@@ -150,8 +145,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.createFormTemplate(
@@ -172,8 +166,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const templates = await this.templatesService.findAllFormTemplates(
@@ -194,8 +187,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.findOneFormTemplate(
@@ -218,8 +210,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.updateFormTemplate(
@@ -242,8 +233,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     await this.templatesService.deleteFormTemplate(conferenceId, templateId);
@@ -262,8 +252,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.createOrUpdateCfpTemplate(
@@ -284,8 +273,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.getCfpTemplate(conferenceId);
@@ -304,8 +292,7 @@ export class TemplatesController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const template = await this.templatesService.updateCfpTemplate(

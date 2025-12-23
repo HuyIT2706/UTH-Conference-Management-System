@@ -286,7 +286,7 @@ export class ConferencesService {
     }
   }
 
-  private async ensureCanManageConference(
+  async ensureCanManageConference(
     conferenceId: number,
     user: { id: number; roles: string[] },
   ) {

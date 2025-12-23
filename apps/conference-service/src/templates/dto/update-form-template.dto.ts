@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsArray,
   ValidateNested,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FormTemplateType, FormField } from '../entities/form-template.entity';

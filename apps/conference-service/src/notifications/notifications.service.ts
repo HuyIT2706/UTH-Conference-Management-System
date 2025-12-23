@@ -3,7 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BulkNotificationDto, RecipientType } from './dto/bulk-notification.dto';
 import { EmailTemplate } from '../templates/entities/email-template.entity';
-import { ConferenceMember } from '../conferences/entities/conference-member.entity';
+import {
+  ConferenceMember,
+  ConferenceMemberRole,
+} from '../conferences/entities/conference-member.entity';
 import { Conference } from '../conferences/entities/conference.entity';
 
 @Injectable()
@@ -47,7 +50,7 @@ export class NotificationsService {
             conferenceId,
             role:
               recipientType === RecipientType.CHAIRS
-                ? 'CHAIR'
+                ? ConferenceMemberRole.CHAIR
                 : undefined,
           },
         });

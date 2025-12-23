@@ -29,8 +29,7 @@ export class NotificationsController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const result = await this.notificationsService.sendBulkNotification(
@@ -52,8 +51,7 @@ export class NotificationsController {
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
-      user.sub,
-      user.roles,
+      { id: user.sub, roles: user.roles },
     );
 
     const preview = await this.notificationsService.previewNotification(
