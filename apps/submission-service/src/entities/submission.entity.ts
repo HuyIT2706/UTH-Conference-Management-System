@@ -14,6 +14,8 @@ export enum SubmissionStatus {
   REVIEWING = 'REVIEWING',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
+  WITHDRAWN = 'WITHDRAWN',
+  CAMERA_READY = 'CAMERA_READY',
 }
 
 @Entity({ name: 'submissions' })
@@ -44,7 +46,16 @@ export class Submission {
   authorId: number; 
 
   @Column({ type: 'int' })
-  trackId: number; 
+  trackId: number;
+
+  @Column({ type: 'int' })
+  conferenceId: number;
+
+  @Column({ type: 'jsonb', nullable: true })
+  coAuthors: Array<{ name: string; email: string; affiliation?: string }> | null;
+
+  @Column({ type: 'text', nullable: true })
+  cameraReadyFileUrl: string | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -57,5 +68,6 @@ export class Submission {
   })
   versions: SubmissionVersion[];
 }
+
 
 

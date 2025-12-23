@@ -12,3 +12,4 @@ export class AddConferenceMemberDto {
   @IsNotEmpty()
   role: ConferenceMemberRole;
 }
+

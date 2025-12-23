@@ -38,3 +38,4 @@ export class BulkNotificationDto {
   @IsNotEmpty()
   body?: string;
 }
+

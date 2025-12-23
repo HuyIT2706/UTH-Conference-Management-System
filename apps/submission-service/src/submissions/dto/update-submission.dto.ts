@@ -1,5 +1,13 @@
-import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  MaxLength,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import { CoAuthorDto } from './create-submission.dto';
 
 export class UpdateSubmissionDto {
   @IsString()
@@ -20,6 +28,13 @@ export class UpdateSubmissionDto {
   @IsInt()
   @IsOptional()
   trackId?: number;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CoAuthorDto)
+  coAuthors?: CoAuthorDto[];
 }
+
 
 

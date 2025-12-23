@@ -303,3 +303,4 @@ Tất cả các chức năng mới đều phục vụ mục đích:
 5. **Tích hợp:** Hỗ trợ các service khác
 
 **Tất cả đều hướng tới mục tiêu: Tạo một hệ thống quản lý conference chuyên nghiệp, hiệu quả và dễ sử dụng!** 🚀
+

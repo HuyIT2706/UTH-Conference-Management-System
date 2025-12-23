@@ -37,3 +37,4 @@ export class CfpTemplate {
   @JoinColumn({ name: 'conference_id' })
   conference: Conference;
 }
+

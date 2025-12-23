@@ -1,19 +1,41 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import { HttpModule } from '@nestjs/axios';
 import { Submission } from './entities/submission.entity';
 import { SubmissionVersion } from './entities/submission-version.entity';
 import { SubmissionsController } from './submissions/submissions.controller';
 import { SubmissionsService } from './submissions/submissions.service';
 import { SupabaseService } from './supabase/supabase.config';
+import { ConferenceClientService } from './integrations/conference-client.service';
+import { ReviewClientService } from './integrations/review-client.service';
+import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['apps/submission-service/.env', '.env'],
+    }),
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
+        signOptions: {
+          expiresIn:
+            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+        },
+      }),
+    }),
+    HttpModule.register({
+      timeout: 10000,
+      maxRedirects: 5,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -51,6 +73,12 @@ import { SupabaseService } from './supabase/supabase.config';
     }),
   ],
   controllers: [SubmissionsController],
-  providers: [SubmissionsService, SupabaseService],
+  providers: [
+    SubmissionsService,
+    SupabaseService,
+    ConferenceClientService,
+    ReviewClientService,
+    JwtStrategy,
+  ],
 })
 export class SubmissionServiceModule {}

@@ -9,3 +9,4 @@ export class UpdateCfpTemplateDto {
   @IsObject()
   customStyles?: Record<string, any>;
 }
+

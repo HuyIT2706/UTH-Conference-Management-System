@@ -30,3 +30,4 @@ export class UpdateEmailTemplateDto {
   @IsObject()
   variables?: Record<string, string>;
 }
+

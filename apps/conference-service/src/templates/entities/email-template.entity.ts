@@ -55,3 +55,4 @@ export class EmailTemplate {
   })
   conference: Conference;
 }
+

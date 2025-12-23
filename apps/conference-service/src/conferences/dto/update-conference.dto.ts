@@ -19,3 +19,4 @@ export class UpdateConferenceDto {
   @MaxLength(255)
   venue?: string;
 }
+
