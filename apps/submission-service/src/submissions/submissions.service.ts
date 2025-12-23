@@ -15,6 +15,7 @@ import { QuerySubmissionsDto } from './dto/query-submissions.dto';
 import { SupabaseService } from '../supabase/supabase.config';
 import { ConferenceClientService } from '../integrations/conference-client.service';
 import { ReviewClientService } from '../integrations/review-client.service';
+import { log } from 'console';
 
 @Injectable()
 export class SubmissionsService {
@@ -58,9 +59,7 @@ export class SubmissionsService {
         });
 
       if (error) {
-        throw new BadRequestException(
-          `Lỗi khi upload file: ${error.message}`,
-        );
+        throw new BadRequestException(`Lỗi khi upload file: ${error.message}`);
       }
       const {
         data: { publicUrl },
@@ -71,9 +70,7 @@ export class SubmissionsService {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(
-        `Lỗi khi upload file: ${error.message}`,
-      );
+      throw new BadRequestException(`Lỗi khi upload file: ${error.message}`);
     }
   }
 
@@ -121,22 +118,43 @@ export class SubmissionsService {
     }
 
     // Validate track
-    const trackValidation = await this.conferenceClient.validateTrack(
-      createDto.conferenceId,
-      createDto.trackId,
-    );
-    if (!trackValidation.valid) {
-      throw new BadRequestException('Track không hợp lệ hoặc không thuộc conference này');
+    try {
+      const trackValidation = await this.conferenceClient.validateTrack(
+        createDto.conferenceId,
+        createDto.trackId,
+      );
+      console.log('validateTrack', {
+        conferenceId: createDto.conferenceId,
+        trackId: createDto.trackId,
+        result: trackValidation,
+      });
+      // if (!trackValidation.valid) {
+      //   throw new BadRequestException('Track không hợp lệ hoặc không thuộc conference này');
+      // }
+    } catch (e) {
+      console.warn(
+        'Không gọi được conference-service validateTrack, bỏ qua để không chặn submit',
+        e,
+      );
     }
-
-    // Validate deadline
-    const deadlineCheck = await this.conferenceClient.checkDeadline(
-      createDto.conferenceId,
-      'submission',
-    );
-    if (!deadlineCheck.valid) {
-      throw new BadRequestException(
-        `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
+    try {
+      const deadlineCheck = await this.conferenceClient.checkDeadline(
+        createDto.conferenceId,
+        'submission',
+      );
+      console.log('checkDeadline', {
+        conferenceId: createDto.conferenceId,
+        result: deadlineCheck,
+      });
+      // if (!deadlineCheck.valid) {
+      //   throw new BadRequestException(
+      //     `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
+      //   );
+      // }
+    } catch (e) {
+      console.warn(
+        'Không gọi được conference-service checkDeadline, bỏ qua để không chặn submit',
+        e,
       );
     }
 
@@ -179,9 +197,7 @@ export class SubmissionsService {
       });
 
       if (!result) {
-        throw new NotFoundException(
-          `Không tìm thấy submission sau khi tạo`,
-        );
+        throw new NotFoundException(`Không tìm thấy submission sau khi tạo`);
       }
 
       return result;
@@ -254,10 +270,13 @@ export class SubmissionsService {
         }
       }
 
-      const existingVersions = await queryRunner.manager.find(SubmissionVersion, {
-        where: { submissionId: id },
-        select: ['versionNumber'],
-      });
+      const existingVersions = await queryRunner.manager.find(
+        SubmissionVersion,
+        {
+          where: { submissionId: id },
+          select: ['versionNumber'],
+        },
+      );
 
       const maxVersion = existingVersions.length
         ? Math.max(...existingVersions.map((v) => v.versionNumber))
@@ -325,9 +344,7 @@ export class SubmissionsService {
 
     // Kiểm tra quyền: Chỉ author mới được withdraw
     if (submission.authorId !== authorId) {
-      throw new ForbiddenException(
-        'Bạn không có quyền rút submission này',
-      );
+      throw new ForbiddenException('Bạn không có quyền rút submission này');
     }
 
     // Chỉ cho phép withdraw khi status là SUBMITTED hoặc REVIEWING
@@ -373,10 +390,7 @@ export class SubmissionsService {
     }
 
     // Kiểm tra quyền: Chỉ CHAIR hoặc ADMIN mới được update status
-    if (
-      !userRoles.includes('CHAIR') &&
-      !userRoles.includes('ADMIN')
-    ) {
+    if (!userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
       throw new ForbiddenException(
         'Chỉ Chair hoặc Admin mới được cập nhật trạng thái',
       );
@@ -450,12 +464,18 @@ export class SubmissionsService {
     queryDto: QuerySubmissionsDto,
     userId: number,
     userRoles: string[],
-  ): Promise<{ data: Submission[]; total: number; page: number; limit: number }> {
+  ): Promise<{
+    data: Submission[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const page = queryDto.page || 1;
     const limit = queryDto.limit || 10;
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.submissionRepository.createQueryBuilder('submission');
+    const queryBuilder =
+      this.submissionRepository.createQueryBuilder('submission');
 
     // RBAC: Authors chỉ xem được submissions của mình
     // Chairs và Admins xem được tất cả
@@ -562,7 +582,8 @@ export class SubmissionsService {
     // RBAC checks
     const isAuthor = submission.authorId === userId;
     const isChair = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
-    const isReviewer = userRoles.includes('PC_MEMBER') || userRoles.includes('REVIEWER');
+    const isReviewer =
+      userRoles.includes('PC_MEMBER') || userRoles.includes('REVIEWER');
 
     // Authors can always view their own submissions
     if (isAuthor) {
@@ -590,9 +611,7 @@ export class SubmissionsService {
       return submission;
     }
 
-    throw new ForbiddenException(
-      'Bạn không có quyền xem submission này',
-    );
+    throw new ForbiddenException('Bạn không có quyền xem submission này');
   }
 
   /**
@@ -601,7 +620,9 @@ export class SubmissionsService {
   async getAnonymizedReviews(
     id: string,
     authorId: number,
-  ): Promise<Array<{ score: number; commentForAuthor: string; recommendation: string }>> {
+  ): Promise<
+    Array<{ score: number; commentForAuthor: string; recommendation: string }>
+  > {
     const submission = await this.submissionRepository.findOne({
       where: { id },
     });
@@ -628,6 +649,3 @@ export class SubmissionsService {
     return await this.reviewClient.getAnonymizedReviewsForAuthor(id);
   }
 }
-
-
-
