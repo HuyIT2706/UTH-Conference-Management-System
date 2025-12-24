@@ -16,8 +16,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Conference Service API')
-    .setDescription('API documentation for Conference Service - Conference, Track, CFP, Templates & Notifications Management')
+    .setTitle('UTH-ConfMS Conference Service')
+    .setDescription('Hệ thống quản lý bài báo hội nghị nghiên cứu khoa học cho Đại học UTH (UTH-ConfMS) - Conference Service: Quản lý Hội nghị, Track, CFP, Templates & Thông báo')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -36,9 +36,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || process.env.port || 3002;
   await app.listen(port);
-  // eslint-disable-next-line no-console
   console.log(`[Conference-Service] Application is running on: http://localhost:${port}/api`);
-  // eslint-disable-next-line no-console
   console.log(`[Conference-Service] Swagger documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();

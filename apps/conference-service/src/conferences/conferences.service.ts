@@ -43,6 +43,9 @@ export class ConferencesService {
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
       venue: dto.venue,
+      description: dto.description ?? null,
+      shortDescription: dto.shortDescription ?? null,
+      contactEmail: dto.contactEmail ?? null,
       organizerId,
     });
 
@@ -136,6 +139,9 @@ export class ConferencesService {
       startDate: dto.startDate ? new Date(dto.startDate) : conference.startDate,
       endDate: dto.endDate ? new Date(dto.endDate) : conference.endDate,
       venue: dto.venue ?? conference.venue,
+      description: dto.description !== undefined ? dto.description : conference.description,
+      shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : conference.shortDescription,
+      contactEmail: dto.contactEmail !== undefined ? dto.contactEmail : conference.contactEmail,
     });
 
     return this.conferenceRepository.save(conference);

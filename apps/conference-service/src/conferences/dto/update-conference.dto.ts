@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateConferenceDto {
@@ -41,6 +41,36 @@ export class UpdateConferenceDto {
   @IsOptional()
   @MaxLength(255)
   venue?: string;
+
+  @ApiProperty({
+    description: 'Mô tả chi tiết về hội nghị',
+    example: 'International Conference on Transportation and Logistics 2025...',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({
+    description: 'Mô tả ngắn gọn cho trang CFP (tối đa 500 ký tự)',
+    example: 'Join us for the premier conference on transportation research...',
+    maxLength: 500,
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  shortDescription?: string;
+
+  @ApiProperty({
+    description: 'Email liên hệ cho hội nghị',
+    example: 'conference@uth.edu.vn',
+    required: false,
+  })
+  @IsEmail()
+  @IsOptional()
+  @MaxLength(255)
+  contactEmail?: string;
 }
 
 

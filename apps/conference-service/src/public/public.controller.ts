@@ -25,6 +25,9 @@ export class PublicController {
           startDate: conference.startDate,
           endDate: conference.endDate,
           venue: conference.venue,
+          description: conference.description,
+          shortDescription: conference.shortDescription,
+          contactEmail: conference.contactEmail,
         },
         tracks: tracks.map((track) => ({
           id: track.id,
@@ -61,6 +64,7 @@ export class PublicController {
     };
   }
 }
+
 
 
 

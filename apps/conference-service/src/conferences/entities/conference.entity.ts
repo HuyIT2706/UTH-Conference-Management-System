@@ -24,6 +24,15 @@ export class Conference {
   @Column({ type: 'varchar', length: 255 })
   venue: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true, name: 'short_description' })
+  shortDescription: string | null;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'contact_email' })
+  contactEmail: string | null;
+
   @Column({ type: 'int' })
   organizerId: number;
 
