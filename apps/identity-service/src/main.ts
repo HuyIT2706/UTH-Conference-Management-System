@@ -25,8 +25,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Identity Service API')
-    .setDescription('API documentation for Identity Service - Authentication & User Management')
+    .setTitle('UTH-ConfMS Identity Service')
+    .setDescription('Identity Service API: Xác thực & Quản lý người dùng')
     .setVersion('1.0')
     .addBearerAuth(
       {
