@@ -170,6 +170,57 @@ export class AuthService {
     return { message: 'Xác minh email thành công' };
   }
 
+  /**
+   * Helper method để lấy verification token từ database (cho development/testing)
+   * Chỉ dùng trong development, không nên expose trong production
+   * Nếu không có token hoặc đã verify, sẽ tạo token mới
+   */
+  async getVerificationTokenByEmail(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+
+    // Nếu đã verify rồi thì báo luôn
+    if (user.isVerified) {
+      return {
+        email: user.email,
+        message: 'Email đã được xác minh',
+        isVerified: true,
+      };
+    }
+
+    // Tìm token chưa dùng
+    let token = await this.emailVerificationTokenRepository.findOne({
+      where: { userId: user.id, used: false },
+      order: { createdAt: 'DESC' },
+    });
+
+    // Nếu không có token hợp lệ, tạo mới
+    if (!token || token.expiresAt.getTime() < Date.now()) {
+      // Tạo token mới
+      await this.createAndSendEmailVerificationToken(user);
+      
+      // Lấy token vừa tạo
+      token = await this.emailVerificationTokenRepository.findOne({
+        where: { userId: user.id, used: false },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (!token) {
+        throw new NotFoundException('Không thể tạo verification token');
+      }
+    }
+
+    return {
+      email: user.email,
+      token: token.token,
+      expiresAt: token.expiresAt,
+      verifyUrl: `http://localhost:3001/api/auth/verify-email?token=${encodeURIComponent(token.token)}`,
+      isVerified: false,
+    };
+  }
+
   private stripPassword(user: User) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;

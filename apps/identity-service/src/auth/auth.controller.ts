@@ -18,9 +18,11 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Email đã tồn tại hoặc dữ liệu không hợp lệ' })
   async register(@Body() dto: RegisterDto) {
     const result = await this.authService.register(dto);
+    // Loại bỏ message từ result để tránh conflict, sau đó thêm message mới
+    const { message: _, ...rest } = result;
     return {
       message: 'Đăng ký tài khoản thành công',
-      ...result,
+      ...rest,
     };
   }
 
@@ -71,6 +73,31 @@ export class AuthController {
   async verifyEmail(@Query('token') token: string) {
     const result = await this.authService.verifyEmail(token);
     return result;
+  }
+
+  @Get('get-verification-token')
+  @ApiOperation({ 
+    summary: '[DEV ONLY] Lấy verification token từ database (chỉ dùng trong development)',
+    description: 'Helper endpoint để lấy verification token cho user để test. Nếu user chưa có token, sẽ tự động tạo mới. KHÔNG nên dùng trong production!'
+  })
+  @ApiQuery({ name: 'email', description: 'Email của user cần lấy token', required: true, example: 'user@example.com' })
+  @ApiResponse({ status: 200, description: 'Lấy token thành công' })
+  @ApiResponse({ status: 404, description: 'User không tồn tại' })
+  async getVerificationToken(@Query('email') email: string) {
+    const result = await this.authService.getVerificationTokenByEmail(email);
+    
+    // Nếu đã verify rồi thì trả về message khác
+    if (result.isVerified) {
+      return {
+        message: result.message || 'Email đã được xác minh',
+        data: result,
+      };
+    }
+    
+    return {
+      message: 'Lấy verification token thành công (chỉ dùng trong development)',
+      data: result,
+    };
   }
 }
 

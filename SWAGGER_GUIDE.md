@@ -87,10 +87,17 @@ Tất cả services đã được cấu hình để hỗ trợ JWT Bearer token:
 
 ## Tips
 
-1. **File Upload**: Với endpoints có file upload (như create submission), Swagger UI sẽ tự động hiển thị file picker
-2. **Query Parameters**: Các query params như pagination sẽ được hiển thị dưới dạng input fields
-3. **Response Examples**: Click vào response schema để xem cấu trúc dữ liệu chi tiết
-4. **Error Responses**: Tất cả các error codes đã được document (400, 401, 403, 404, etc.)
+1. **Chỉnh sửa JSON Body**: 
+   - Click **"Try it out"** trên bất kỳ endpoint nào
+   - Swagger sẽ hiển thị JSON body với example values đã được điền sẵn
+   - Bạn có thể chỉnh sửa trực tiếp JSON trong textarea để thay đổi giá trị
+   - Click **"Execute"** để gửi request với JSON đã chỉnh sửa
+
+2. **File Upload**: Với endpoints có file upload (như create submission), Swagger UI sẽ tự động hiển thị file picker
+3. **Query Parameters**: Các query params như pagination sẽ được hiển thị dưới dạng input fields
+4. **Response Examples**: Click vào response schema để xem cấu trúc dữ liệu chi tiết
+5. **Error Responses**: Tất cả các error codes đã được document (400, 401, 403, 404, etc.)
+6. **Example Values**: Tất cả các DTOs đã có example values mặc định để dễ test
 
 ## Cải thiện tương lai
 

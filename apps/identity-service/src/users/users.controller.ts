@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -9,6 +9,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleName } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -91,16 +92,33 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @Patch(':id/roles')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Cập nhật role cho user (Admin only, chỉ 1 role)' })
+  @ApiResponse({ status: 200, description: 'Cập nhật role thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async updateUserRoles(
     @Param('id', ParseIntPipe) userId: number,
-    @Body('roles') roles: string[],
+    @Body() dto: UpdateUserRolesDto,
   ) {
-    const user = await this.usersService.updateUserRoles(userId, roles);
+    const user = await this.usersService.updateUserRoles(userId, dto.role);
     const { password, ...userWithoutPassword } = user;
     return {
       message: 'Cập nhật vai trò người dùng thành công',
       user: userWithoutPassword,
     };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADMIN)
+  @Delete(':id')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Xóa user (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Xóa user thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
+  @ApiResponse({ status: 404, description: 'User không tồn tại' })
+  async deleteUser(@Param('id', ParseIntPipe) userId: number) {
+    await this.usersService.deleteUser(userId);
+    return { message: 'Xóa user thành công' };
   }
 }
 

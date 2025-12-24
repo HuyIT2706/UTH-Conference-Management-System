@@ -162,22 +162,19 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async updateUserRoles(userId: number, roleNames: string[]): Promise<User> {
+  async updateUserRoles(userId: number, roleName: string): Promise<User> {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const roles: Role[] = [];
-    for (const roleName of roleNames) {
-      const role = await this.findRoleByName(roleName);
-      if (!role) {
-        throw new BadRequestException(`Role ${roleName} not found`);
-      }
-      roles.push(role);
+    const role = await this.findRoleByName(roleName);
+    if (!role) {
+      throw new BadRequestException(`Role ${roleName} not found`);
     }
 
-    user.roles = roles;
+    // Ghi đè toàn bộ roles, chỉ giữ 1 role duy nhất
+    user.roles = [role];
     return this.usersRepository.save(user);
   }
 
@@ -272,6 +269,15 @@ export class UsersService {
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
     await this.usersRepository.save(user);
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    await this.usersRepository.remove(user);
   }
 }
 
