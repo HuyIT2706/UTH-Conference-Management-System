@@ -27,8 +27,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Submission Service API')
-    .setDescription('API documentation for Submission Service - Submission & Version Management')
+    .setTitle('UTH-ConfMS Submission Service')
+    .setDescription('Hệ thống quản lý bài báo hội nghị nghiên cứu khoa học cho Đại học UTH (UTH-ConfMS) - Submission Service: Quản lý Bài nộp & Version History')
     .setVersion('1.0')
     .addBearerAuth(
       {

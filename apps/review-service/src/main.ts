@@ -16,8 +16,8 @@ async function bootstrap() {
 
   // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('Review Service API')
-    .setDescription('API documentation for Review Service - Review, Assignment, Bidding, Decision & Rebuttal Management')
+    .setTitle('UTH-ConfMS Review Service')
+    .setDescription('Hệ thống quản lý bài báo hội nghị nghiên cứu khoa học cho Đại học UTH (UTH-ConfMS) - Review Service: Quản lý Đánh giá, Phân công, Bidding, Quyết định & Phản biện')
     .setVersion('1.0')
     .addBearerAuth(
       {
