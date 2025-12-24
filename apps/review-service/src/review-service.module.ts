@@ -3,8 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { ReviewServiceController } from './review-service.controller';
-import { ReviewServiceService } from './review-service.service';
 import { ReviewsController } from './reviews/reviews.controller';
 import { ReviewsService } from './reviews/reviews.service';
 import { ReviewPreference } from './reviews/entities/review-preference.entity';
@@ -33,7 +31,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
           expiresIn:
-            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 3600,
         },
       }),
     }),
@@ -80,7 +78,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
       Rebuttal,
     ]),
   ],
-  controllers: [ReviewServiceController, ReviewsController],
-  providers: [ReviewServiceService, ReviewsService, JwtStrategy],
+  controllers: [ReviewsController],
+  providers: [ReviewsService, JwtStrategy],
 })
 export class ReviewServiceModule {}
