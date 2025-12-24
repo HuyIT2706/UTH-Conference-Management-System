@@ -14,8 +14,6 @@ export class PasswordResetToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Mã reset (hoặc token) lưu dạng plain để đơn giản,
-  // nếu muốn an toàn hơn có thể đổi sang hash + salt
   @Column()
   token: string;
 

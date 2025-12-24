@@ -93,7 +93,7 @@ export class UsersController {
   @Roles(RoleName.ADMIN)
   @Patch(':id/roles')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Cập nhật role cho user (Admin only, chỉ 1 role)' })
+  @ApiOperation({ summary: 'Cập nhật role cho user (Admin thực hiện)' })
   @ApiResponse({ status: 200, description: 'Cập nhật role thành công' })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async updateUserRoles(

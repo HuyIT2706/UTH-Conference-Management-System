@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IdentityServiceController } from './identity-service.controller';
-import { IdentityServiceService } from './identity-service.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
@@ -17,7 +15,7 @@ import { PasswordResetToken } from './users/entities/password-reset-token.entity
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
-        'apps/identity-service/.env.local', // Local development override
+        'apps/identity-service/.env.local', 
         'apps/identity-service/.env',
         '.env',
       ],
@@ -31,9 +29,6 @@ import { PasswordResetToken } from './users/entities/password-reset-token.entity
         const username = config.get<string>('DB_USERNAME') || 'admin';
         const password = config.get<string>('DB_PASSWORD') || 'admin123';
         const database = config.get<string>('DB_DATABASE') || 'db_identity';
-
-        // Debug log to confirm actual DB config being used
-        // eslint-disable-next-line no-console
         console.log(
           `[Identity-Service] DB -> host=${host} port=${port} user=${username} db=${database}`,
         );
@@ -54,7 +49,7 @@ import { PasswordResetToken } from './users/entities/password-reset-token.entity
     UsersModule,
     AuthModule,
   ],
-  controllers: [IdentityServiceController],
-  providers: [IdentityServiceService],
+  controllers: [],
+  providers: [],
 })
 export class IdentityServiceModule {}

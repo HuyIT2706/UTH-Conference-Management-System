@@ -18,7 +18,6 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Email đã tồn tại hoặc dữ liệu không hợp lệ' })
   async register(@Body() dto: RegisterDto) {
     const result = await this.authService.register(dto);
-    // Loại bỏ message từ result để tránh conflict, sau đó thêm message mới
     const { message: _, ...rest } = result;
     return {
       message: 'Đăng ký tài khoản thành công',
@@ -28,7 +27,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập và lấy JWT tokens' })
-  @ApiResponse({ status: 200, description: 'Đăng nhập thành công, trả về accessToken và refreshToken' })
+  @ApiResponse({ status: 200, description: 'Đăng nhập thành công' })
   @ApiResponse({ status: 401, description: 'Thông tin đăng nhập không hợp lệ hoặc tài khoản chưa xác minh email' })
   async login(@Body() dto: LoginDto) {
     const result = await this.authService.login(dto);
@@ -60,7 +59,6 @@ export class AuthController {
     @CurrentUser('sub') userId: number,
     @Body() dto: RefreshTokenDto,
   ) {
-    // userId được guard xác thực, sử dụng để log / kiểm tra nếu cần
     return this.authService.logout(dto);
   }
 
@@ -78,7 +76,7 @@ export class AuthController {
   @Get('get-verification-token')
   @ApiOperation({ 
     summary: '[DEV ONLY] Lấy verification token từ database (chỉ dùng trong development)',
-    description: 'Helper endpoint để lấy verification token cho user để test. Nếu user chưa có token, sẽ tự động tạo mới. KHÔNG nên dùng trong production!'
+    description: 'Helper endpoint để lấy verification token cho user để test.'
   })
   @ApiQuery({ name: 'email', description: 'Email của user cần lấy token', required: true, example: 'user@example.com' })
   @ApiResponse({ status: 200, description: 'Lấy token thành công' })
@@ -86,7 +84,6 @@ export class AuthController {
   async getVerificationToken(@Query('email') email: string) {
     const result = await this.authService.getVerificationTokenByEmail(email);
     
-    // Nếu đã verify rồi thì trả về message khác
     if (result.isVerified) {
       return {
         message: result.message || 'Email đã được xác minh',

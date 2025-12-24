@@ -23,12 +23,10 @@ export class UsersService {
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
     private readonly dataSource: DataSource,
   ) {}
-
-  // Cho phép các service khác (vd: AuthService) cập nhật user an toàn
   async markEmailVerified(userId: number): Promise<User> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Không tìm thấy tài khoản người dùng');
     }
     user.isVerified = true;
     return this.usersRepository.save(user);
@@ -54,26 +52,19 @@ export class UsersService {
     fullName: string;
     roles?: Role[];
   }): Promise<User> {
-    console.log('[createUser] Creating user with roles:', params.roles?.map(r => `${r.name} (ID: ${r.id})`));
-    
-    // Đảm bảo roles được load đầy đủ với ID
     const rolesToAssign = params.roles || [];
     if (rolesToAssign.length > 0) {
-      // Verify roles có ID hợp lệ và reload từ database để đảm bảo
       const verifiedRoles: Role[] = [];
       for (const role of rolesToAssign) {
         if (!role.id) {
-          throw new Error(`Role ${role.name} does not have an ID. Please ensure roles are loaded from database.`);
+          throw new Error(`Role ${role.name} Không có ID. Vui lòng đảm bảo các vai trò được tải từ cơ sở dữ liệu.`);
         }
-        // Reload role từ database để đảm bảo nó tồn tại
         const dbRole = await this.roleRepository.findOne({ where: { id: role.id } });
         if (!dbRole) {
-          throw new Error(`Role ${role.name} with ID ${role.id} not found in database`);
+          throw new Error(`Role ${role.name} with ID ${role.id} Không có trong cơ sở dữ liệu`);
         }
         verifiedRoles.push(dbRole);
       }
-      
-      // Tạo user với roles được gán trực tiếp
       const user = this.usersRepository.create({
         email: params.email,
         password: params.password,
@@ -83,9 +74,6 @@ export class UsersService {
       });
       
       const savedUser = await this.usersRepository.save(user);
-      console.log('[createUser] User saved with ID:', savedUser.id);
-      
-      // Reload user với relations để đảm bảo roles được load
       const userWithRoles = await this.usersRepository.findOne({
         where: { id: savedUser.id },
         relations: ['roles'],
@@ -94,11 +82,8 @@ export class UsersService {
       if (!userWithRoles) {
         throw new Error('Failed to reload user with roles');
       }
-      
-      console.log('[createUser] User reloaded with roles:', userWithRoles.roles?.map(r => `${r.name} (ID: ${r.id})`));
       return userWithRoles;
     } else {
-      // Không có roles, tạo user bình thường
       const user = this.usersRepository.create({
         email: params.email,
         password: params.password,
@@ -107,9 +92,6 @@ export class UsersService {
       });
       
       const savedUser = await this.usersRepository.save(user);
-      console.log('[createUser] User saved with ID:', savedUser.id);
-      
-      // Reload user với relations
       const userWithRoles = await this.usersRepository.findOne({
         where: { id: savedUser.id },
         relations: ['roles'],
@@ -172,8 +154,6 @@ export class UsersService {
     if (!role) {
       throw new BadRequestException(`Role ${roleName} not found`);
     }
-
-    // Ghi đè toàn bộ roles, chỉ giữ 1 role duy nhất
     user.roles = [role];
     return this.usersRepository.save(user);
   }
@@ -218,7 +198,7 @@ export class UsersService {
     // Tạo mã 6 chữ số
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); //
 
     const resetToken = this.passwordResetTokenRepository.create({
       token: code,

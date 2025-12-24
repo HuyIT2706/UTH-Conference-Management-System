@@ -25,9 +25,7 @@ export class SeedService implements OnModuleInit {
       if (!existingRole) {
         const role = this.roleRepository.create({ name: roleName });
         await this.roleRepository.save(role);
-        console.log(`[Seed] Created role: ${roleName}`);
       }
     }
-    console.log('[Seed] Role seeding completed');
   }
 }

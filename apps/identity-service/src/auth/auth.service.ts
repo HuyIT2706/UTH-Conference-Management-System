@@ -37,7 +37,7 @@ export class AuthService {
     this.refreshExpiresIn =
       this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
   }
-
+// APi 1:  Đăng ký tài admin
   async register(dto: RegisterDto) {
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
@@ -47,32 +47,27 @@ export class AuthService {
     const adminRole = await this.usersService.findRoleByName(RoleName.ADMIN);
     if (!adminRole || !adminRole.id) {
       throw new BadRequestException(
-        'Không tìm thấy quyền ADMIN. Vui lòng chạy seed dữ liệu trước.',
+        'Không tìm thấy quyền ADMIN.',
       );
     }
 
     const hashed = await bcrypt.hash(dto.password, 10);
-    console.log('[Đăng ký] Gọi createUser với quyền ADMIN...');
     const user = await this.usersService.createUser({
       email: dto.email,
       password: hashed,
       fullName: dto.fullName,
       roles: [adminRole],
     });
-
-    // Sau khi tạo user, tạo token verify email
     await this.createAndSendEmailVerificationToken(user);
-
-    // Không tự động login, yêu cầu xác minh email trước (tùy bạn có thể đổi)
     return {
       user: this.stripPassword(user),
       message: 'Vui lòng kiểm tra email để xác minh tài khoản',
     };
   }
-
+// Api 2: Xác tài khoản qua email viên token
   private async createAndSendEmailVerificationToken(user: User) {
-    const token = await bcrypt.genSalt(10); // dùng chuỗi random, không liên quan password
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    const token = await bcrypt.genSalt(10);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const entity = this.emailVerificationTokenRepository.create({
       token,
@@ -83,24 +78,16 @@ export class AuthService {
     await this.emailVerificationTokenRepository.save(entity);
 
     const appUrl =
-      this.configService.get<string>('APP_BASE_URL') ||
-      'http://localhost:3000';
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:3000';
     const verifyUrl = `${appUrl}/verify-email?token=${encodeURIComponent(
       token,
     )}`;
-
-    // TODO: gửi email thật qua SMTP/notification-service
-    // Tạm thời log ra server để dev kiểm tra
-    // eslint-disable-next-line no-console
-    console.log(
-      `[EmailVerification] Send verify link to ${user.email}: ${verifyUrl} (expires at ${expiresAt.toISOString()})`,
-    );
   }
-
+// Api 3: Đăng nhập
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) {
-      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
+      throw new UnauthorizedException('Gmail đăng nhập không hợp lệ');
     }
 
     if (!user.isVerified) {
@@ -111,13 +98,13 @@ export class AuthService {
 
     const isValid = await bcrypt.compare(dto.password, user.password);
     if (!isValid) {
-      throw new UnauthorizedException('Thông tin đăng nhập không hợp lệ');
+      throw new UnauthorizedException('Mật khẩu đăng nhập không hợp lệ');
     }
 
     const tokens = await this.issueTokens(user);
     return { user: this.stripPassword(user), ...tokens };
   }
-
+// Api 4: Tạo lại token
   async refreshToken(dto: RefreshTokenDto) {
     const payload = await this.verifyRefreshToken(dto.refreshToken);
     const stored = await this.refreshTokenRepository.findOne({
@@ -137,18 +124,16 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Không tìm thấy người dùng');
     }
-
-    // Rotate refresh token: remove old, issue new
     await this.refreshTokenRepository.delete({ id: stored.id });
     const tokens = await this.issueTokens(user);
     return { user: this.stripPassword(user), ...tokens };
   }
-
+// Api 5: Đăng xuất
   async logout(dto: RefreshTokenDto) {
     await this.refreshTokenRepository.delete({ token: dto.refreshToken });
     return { message: 'Đã đăng xuất' };
   }
-
+// Api 6: Xác thực tk bằng token từ gmail
   async verifyEmail(token: string) {
     const record = await this.emailVerificationTokenRepository.findOne({
       where: { token, used: false },
@@ -170,18 +155,11 @@ export class AuthService {
     return { message: 'Xác minh email thành công' };
   }
 
-  /**
-   * Helper method để lấy verification token từ database (cho development/testing)
-   * Chỉ dùng trong development, không nên expose trong production
-   * Nếu không có token hoặc đã verify, sẽ tạo token mới
-   */
   async getVerificationTokenByEmail(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
-
-    // Nếu đã verify rồi thì báo luôn
     if (user.isVerified) {
       return {
         email: user.email,
@@ -189,19 +167,12 @@ export class AuthService {
         isVerified: true,
       };
     }
-
-    // Tìm token chưa dùng
     let token = await this.emailVerificationTokenRepository.findOne({
       where: { userId: user.id, used: false },
       order: { createdAt: 'DESC' },
     });
-
-    // Nếu không có token hợp lệ, tạo mới
     if (!token || token.expiresAt.getTime() < Date.now()) {
-      // Tạo token mới
       await this.createAndSendEmailVerificationToken(user);
-      
-      // Lấy token vừa tạo
       token = await this.emailVerificationTokenRepository.findOne({
         where: { userId: user.id, used: false },
         order: { createdAt: 'DESC' },
@@ -220,17 +191,14 @@ export class AuthService {
       isVerified: false,
     };
   }
-
+// Api update password
   private stripPassword(user: User) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = user;
     return rest;
   }
 
   private async issueTokens(user: User) {
-    // Get role names from user roles
     const roleNames = user.roles?.map((role) => role.name) || [];
-    
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
@@ -244,7 +212,6 @@ export class AuthService {
       },
       {
         secret: this.refreshSecret,
-        // jose types prefer numeric seconds
         expiresIn: this.parseExpiryToSeconds(this.refreshExpiresIn),
       },
     );
@@ -264,7 +231,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       expiresIn:
-        this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '900',
+        this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '3600',
       refreshExpiresIn: this.refreshExpiresIn,
     };
   }
@@ -281,7 +248,7 @@ export class AuthService {
 
   private parseExpiryToMs(expiry: string): number {
     const match = /^(\d+)([smhd])$/.exec(expiry);
-    if (!match) return 7 * 24 * 60 * 60 * 1000; // default 7d
+    if (!match) return 7 * 24 * 60 * 60 * 1000; 
     const value = Number(match[1]);
     const unit = match[2];
     const unitMs =
@@ -298,4 +265,3 @@ export class AuthService {
     return value * unitSec;
   }
 }
-

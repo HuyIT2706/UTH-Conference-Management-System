@@ -4,7 +4,7 @@ import { RoleName } from '../entities/role.entity';
 
 export class UpdateUserRolesDto {
   @ApiProperty({
-    description: 'Role mới của user (chỉ 1 role)',
+    description: 'Cập nhật roles cho user (admin thực hiện)',
     enum: RoleName,
     example: RoleName.CHAIR,
   })

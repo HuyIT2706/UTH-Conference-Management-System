@@ -5,8 +5,6 @@ import { webcrypto, randomUUID } from 'crypto';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  // Ensure global crypto + randomUUID for libraries expecting WebCrypto on Node 18
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
   const g: any = global as any;
   if (typeof g.crypto === 'undefined') {
     g.crypto = webcrypto;
@@ -46,9 +44,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(process.env.port ?? 3001);
-  // eslint-disable-next-line no-console
   console.log(`[Identity-Service] Application is running on: http://localhost:${process.env.port ?? 3001}/api`);
-  // eslint-disable-next-line no-console
   console.log(`[Identity-Service] Swagger documentation: http://localhost:${process.env.port ?? 3001}/api/docs`);
 }
 bootstrap();
