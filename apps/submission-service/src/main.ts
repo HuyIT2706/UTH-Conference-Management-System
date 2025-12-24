@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SubmissionServiceModule } from './submission-service.module';
 import { ValidationPipe } from '@nestjs/common';
 import { webcrypto, randomUUID } from 'crypto';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   // Ensure global crypto + randomUUID for libraries expecting WebCrypto on Node 18
@@ -23,6 +24,32 @@ async function bootstrap() {
       forbidUnknownValues: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3003, '0.0.0.0');
+
+  // Swagger setup
+  const config = new DocumentBuilder()
+    .setTitle('Submission Service API')
+    .setDescription('API documentation for Submission Service - Submission & Version Management')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  const port = process.env.PORT ?? 3003;
+  await app.listen(port, '0.0.0.0');
+  // eslint-disable-next-line no-console
+  console.log(`[Submission-Service] Application is running on: http://localhost:${port}/api`);
+  // eslint-disable-next-line no-console
+  console.log(`[Submission-Service] Swagger documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();

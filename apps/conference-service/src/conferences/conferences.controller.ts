@@ -9,6 +9,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { ConferencesService } from './conferences.service';
 import { CreateConferenceDto } from './dto/create-conference.dto';
 import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
@@ -20,12 +21,17 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt.strategy';
 
+@ApiTags('Conferences')
 @Controller('conferences')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class ConferencesController {
   constructor(private readonly conferencesService: ConferencesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Tạo hội nghị mới' })
+  @ApiResponse({ status: 201, description: 'Tạo hội nghị thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   async create(
     @CurrentUser() user: JwtPayload,
     @Body() dto: CreateConferenceDto,
@@ -39,16 +45,26 @@ export class ConferencesController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Lấy danh sách tất cả hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
   findAll() {
     return this.conferencesService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Lấy thông tin chi tiết hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.conferencesService.findOne(id);
   }
 
   @Post(':id/tracks')
+  @ApiOperation({ summary: 'Thêm track vào hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 201, description: 'Thêm track thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
   async addTrack(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateTrackDto,

@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -9,12 +10,17 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RoleName } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Lấy thông tin profile của user hiện tại' })
+  @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
+  @ApiResponse({ status: 401, description: 'Không có quyền truy cập' })
   async getProfile(@CurrentUser('sub') userId: number) {
     const user = await this.usersService.getProfile(userId);
     const { password, ...rest } = user;
@@ -26,6 +32,10 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('change-password')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Đổi mật khẩu' })
+  @ApiResponse({ status: 200, description: 'Đổi mật khẩu thành công' })
+  @ApiResponse({ status: 400, description: 'Mật khẩu cũ không đúng' })
   async changePassword(
     @CurrentUser('sub') userId: number,
     @Body() dto: ChangePasswordDto,
@@ -53,6 +63,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADMIN)
   @Post('create')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Tạo user mới với role tùy chỉnh (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Tạo user thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async createUser(@Body() dto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.createUserWithRole({

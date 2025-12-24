@@ -7,3 +7,4 @@ COPY . .
 RUN npm run build review-service
 EXPOSE 3004
 CMD ["node", "dist/apps/review-service/main"]
+

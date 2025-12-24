@@ -16,6 +16,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SubmissionsService } from './submissions.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -25,13 +26,33 @@ import { QuerySubmissionsDto } from './dto/query-submissions.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
 
+@ApiTags('Submissions')
 @Controller('submissions')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Tạo submission mới với file PDF' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'File PDF (tối đa 10MB)' },
+        title: { type: 'string', example: 'Machine Learning in Healthcare' },
+        abstract: { type: 'string', example: 'This paper presents...' },
+        keywords: { type: 'string', example: 'machine learning, healthcare, AI' },
+        trackId: { type: 'number', example: 1 },
+        conferenceId: { type: 'number', example: 1 },
+      },
+      required: ['file', 'title', 'abstract', 'trackId', 'conferenceId'],
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Tạo submission thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc deadline đã qua' })
   async create(
     @Body() createDto: CreateSubmissionDto,
     @UploadedFile() file: Express.Multer.File,
@@ -79,6 +100,8 @@ export class SubmissionsController {
     };
   }
   @Get()
+  @ApiOperation({ summary: 'Lấy danh sách submissions (có phân trang và filter)' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
   async findAll(
     @Query() queryDto: QuerySubmissionsDto,
     @Req() req: Request,
@@ -122,6 +145,10 @@ export class SubmissionsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Lấy chi tiết submission kèm lịch sử versions' })
+  @ApiParam({ name: 'id', description: 'UUID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy chi tiết thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @Req() req: Request,

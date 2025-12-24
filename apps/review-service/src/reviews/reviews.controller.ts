@@ -13,6 +13,7 @@ import {
   UnauthorizedException,
   Query,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { ReviewsService } from './reviews.service';
 import { CreateBidDto } from './dto/create-bid.dto';
@@ -26,8 +27,10 @@ import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { CreateRebuttalDto } from './dto/create-rebuttal.dto';
 import { CreateAutoAssignmentDto } from './dto/create-auto-assignment.dto';
 
+@ApiTags('Reviews')
 @Controller('reviews')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
@@ -56,6 +59,9 @@ export class ReviewsController {
    * Reviewer submit preference (bidding) for a submission
    */
   @Post('bids')
+  @ApiOperation({ summary: 'Reviewer submit preference (bidding) cho bài báo' })
+  @ApiResponse({ status: 201, description: 'Submit bidding thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền REVIEWER' })
   async submitBid(
     @Req() req: Request,
     @Body() dto: CreateBidDto,
@@ -156,6 +162,9 @@ export class ReviewsController {
    * Reviewer submit review for an assignment
    */
   @Post()
+  @ApiOperation({ summary: 'Reviewer nộp bài chấm' })
+  @ApiResponse({ status: 201, description: 'Nộp review thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền hoặc assignment chưa được accept' })
   async submitReview(
     @Req() req: Request,
     @Body() dto: CreateReviewDto,
@@ -524,6 +533,8 @@ export class ReviewsController {
     };
   }
 }
+
+
 
 
 
