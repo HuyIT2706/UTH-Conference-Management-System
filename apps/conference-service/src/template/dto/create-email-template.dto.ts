@@ -12,7 +12,7 @@ import { EmailTemplateType } from '../entities/email-template.entity';
 export class CreateEmailTemplateDto {
   @ApiProperty({
     description: 'Tên của email template',
-    example: 'Decision Accepted Email',
+    example: 'buivanhuy2706@gmail.com',
     maxLength: 100,
   })
   @IsString()
@@ -30,7 +30,7 @@ export class CreateEmailTemplateDto {
 
   @ApiProperty({
     description: 'Tiêu đề email',
-    example: 'Congratulations! Your submission has been accepted',
+    example: 'Chúc mừng bài bạn được chấp nhận',
     maxLength: 255,
   })
   @IsString()
@@ -39,19 +39,20 @@ export class CreateEmailTemplateDto {
   subject: string;
 
   @ApiProperty({
-    description: 'Nội dung email (có thể dùng variables như {{authorName}}, {{deadline}})',
-    example: 'Dear {{authorName}},\n\nYour submission "{{submissionTitle}}" has been accepted for {{conferenceName}}.\n\nBest regards,\n{{conferenceName}} Committee',
+    description: 'Nội dung email ',
+    example: "Chúc mừng bài thi đã được chấp nhận, Kính gửi người nộp, bài nộp của bạn (Bài học docker) đã được chấp nhận cho hội nghị thi công nghệ 2026, Trân trọng Ban tổ chức Bui Van Huy",
+
   })
   @IsString()
   @IsNotEmpty()
   body: string;
 
   @ApiProperty({
-    description: 'Danh sách các biến có thể sử dụng trong template (optional)',
+    description: 'Danh sách các biến có thể sử dụng trong template',
     example: {
-      authorName: 'Tên tác giả',
-      submissionTitle: 'Tiêu đề bài nộp',
-      conferenceName: 'Tên hội nghị',
+      authorName: 'Bùi Văn Huy(Author)',
+      submissionTitle: 'Bài học docker',
+      conferenceName: 'Cuộc THi Công Nghệ 2026',
     },
     required: false,
   })
