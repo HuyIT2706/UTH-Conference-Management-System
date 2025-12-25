@@ -9,7 +9,13 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { TemplatesService } from './templates.service';
 import { CreateEmailTemplateDto } from './dto/create-email-template.dto';
 import { UpdateEmailTemplateDto } from './dto/update-email-template.dto';
@@ -36,29 +42,29 @@ export class TemplatesController {
   @Post('email')
   @ApiOperation({
     summary: 'Tạo email template mới',
-    description: `Tạo một email template mới cho hội nghị. Có thể sử dụng variables trong body như {{authorName}}, {{deadline}}, {{conferenceName}}.
+    description: `Tạo một email template mới cho hội nghị.
 
-**Ví dụ request body:**
-\`\`\`json
-{
-  "name": "Decision Accepted Email",
-  "type": "DECISION_ACCEPTED",
-  "subject": "Congratulations! Your submission has been accepted",
-  "body": "Dear {{authorName}},\\n\\nYour submission '{{submissionTitle}}' has been accepted for {{conferenceName}}.\\n\\nBest regards,\\n{{conferenceName}} Committee",
-  "variables": {
-    "authorName": "Tên tác giả",
-    "submissionTitle": "Tiêu đề bài nộp",
-    "conferenceName": "Tên hội nghị"
-  }
-}
-\`\`\`
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "name": "buivanhuy2706@gmail.com",
+      "type": "DECISION_ACCEPTED",
+      "subject": "Chúc mừng bài thi đã được chấp nhận",
+      "body": "Kính gửi người nộp, bài nộp của bạn (Bài học docker) đã được chấp nhận cho hội nghị thi công nghệ 2026, Trân trọng Ban tổ chức Bui Van Huy",
+      "variables": {
+        "authorName": "Bùi Văn Huy",
+        "submissionTitle": "Bài học docker",
+        "conferenceName": "Cuộc THi Công Nghệ 2026"
+      }
+    }
+    \`\`\`
 
-**Các loại email template (type):**
-- \`DECISION_ACCEPTED\`: Email thông báo bài được chấp nhận
-- \`DECISION_REJECTED\`: Email thông báo bài bị từ chối
-- \`REMINDER_REVIEW\`: Email nhắc nhở deadline review
-- \`INVITATION_PC\`: Email mời PC member
-- \`NOTIFICATION_DEADLINE\`: Email thông báo deadline`
+    **Các loại email template (type):**
+    - \`DECISION_ACCEPTED\`: Email thông báo bài được chấp nhận
+    - \`DECISION_REJECTED\`: Email thông báo bài bị từ chối
+    - \`REMINDER_REVIEW\`: Email nhắc nhở deadline review
+    - \`INVITATION_PC\`: Email mời PC member
+    - \`NOTIFICATION_DEADLINE\`: Email thông báo deadline`,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo email template thành công' })
@@ -68,10 +74,10 @@ export class TemplatesController {
     @Body() createDto: CreateEmailTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.createEmailTemplate(
       conferenceId,
@@ -85,21 +91,25 @@ export class TemplatesController {
   }
 
   @Get('email')
-  @ApiOperation({ summary: 'Lấy danh sách tất cả email templates của hội nghị' })
+  @ApiOperation({
+    summary: 'Lấy danh sách tất cả email templates của hội nghị',
+  })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách email templates thành công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy danh sách email templates thành công',
+  })
   async findAllEmailTemplates(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
-    const templates = await this.templatesService.findAllEmailTemplates(
-      conferenceId,
-    );
+    const templates =
+      await this.templatesService.findAllEmailTemplates(conferenceId);
 
     return {
       message: 'Lấy danh sách email templates thành công',
@@ -118,10 +128,10 @@ export class TemplatesController {
     @Param('templateId', ParseIntPipe) templateId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.findOneEmailTemplate(
       conferenceId,
@@ -137,19 +147,14 @@ export class TemplatesController {
   @Patch('email/:templateId')
   @ApiOperation({
     summary: 'Cập nhật email template',
-    description: `Cập nhật thông tin email template. Tất cả các trường đều tùy chọn.
-    
-**Ví dụ request body (cập nhật một số trường):**
-\`\`\`json
-{
-  "subject": "Updated: Your submission has been accepted",
-  "body": "Dear {{authorName}},\\n\\nUpdated email content..."
-}
-\`\`\``
+    description: `Cập nhật thông tin email template.`,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiParam({ name: 'templateId', description: 'ID của email template' })
-  @ApiResponse({ status: 200, description: 'Cập nhật email template thành công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cập nhật email template thành công',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy email template' })
   async updateEmailTemplate(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -157,10 +162,10 @@ export class TemplatesController {
     @Body() updateDto: UpdateEmailTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.updateEmailTemplate(
       conferenceId,
@@ -177,7 +182,10 @@ export class TemplatesController {
   @Delete('email/:templateId')
   @ApiOperation({ summary: 'Xóa email template' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
-  @ApiParam({ name: 'templateId', description: 'ID của email template cần xóa' })
+  @ApiParam({
+    name: 'templateId',
+    description: 'ID của email template cần xóa',
+  })
   @ApiResponse({ status: 200, description: 'Xóa email template thành công' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy email template' })
   async deleteEmailTemplate(
@@ -185,10 +193,10 @@ export class TemplatesController {
     @Param('templateId', ParseIntPipe) templateId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     await this.templatesService.deleteEmailTemplate(conferenceId, templateId);
 
@@ -203,42 +211,42 @@ export class TemplatesController {
     summary: 'Tạo form template mới',
     description: `Tạo một form template mới với các fields tùy chỉnh.
     
-**Ví dụ request body:**
-\`\`\`json
-{
-  "type": "SUBMISSION_FORM",
-  "name": "Submission Form Template",
-  "description": "Template for submission form",
-  "fields": [
+    **Ví dụ request body:**
+    \`\`\`json
     {
-      "name": "title",
-      "label": "Title",
-      "type": "text",
-      "required": true,
-      "validation": {
-        "maxLength": 500
-      }
-    },
-    {
-      "name": "abstract",
-      "label": "Abstract",
-      "type": "textarea",
-      "required": true
-    },
-    {
-      "name": "keywords",
-      "label": "Keywords",
-      "type": "text",
-      "required": false
+      "type": "SUBMISSION_FORM",
+      "name": "Submission Form Template",
+      "description": "Template for submission form",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "type": "text",
+          "required": true,
+          "validation": {
+            "maxLength": 500
+          }
+        },
+        {
+          "name": "abstract",
+          "label": "Abstract",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "name": "keywords",
+          "label": "Keywords",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
-  ]
-}
-\`\`\`
+    \`\`\`
 
-**Các loại form template (type):**
-- \`SUBMISSION_FORM\`: Form nộp bài
-- \`REVIEW_FORM\`: Form đánh giá
-- \`CFP_FORM\`: Form CFP`
+    **Các loại form template (type):**
+    - \`SUBMISSION_FORM\`: Form nộp bài
+    - \`REVIEW_FORM\`: Form đánh giá
+    - \`CFP_FORM\`: Form CFP`,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo form template thành công' })
@@ -248,10 +256,10 @@ export class TemplatesController {
     @Body() createDto: CreateFormTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.createFormTemplate(
       conferenceId,
@@ -267,19 +275,21 @@ export class TemplatesController {
   @Get('form')
   @ApiOperation({ summary: 'Lấy danh sách tất cả form templates của hội nghị' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách form templates thành công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy danh sách form templates thành công',
+  })
   async findAllFormTemplates(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
-    const templates = await this.templatesService.findAllFormTemplates(
-      conferenceId,
-    );
+    const templates =
+      await this.templatesService.findAllFormTemplates(conferenceId);
 
     return {
       message: 'Lấy danh sách form templates thành công',
@@ -298,10 +308,10 @@ export class TemplatesController {
     @Param('templateId', ParseIntPipe) templateId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.findOneFormTemplate(
       conferenceId,
@@ -319,24 +329,27 @@ export class TemplatesController {
     summary: 'Cập nhật form template',
     description: `Cập nhật thông tin form template. Tất cả các trường đều tùy chọn.
     
-**Ví dụ request body:**
-\`\`\`json
-{
-  "name": "Updated Submission Form",
-  "fields": [
+    **Ví dụ request body:**
+    \`\`\`json
     {
-      "name": "title",
-      "label": "Title",
-      "type": "text",
-      "required": true
+      "name": "Updated Submission Form",
+      "fields": [
+        {
+          "name": "title",
+          "label": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
-  ]
-}
-\`\`\``
+    \`\`\``,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiParam({ name: 'templateId', description: 'ID của form template' })
-  @ApiResponse({ status: 200, description: 'Cập nhật form template thành công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cập nhật form template thành công',
+  })
   @ApiResponse({ status: 404, description: 'Không tìm thấy form template' })
   async updateFormTemplate(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -344,10 +357,10 @@ export class TemplatesController {
     @Body() updateDto: UpdateFormTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.updateFormTemplate(
       conferenceId,
@@ -372,10 +385,10 @@ export class TemplatesController {
     @Param('templateId', ParseIntPipe) templateId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     await this.templatesService.deleteFormTemplate(conferenceId, templateId);
 
@@ -388,19 +401,19 @@ export class TemplatesController {
   @Post('cfp')
   @ApiOperation({
     summary: 'Tạo hoặc cập nhật CFP template',
-    description: `Tạo hoặc cập nhật template HTML cho trang CFP công khai. Có thể sử dụng variables như {{conferenceName}}, {{deadline}}, {{submissionDeadline}}.
+    description: `Tạo hoặc cập nhật template HTML cho trang CFP công khai.
     
-**Ví dụ request body:**
-\`\`\`json
-{
-  "htmlContent": "<html><body><h1>{{conferenceName}}</h1><p>Welcome to our conference!</p><p>Submission deadline: {{submissionDeadline}}</p></body></html>",
-  "customStyles": {
-    "primaryColor": "#007bff",
-    "fontFamily": "Arial, sans-serif",
-    "backgroundColor": "#ffffff"
-  }
-}
-\`\`\``
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "htmlContent": "<html><body><h1>{{conferenceName}}</h1><p>Welcome to our conference!</p><p>Submission deadline: {{submissionDeadline}}</p></body></html>",
+      "customStyles": {
+        "primaryColor": "#007bff",
+        "fontFamily": "Arial, sans-serif",
+        "backgroundColor": "#ffffff"
+      }
+    }
+    \`\`\``,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo CFP template thành công' })
@@ -410,10 +423,10 @@ export class TemplatesController {
     @Body() createDto: CreateCfpTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.createOrUpdateCfpTemplate(
       conferenceId,
@@ -435,10 +448,10 @@ export class TemplatesController {
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.getCfpTemplate(conferenceId);
 
@@ -451,17 +464,17 @@ export class TemplatesController {
   @Patch('cfp')
   @ApiOperation({
     summary: 'Cập nhật CFP template',
-    description: `Cập nhật CFP template. Tất cả các trường đều tùy chọn.
+    description: `Cập nhật CFP template.
     
-**Ví dụ request body:**
-\`\`\`json
-{
-  "htmlContent": "<html><body><h1>Updated CFP Page</h1></body></html>",
-  "customStyles": {
-    "primaryColor": "#28a745"
-  }
-}
-\`\`\``
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "htmlContent": "<html><body><h1>Updated CFP Page</h1></body></html>",
+      "customStyles": {
+        "primaryColor": "#28a745"
+      }
+    }
+    \`\`\``,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Cập nhật CFP template thành công' })
@@ -471,10 +484,10 @@ export class TemplatesController {
     @Body() updateDto: UpdateCfpTemplateDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    await this.conferencesService.ensureCanManageConference(
-      conferenceId,
-      { id: user.sub, roles: user.roles },
-    );
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
 
     const template = await this.templatesService.updateCfpTemplate(
       conferenceId,
@@ -487,4 +500,3 @@ export class TemplatesController {
     };
   }
 }
-
