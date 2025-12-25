@@ -5,8 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
-import { TemplatesController } from './templates/templates.controller';
-import { TemplatesService } from './templates/templates.service';
+import { TemplatesController } from './template/templates.controller';
+import { TemplatesService } from './template/templates.service';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
 import { PublicController } from './public/public.controller';
@@ -19,9 +19,9 @@ import { Conference } from './conferences/entities/conference.entity';
 import { Track } from './conferences/entities/track.entity';
 import { ConferenceMember } from './conferences/entities/conference-member.entity';
 import { CfpSetting } from './cfp/entities/cfp-setting.entity';
-import { EmailTemplate } from './templates/entities/email-template.entity';
-import { FormTemplate } from './templates/entities/form-template.entity';
-import { CfpTemplate } from './templates/entities/cfp-template.entity';
+import { EmailTemplate } from './template/entities/email-template.entity';
+import { FormTemplate } from './template/entities/form-template.entity';
+import { CfpTemplate } from './template/entities/cfp-template.entity';
 import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 
@@ -46,7 +46,6 @@ import { JwtStrategy } from './auth/jwt.strategy';
         const database =
           config.get<string>('DB_DATABASE') || 'db_conference';
 
-        // eslint-disable-next-line no-console
         console.log(
           `[Conference-Service] DB -> host=${host} port=${port} user=${username} db=${database}`,
         );

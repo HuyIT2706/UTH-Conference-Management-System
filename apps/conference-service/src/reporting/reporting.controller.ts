@@ -5,14 +5,17 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ReportingService } from './reporting.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt.strategy';
 import { ConferencesService } from '../conferences/conferences.service';
 
+@ApiTags('Reporting')
 @Controller('conferences/:conferenceId/stats')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
 export class ReportingController {
   constructor(
     private readonly reportingService: ReportingService,
@@ -20,6 +23,14 @@ export class ReportingController {
   ) {}
 
   @Get()
+  @ApiOperation({
+    summary: 'Lấy thống kê tổng quan của hội nghị',
+    description: 'Lấy các thống kê tổng quan như số tracks, số members, số members theo role.'
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async getStats(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
@@ -38,6 +49,14 @@ export class ReportingController {
   }
 
   @Get('submissions')
+  @ApiOperation({
+    summary: 'Lấy thống kê về submissions',
+    description: 'Lấy thống kê về submissions của hội nghị (cần tích hợp với submission-service để lấy dữ liệu thực tế).'
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê submissions thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async getSubmissionStats(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
@@ -56,6 +75,14 @@ export class ReportingController {
   }
 
   @Get('acceptance-rate')
+  @ApiOperation({
+    summary: 'Lấy tỷ lệ chấp nhận (acceptance rate)',
+    description: 'Lấy tỷ lệ chấp nhận bài báo của hội nghị (cần tích hợp với submission-service để lấy dữ liệu thực tế).'
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy tỷ lệ chấp nhận thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async getAcceptanceRate(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
@@ -74,6 +101,14 @@ export class ReportingController {
   }
 
   @Get('tracks')
+  @ApiOperation({
+    summary: 'Lấy thống kê về tracks',
+    description: 'Lấy thống kê về các tracks (lĩnh vực/chủ đề) của hội nghị.'
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê tracks thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async getTrackStats(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,

@@ -29,7 +29,25 @@ export class ConferencesController {
   constructor(private readonly conferencesService: ConferencesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Tạo hội nghị mới' })
+  @ApiOperation({ 
+    summary: 'Tạo hội nghị mới',
+    description: `Tạo một hội nghị mới. Người tạo sẽ tự động trở thành CHAIR của hội nghị.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "name": "International UTH Conference 2025",
+  "startDate": "2025-06-01T09:00:00Z",
+  "endDate": "2025-06-03T18:00:00Z",
+  "venue": "HCMC University of Transport",
+  "description": "International Conference on Transportation and Logistics 2025...",
+  "shortDescription": "Join us for the premier conference on transportation research...",
+  "contactEmail": "conference@uth.edu.vn"
+}
+\`\`\`
+
+**Lưu ý:** \`description\`, \`shortDescription\`, và \`contactEmail\` là các trường tùy chọn.`
+  })
   @ApiResponse({ status: 201, description: 'Tạo hội nghị thành công' })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   async create(
@@ -61,7 +79,17 @@ export class ConferencesController {
   }
 
   @Post(':id/tracks')
-  @ApiOperation({ summary: 'Thêm track vào hội nghị' })
+  @ApiOperation({ 
+    summary: 'Thêm track vào hội nghị',
+    description: `Thêm một track (lĩnh vực/chủ đề) mới vào hội nghị.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "name": "Artificial Intelligence & Machine Learning"
+}
+\`\`\``
+  })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Thêm track thành công' })
   @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
@@ -82,6 +110,25 @@ export class ConferencesController {
   }
 
   @Post(':id/cfp')
+  @ApiOperation({ 
+    summary: 'Thiết lập các mốc thời gian CFP (Call for Papers)',
+    description: `Thiết lập các deadline cho hội nghị. Thứ tự deadline phải hợp lệ: submissionDeadline ≤ reviewDeadline ≤ notificationDate ≤ cameraReadyDeadline.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "submissionDeadline": "2025-03-01T23:59:59.000Z",
+  "reviewDeadline": "2025-03-15T23:59:59.000Z",
+  "notificationDate": "2025-04-01T12:00:00.000Z",
+  "cameraReadyDeadline": "2025-04-15T23:59:59.000Z"
+}
+\`\`\``
+  })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 201, description: 'Thiết lập CFP thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ (thứ tự deadline không đúng)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async setCfp(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: SetCfpSettingDto,
@@ -99,6 +146,25 @@ export class ConferencesController {
   }
 
   @Patch(':id')
+  @ApiOperation({ 
+    summary: 'Cập nhật thông tin hội nghị',
+    description: `Cập nhật thông tin hội nghị. Tất cả các trường đều tùy chọn, chỉ cần gửi các trường muốn cập nhật.
+    
+**Ví dụ request body (cập nhật một số trường):**
+\`\`\`json
+{
+  "name": "International UTH Conference 2025 Updated",
+  "venue": "HCMC University of Transport - Main Campus",
+  "description": "Updated description for the conference",
+  "contactEmail": "conference2025@uth.edu.vn"
+}
+\`\`\``
+  })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Cập nhật hội nghị thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async updateConference(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateConferenceDto,
@@ -115,6 +181,11 @@ export class ConferencesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Xóa hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Xóa hội nghị thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async deleteConference(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: JwtPayload,
@@ -129,6 +200,22 @@ export class ConferencesController {
   }
 
   @Patch(':conferenceId/tracks/:trackId')
+  @ApiOperation({ 
+    summary: 'Cập nhật thông tin track (lĩnh vực/chủ đề)',
+    description: `Cập nhật tên của track. Tất cả các trường đều tùy chọn.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "name": "AI & ML Track (Updated)"
+}
+\`\`\``
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiParam({ name: 'trackId', description: 'ID của track cần cập nhật' })
+  @ApiResponse({ status: 200, description: 'Cập nhật track thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị hoặc track' })
   async updateTrack(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @Param('trackId', ParseIntPipe) trackId: number,
@@ -148,6 +235,12 @@ export class ConferencesController {
   }
 
   @Delete(':conferenceId/tracks/:trackId')
+  @ApiOperation({ summary: 'Xóa track (lĩnh vực/chủ đề) khỏi hội nghị' })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiParam({ name: 'trackId', description: 'ID của track cần xóa' })
+  @ApiResponse({ status: 200, description: 'Xóa track thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị hoặc track' })
   async deleteTrack(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @Param('trackId', ParseIntPipe) trackId: number,
@@ -161,6 +254,10 @@ export class ConferencesController {
   }
 
   @Get(':id/members')
+  @ApiOperation({ summary: 'Lấy danh sách thành viên (PC members và Chairs) của hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành viên thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async listMembers(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: JwtPayload,
@@ -173,6 +270,27 @@ export class ConferencesController {
   }
 
   @Post(':id/members')
+  @ApiOperation({ 
+    summary: 'Thêm thành viên (PC member hoặc Chair) vào hội nghị',
+    description: `Thêm một user vào hội nghị với vai trò PC_MEMBER hoặc CHAIR.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "userId": 5,
+  "role": "PC_MEMBER"
+}
+\`\`\`
+
+**Các giá trị role có thể:**
+- \`PC_MEMBER\`: Thành viên ban chương trình
+- \`CHAIR\`: Chủ tịch hội nghị`
+  })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 201, description: 'Thêm thành viên thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc user không tồn tại' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async addMember(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AddConferenceMemberDto,
@@ -186,6 +304,12 @@ export class ConferencesController {
   }
 
   @Delete(':id/members/:userId')
+  @ApiOperation({ summary: 'Xóa thành viên khỏi hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiParam({ name: 'userId', description: 'ID của user cần xóa khỏi hội nghị' })
+  @ApiResponse({ status: 200, description: 'Xóa thành viên thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị hoặc thành viên' })
   async removeMember(
     @Param('id', ParseIntPipe) id: number,
     @Param('userId', ParseIntPipe) userId: number,

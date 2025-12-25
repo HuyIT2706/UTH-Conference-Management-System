@@ -2,9 +2,9 @@ import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typ
 import { Track } from './track.entity';
 import { ConferenceMember } from './conference-member.entity';
 import { CfpSetting } from '../../cfp/entities/cfp-setting.entity';
-import { EmailTemplate } from '../../templates/entities/email-template.entity';
-import { FormTemplate } from '../../templates/entities/form-template.entity';
-import { CfpTemplate } from '../../templates/entities/cfp-template.entity';
+import { EmailTemplate } from '../../template/entities/email-template.entity';
+import { FormTemplate } from '../../template/entities/form-template.entity';
+import { CfpTemplate } from '../../template/entities/cfp-template.entity';
 import { AuditLog } from '../../audit/entities/audit-log.entity';
 
 @Entity({ name: 'conferences' })

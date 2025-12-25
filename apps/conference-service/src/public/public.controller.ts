@@ -1,6 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { ConferencesService } from '../conferences/conferences.service';
-import { TemplatesService } from '../templates/templates.service';
+import { TemplatesService } from '../template/templates.service';
 
 @Controller('public/conferences')
 export class PublicController {

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BulkNotificationDto, RecipientType } from './dto/bulk-notification.dto';
-import { EmailTemplate } from '../templates/entities/email-template.entity';
+import { EmailTemplate } from '../template/entities/email-template.entity';
 import {
   ConferenceMember,
   ConferenceMemberRole,
