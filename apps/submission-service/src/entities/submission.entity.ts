@@ -43,7 +43,10 @@ export class Submission {
   status: SubmissionStatus;
 
   @Column({ type: 'int' })
-  authorId: number; 
+  authorId: number;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'author_name' })
+  authorName: string | null;
 
   @Column({ type: 'int' })
   trackId: number;

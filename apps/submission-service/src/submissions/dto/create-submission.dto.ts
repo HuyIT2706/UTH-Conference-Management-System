@@ -4,41 +4,9 @@ import {
   IsInt,
   IsOptional,
   MaxLength,
-  IsArray,
-  ValidateNested,
-  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-
-export class CoAuthorDto {
-  @ApiProperty({
-    description: 'Tên đồng tác giả',
-    example: 'Nguyễn Văn B',
-  })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  name: string;
-
-  @ApiProperty({
-    description: 'Email đồng tác giả',
-    example: 'coauthor@example.com',
-  })
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({
-    description: 'Tổ chức/đơn vị của đồng tác giả',
-    example: 'University of Technology',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  affiliation?: string;
-}
 
 export class CreateSubmissionDto {
   @ApiProperty({
@@ -87,17 +55,6 @@ export class CreateSubmissionDto {
   @IsInt()
   @IsNotEmpty()
   conferenceId: number;
-
-  @ApiProperty({
-    description: 'Danh sách đồng tác giả (tùy chọn)',
-    type: [CoAuthorDto],
-    required: false,
-  })
-  @IsArray()
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => CoAuthorDto)
-  coAuthors?: CoAuthorDto[];
 }
 
 

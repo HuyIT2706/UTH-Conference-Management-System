@@ -31,7 +31,6 @@ export class SubmissionsService {
   ) {}
 
   /**
-   * Upload file (PDF, DOCX, ZIP) lên Supabase Storage
    * @param file Express.Multer.File
    * @returns Public URL của file
    */
@@ -40,10 +39,9 @@ export class SubmissionsService {
       throw new BadRequestException('File không được để trống');
     }
 
-    // Cho phép các file types: PDF, DOCX, ZIP
     const allowedMimeTypes = [
       'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
       'application/zip',
     ];
 
@@ -53,12 +51,11 @@ export class SubmissionsService {
       );
     }
 
-    // Get file extension từ mimetype
     const getFileExtension = (mimetype: string): string => {
       if (mimetype === 'application/pdf') return '.pdf';
       if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return '.docx';
       if (mimetype === 'application/zip') return '.zip';
-      return '.pdf'; // default
+      return '.pdf'; 
     };
 
     const supabase = this.supabaseService.getClient();
@@ -92,9 +89,6 @@ export class SubmissionsService {
     }
   }
 
-  /**
-   * Validate status transition
-   */
   private validateStatusTransition(
     currentStatus: SubmissionStatus,
     newStatus: SubmissionStatus,
@@ -124,12 +118,14 @@ export class SubmissionsService {
    * @param createDto DTO chứa thông tin submission
    * @param file File PDF, DOCX hoặc ZIP (bắt buộc)
    * @param authorId ID của author (từ JWT token)
+   * @param authorName Tên của author (từ JWT token)
    * @returns Submission đã tạo
    */
   async create(
     createDto: CreateSubmissionDto,
     file: Express.Multer.File,
     authorId: number,
+    authorName?: string,
   ): Promise<Submission> {
     if (!file) {
       throw new BadRequestException('File là bắt buộc (PDF, DOCX hoặc ZIP)');
@@ -192,9 +188,10 @@ export class SubmissionsService {
         fileUrl,
         status: SubmissionStatus.SUBMITTED,
         authorId,
+        authorName: authorName || null, // Lưu tên từ JWT token
         trackId: createDto.trackId,
         conferenceId: createDto.conferenceId,
-        coAuthors: createDto.coAuthors || null,
+        coAuthors: null, // Không dùng coAuthors nữa, chỉ dùng authorId từ token
       });
 
       const savedSubmission = await queryRunner.manager.save(submission);
@@ -254,7 +251,6 @@ export class SubmissionsService {
         throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
       }
 
-      // Kiểm tra quyền: Chỉ author mới được sửa
       if (submission.authorId !== authorId) {
         throw new ForbiddenException(
           'Bạn không có quyền cập nhật submission này',
@@ -322,7 +318,6 @@ export class SubmissionsService {
         keywords: updateDto.keywords ?? submission.keywords,
         trackId: updateDto.trackId ?? submission.trackId,
         fileUrl: newFileUrl,
-        coAuthors: updateDto.coAuthors ?? submission.coAuthors,
       });
 
       const updatedSubmission = await queryRunner.manager.save(submission);
@@ -348,9 +343,6 @@ export class SubmissionsService {
     }
   }
 
-  /**
-   * Withdraw submission (xóa/rút bài)
-   */
   async withdraw(id: string, authorId: number): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
       where: { id },
@@ -359,13 +351,9 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-
-    // Kiểm tra quyền: Chỉ author mới được withdraw
     if (submission.authorId !== authorId) {
       throw new ForbiddenException('Bạn không có quyền rút submission này');
     }
-
-    // Chỉ cho phép withdraw khi status là SUBMITTED hoặc REVIEWING
     if (
       submission.status !== SubmissionStatus.SUBMITTED &&
       submission.status !== SubmissionStatus.REVIEWING
@@ -389,10 +377,7 @@ export class SubmissionsService {
     submission.status = SubmissionStatus.WITHDRAWN;
     return await this.submissionRepository.save(submission);
   }
-
-  /**
-   * Update submission status (for Chairs)
-   */
+// Update status submission
   async updateStatus(
     id: string,
     updateStatusDto: UpdateStatusDto,
@@ -406,8 +391,6 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-
-    // Kiểm tra quyền: Chỉ CHAIR hoặc ADMIN mới được update status
     if (!userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
       throw new ForbiddenException(
         'Chỉ Chair hoặc Admin mới được cập nhật trạng thái',
@@ -442,15 +425,11 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-
-    // Kiểm tra quyền: Chỉ author mới được upload
     if (submission.authorId !== authorId) {
       throw new ForbiddenException(
         'Bạn không có quyền upload camera-ready cho submission này',
       );
     }
-
-    // Chỉ cho phép upload khi status là ACCEPTED
     if (submission.status !== SubmissionStatus.ACCEPTED) {
       throw new BadRequestException(
         'Chỉ có thể upload camera-ready khi bài đã được chấp nhận',
@@ -474,10 +453,7 @@ export class SubmissionsService {
 
     return await this.submissionRepository.save(submission);
   }
-
-  /**
-   * Lấy danh sách submissions với pagination và filtering
-   */
+// Lấy ds submission fileetr và phân trang
   async findAll(
     queryDto: QuerySubmissionsDto,
     userId: number,
@@ -494,14 +470,9 @@ export class SubmissionsService {
 
     const queryBuilder =
       this.submissionRepository.createQueryBuilder('submission');
-
-    // RBAC: Authors chỉ xem được submissions của mình
-    // Chairs và Admins xem được tất cả
     if (!userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
       queryBuilder.where('submission.authorId = :userId', { userId });
     }
-
-    // Filters
     if (queryDto.trackId) {
       queryBuilder.andWhere('submission.trackId = :trackId', {
         trackId: queryDto.trackId,
@@ -521,7 +492,6 @@ export class SubmissionsService {
     }
 
     if (queryDto.authorId) {
-      // Chairs/Admins có thể filter theo authorId
       if (userRoles.includes('CHAIR') || userRoles.includes('ADMIN')) {
         queryBuilder.andWhere('submission.authorId = :authorId', {
           authorId: queryDto.authorId,
@@ -574,19 +544,17 @@ export class SubmissionsService {
     reviewerId: number,
     assignmentIds: number[],
   ): Promise<Submission[]> {
-    // This will be called from review-service with assignment IDs
-    // For now, return empty array - integration needed
     return [];
   }
 
   /**
-   * Lấy chi tiết submission theo ID với RBAC
+   * Lấy chi tiết submission
    */
   async findOne(
     id: string,
     userId: number,
     userRoles: string[],
-    assignmentIds?: number[], // For reviewers
+    assignmentIds?: number[], 
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
       where: { id },
@@ -596,33 +564,23 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Bài dự thi với ID ${id} không tồn tại`);
     }
-
-    // RBAC checks
     const isAuthor = submission.authorId === userId;
     const isChair = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
     const isReviewer =
       userRoles.includes('PC_MEMBER') || userRoles.includes('REVIEWER');
-
-    // Authors can always view their own submissions
     if (isAuthor) {
       if (submission.versions) {
         submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
       }
       return submission;
     }
-
-    // Chairs can view all submissions
     if (isChair) {
       if (submission.versions) {
         submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
       }
       return submission;
     }
-
-    // Reviewers can view assigned submissions (integration with review-service needed)
     if (isReviewer && assignmentIds && assignmentIds.length > 0) {
-      // TODO: Check if submission is in assignments via review-service
-      // For now, allow if reviewer role
       if (submission.versions) {
         submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
       }
@@ -648,15 +606,11 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-
-    // Chỉ author mới được xem reviews của submission của mình
     if (submission.authorId !== authorId) {
       throw new ForbiddenException(
         'Bạn không có quyền xem reviews của submission này',
       );
     }
-
-    // Chỉ cho phép xem reviews khi đã có decision (ACCEPTED hoặc REJECTED)
     if (
       submission.status !== SubmissionStatus.ACCEPTED &&
       submission.status !== SubmissionStatus.REJECTED

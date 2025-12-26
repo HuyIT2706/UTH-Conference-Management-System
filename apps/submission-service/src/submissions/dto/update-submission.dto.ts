@@ -3,12 +3,9 @@ import {
   IsOptional,
   IsInt,
   MaxLength,
-  IsArray,
-  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { CoAuthorDto } from './create-submission.dto';
 
 export class UpdateSubmissionDto {
   @ApiProperty({
@@ -51,17 +48,6 @@ export class UpdateSubmissionDto {
   @IsInt()
   @IsOptional()
   trackId?: number;
-
-  @ApiProperty({
-    description: 'Danh sách đồng tác giả (tùy chọn)',
-    type: [CoAuthorDto],
-    required: false,
-  })
-  @IsArray()
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => CoAuthorDto)
-  coAuthors?: CoAuthorDto[];
 }
 
 
