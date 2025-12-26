@@ -13,7 +13,7 @@ import {
   UnauthorizedException,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { ReviewsService } from './reviews.service';
 import { CreateBidDto } from './dto/create-bid.dto';
@@ -52,16 +52,31 @@ export class ReviewsController {
     }
   }
 
-  // ========== REVIEWER APIs ==========
-
-  /**
-   * POST /reviews/bids
-   * Reviewer submit preference (bidding) for a submission
-   */
   @Post('bids')
-  @ApiOperation({ summary: 'Reviewer submit preference (bidding) cho bài báo' })
+  @ApiOperation({
+    summary: 'Reviewer submit preference (bidding) cho bài báo',
+    description: `Reviewer đánh giá mức độ quan tâm của mình đối với một bài báo để Chair có thể xem xét khi phân công.
+    
+    **Các loại preference:**
+    - \`INTERESTED\`: Rất quan tâm, muốn review
+    - \`MAYBE\`: Có thể quan tâm
+    - \`CONFLICT\`: Có xung đột lợi ích (COI)
+    - \`NOT_INTERESTED\`: Không quan tâm
+
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": 1,
+      "conferenceId": 1,
+      "preference": "INTERESTED"
+    }
+    \`\`\``
+  })
+  @ApiBody({ type: CreateBidDto })
   @ApiResponse({ status: 201, description: 'Submit bidding thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 403, description: 'Không có quyền REVIEWER' })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
   async submitBid(
     @Req() req: Request,
     @Body() dto: CreateBidDto,
@@ -79,11 +94,25 @@ export class ReviewsController {
     };
   }
 
-  /**
-   * GET /reviews/assignments/me
-   * Reviewer view their assigned submissions
-   */
   @Get('assignments/me')
+  @ApiOperation({
+    summary: 'Lấy danh sách assignments của reviewer hiện tại',
+    description: `Reviewer xem danh sách các bài báo được gán cho mình để review. Có phân trang.
+    
+    **Query parameters:**
+    - \`page\`: Số trang (mặc định: 1)
+    - \`limit\`: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+
+    **Response bao gồm:**
+    - Danh sách assignments với status (PENDING, ACCEPTED, REJECTED, COMPLETED)
+    - Thông tin submission được gán
+    - Due date (nếu có)
+    - Review đã nộp (nếu có)`
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Số trang' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Số lượng mỗi trang' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách assignments thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền REVIEWER' })
   async getMyAssignments(
     @Req() req: Request,
     @Query() query: PaginationQueryDto,
@@ -104,12 +133,15 @@ export class ReviewsController {
       data: assignments,
     };
   }
-
-  /**
-   * PUT /reviews/assignments/:id/accept
-   * Reviewer accept an assignment
-   */
   @Put('assignments/:id/accept')
+  @ApiOperation({
+    summary: 'Reviewer chấp nhận assignment',
+    description: `Reviewer chấp nhận bài báo được gán để bắt đầu review. Status sẽ chuyển từ PENDING sang ACCEPTED.`
+  })
+  @ApiParam({ name: 'id', description: 'ID của assignment' })
+  @ApiResponse({ status: 200, description: 'Chấp nhận assignment thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền hoặc không phải assignment của reviewer này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy assignment' })
   async acceptAssignment(
     @Req() req: Request,
     @Param('id', ParseIntPipe) id: number,
@@ -130,12 +162,15 @@ export class ReviewsController {
       data: assignment,
     };
   }
-
-  /**
-   * PUT /reviews/assignments/:id/reject
-   * Reviewer reject an assignment
-   */
   @Put('assignments/:id/reject')
+  @ApiOperation({
+    summary: 'Reviewer từ chối assignment',
+    description: `Reviewer từ chối bài báo được gán. Status sẽ chuyển từ PENDING sang REJECTED.`
+  })
+  @ApiParam({ name: 'id', description: 'ID của assignment' })
+  @ApiResponse({ status: 200, description: 'Từ chối assignment thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền hoặc không phải assignment của reviewer này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy assignment' })
   async rejectAssignment(
     @Req() req: Request,
     @Param('id', ParseIntPipe) id: number,
@@ -156,15 +191,37 @@ export class ReviewsController {
       data: assignment,
     };
   }
-
-  /**
-   * POST /reviews
-   * Reviewer submit review for an assignment
-   */
   @Post()
-  @ApiOperation({ summary: 'Reviewer nộp bài chấm' })
+  @ApiOperation({
+    summary: 'Reviewer nộp bài chấm',
+    description: `Reviewer nộp kết quả đánh giá cho bài báo. Assignment phải ở trạng thái ACCEPTED.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "assignmentId": 1,
+      "score": 85,
+      "confidence": "HIGH",
+      "commentForAuthor": "Bài viết tốt, cần chỉnh sửa một số phần nhỏ về phương pháp thực nghiệm.",
+      "commentForPC": "Tác giả có thể cải thiện phần methodology và thêm so sánh với các phương pháp hiện có.",
+      "recommendation": "ACCEPT"
+    }
+    \`\`\`
+
+    **Các trường:**
+    - \`score\`: Điểm số từ 0-100
+    - \`confidence\`: Mức độ tự tin (HIGH, MEDIUM, LOW)
+    - \`commentForAuthor\`: Nhận xét cho tác giả (sẽ được hiển thị sau khi có decision)
+    - \`commentForPC\`: Nhận xét nội bộ cho PC (confidential)
+    - \`recommendation\`: Khuyến nghị (ACCEPT, MINOR_REVISION, MAJOR_REVISION, REJECT)
+
+    **Lưu ý:** Sau khi nộp review, assignment status sẽ chuyển sang COMPLETED.`
+  })
+  @ApiBody({ type: CreateReviewDto })
   @ApiResponse({ status: 201, description: 'Nộp review thành công' })
-  @ApiResponse({ status: 403, description: 'Không có quyền hoặc assignment chưa được accept' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc assignment chưa được accept' })
+  @ApiResponse({ status: 403, description: 'Không có quyền hoặc không phải assignment của reviewer này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy assignment' })
   async submitReview(
     @Req() req: Request,
     @Body() dto: CreateReviewDto,
@@ -182,13 +239,31 @@ export class ReviewsController {
     };
   }
 
-  // ========== CHAIR APIs ==========
-
-  /**
-   * POST /reviews/assignments
-   * Chair assign submission to reviewer
-   */
   @Post('assignments')
+  @ApiOperation({
+    summary: 'Chair gán bài báo cho reviewer (Manual Assignment)',
+    description: `Chair gán một bài báo cho một reviewer cụ thể để review.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "reviewerId": 5,
+      "submissionId": 1,
+      "conferenceId": 1,
+      "dueDate": "2025-02-01T23:59:59.000Z"
+    }
+    \`\`\`
+
+    **Lưu ý:**
+    - Chỉ Chair/Admin mới có quyền gán
+    - Reviewer sẽ nhận assignment với status PENDING
+    - Reviewer cần accept assignment trước khi nộp review
+    - \`dueDate\`: Tùy chọn, hạn nộp review (ISO 8601 format)`
+  })
+  @ApiBody({ type: CreateAssignmentDto })
+  @ApiResponse({ status: 201, description: 'Gán bài cho Reviewer thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền gán' })
   async createAssignment(
     @Req() req: Request,
     @Body() dto: CreateAssignmentDto,
@@ -209,11 +284,29 @@ export class ReviewsController {
     };
   }
 
-  /**
-   * POST /reviews/assignments/auto
-   * Simple auto-assignment: assign one submission to multiple reviewers
-   */
   @Post('assignments/auto')
+  @ApiOperation({
+    summary: 'Chair tự động gán bài báo cho nhiều reviewers (Auto Assignment)',
+    description: `Chair gán một bài báo cho nhiều reviewers cùng lúc (simple auto-assignment).
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": 1,
+      "conferenceId": 1,
+      "reviewerIds": [2, 3, 4]
+    }
+    \`\`\`
+
+    **Lưu ý:**
+    - Tất cả reviewers sẽ nhận assignment với status PENDING
+    - Mỗi reviewer cần accept assignment của mình trước khi nộp review
+    - Đây là simple auto-assignment, không có logic phân công thông minh dựa trên bidding/keywords`
+  })
+  @ApiBody({ type: CreateAutoAssignmentDto })
+  @ApiResponse({ status: 201, description: 'Tự động gán bài cho nhiều Reviewer thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ (reviewerIds không được rỗng)' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền gán' })
   async autoAssign(
     @Req() req: Request,
     @Body() dto: CreateAutoAssignmentDto,
@@ -237,11 +330,25 @@ export class ReviewsController {
     };
   }
 
-  /**
-   * GET /reviews/submission/:id
-   * Chair view all reviews for a submission
-   */
   @Get('submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem tất cả reviews của một submission',
+    description: `Chair xem danh sách tất cả reviews đã được nộp cho một submission (bao gồm cả thông tin reviewer).
+    
+    **Query parameters:**
+    - \`page\`: Số trang (mặc định: 1)
+    - \`limit\`: Số lượng mỗi trang (mặc định: 10, tối đa: 100)   
+
+    **Response bao gồm:**
+    - Danh sách reviews với đầy đủ thông tin (score, comments, recommendation)
+    - Thông tin reviewer (cho Chair)
+    - Assignment details`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách reviews thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getReviewsBySubmission(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -263,12 +370,21 @@ export class ReviewsController {
       data: reviews,
     };
   }
-
-  /**
-   * GET /reviews/submission/:id/anonymized
-   * Anonymized reviews for authors (single-blind)
-   */
   @Get('submission/:id/anonymized')
+  @ApiOperation({
+    summary: 'Xem reviews đã ẩn danh (cho tác giả)',
+    description: `Lấy danh sách reviews đã được ẩn danh để tác giả xem sau khi có quyết định (single-blind review).
+    
+    **Response chỉ bao gồm:**
+    - Score
+    - commentForAuthor (không có commentForPC)
+    - Recommendation
+    - CreatedAt
+
+    **Không bao gồm:** Thông tin reviewer (đã ẩn danh)`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách reviews ẩn danh thành công' })
   async getAnonymizedReviews(
     @Param('id', ParseIntPipe) submissionId: number,
   ) {
@@ -281,11 +397,25 @@ export class ReviewsController {
     };
   }
 
-  /**
-   * GET /reviews/bids/submission/:id
-   * Chair view all bids for a submission (optional)
-   */
   @Get('bids/submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem tất cả bids cho một submission',
+    description: `Chair xem danh sách tất cả preferences/bids mà reviewers đã submit cho một submission.
+    
+    **Query parameters:**
+    - \`page\`: Số trang (mặc định: 1)
+    - \`limit\`: Số lượng mỗi trang (mặc định: 10, tối đa: 100)
+
+    **Response bao gồm:**
+    - Danh sách bids với preference (INTERESTED, MAYBE, CONFLICT, NOT_INTERESTED)
+    - Thông tin reviewer
+    - Timestamp`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách bids thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getBidsBySubmission(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -314,6 +444,35 @@ export class ReviewsController {
    * Create PC Discussion message
    */
   @Post('discussions')
+  @ApiOperation({
+    summary: 'Chair tạo thảo luận PC (PC Discussion)',
+    description: `Chair tạo một thông điệp thảo luận nội bộ trong PC về một submission.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": 1,
+      "message": "Tôi nghĩ cần thêm 1 reviewer nữa cho chủ đề này vì có sự khác biệt lớn giữa các reviews hiện tại."
+    }
+    \`\`\`    
+
+    **Lưu ý:**
+    - Chỉ Chair/Admin mới có quyền tạo discussion
+    - Discussions là nội bộ PC, tác giả không thể xem`
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        submissionId: { type: 'number', example: 1, description: 'ID của submission' },
+        message: { type: 'string', example: 'Tôi nghĩ cần thêm 1 reviewer nữa cho chủ đề này.', description: 'Nội dung thảo luận' },
+      },
+      required: ['submissionId', 'message'],
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Tạo thảo luận thành công' })
+  @ApiResponse({ status: 400, description: 'submissionId và message là bắt buộc' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền tạo discussion' })
   async createDiscussion(
     @Req() req: Request,
     @Body() body: { submissionId: number; message: string },
@@ -339,14 +498,28 @@ export class ReviewsController {
       data: discussion,
     };
   }
-
-  // ========== REBUTTAL APIs ==========
-
-  /**
-   * POST /reviews/rebuttals
-   * Author submit rebuttal for a submission
-   */
   @Post('rebuttals')
+  @ApiOperation({
+    summary: 'Tác giả gửi rebuttal (phản hồi reviewers)',
+    description: `Tác giả gửi phản hồi/rebuttal cho các comments từ reviewers.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": 1,
+      "conferenceId": 1,
+      "message": "Chúng tôi đã cập nhật phần thí nghiệm như góp ý của reviewers. Các thay đổi chính bao gồm: (1) Thêm 2 datasets mới, (2) Cải thiện phần so sánh với baseline methods."
+    }
+    \`\`\`
+
+    **Lưu ý:**
+    - Chỉ tác giả của submission mới có quyền gửi rebuttal
+    - Rebuttals sẽ được hiển thị cho Chair/Admin và reviewers`
+  })
+  @ApiBody({ type: CreateRebuttalDto })
+  @ApiResponse({ status: 201, description: 'Gửi rebuttal thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 403, description: 'Chỉ tác giả của submission mới có quyền gửi rebuttal' })
   async createRebuttal(
     @Req() req: Request,
     @Body() dto: CreateRebuttalDto,
@@ -368,12 +541,14 @@ export class ReviewsController {
       data: rebuttal,
     };
   }
-
-  /**
-   * GET /reviews/rebuttals/submission/:id
-   * Get all rebuttals for a submission (Chair/Admin)
-   */
   @Get('rebuttals/submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem tất cả rebuttals của một submission',
+    description: `Chair/Admin xem danh sách tất cả rebuttals mà tác giả đã gửi cho một submission.`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách rebuttal thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getRebuttalsBySubmission(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -398,6 +573,19 @@ export class ReviewsController {
    * Get PC Discussion for a submission
    */
   @Get('discussions/submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem danh sách thảo luận PC của một submission',
+    description: `Chair/Admin xem danh sách tất cả PC discussions về một submission.
+    
+    **Query parameters:**
+    - \`page\`: Số trang (mặc định: 1)
+    - \`limit\`: Số lượng mỗi trang (mặc định: 10, tối đa: 100)`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thảo luận thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDiscussionsBySubmission(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -421,13 +609,19 @@ export class ReviewsController {
     };
   }
 
-  // ========== DECISION & AGGREGATION (CHAIR) ==========
-
-  /**
-   * GET /reviews/decisions/submission/:id
-   * Get aggregated review stats + current decision for a submission
-   */
   @Get('decisions/submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem tổng hợp reviews và quyết định hiện tại',
+    description: `Chair xem tổng hợp thống kê reviews và quyết định cuối cùng (nếu có) cho một submission.
+    
+    **Response bao gồm:**
+    - Tổng hợp thống kê: điểm trung bình, số lượng reviews, consensus
+    - Quyết định cuối cùng (nếu đã set)
+    - Note về quyết định (nếu có)`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy tổng hợp review và quyết định thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDecisionSummary(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -452,6 +646,31 @@ export class ReviewsController {
    * Chair/Admin set or update final decision for a submission
    */
   @Post('decisions')
+  @ApiOperation({
+    summary: 'Chair set/update quyết định cuối cùng cho submission',
+    description: `Chair/Admin set hoặc cập nhật quyết định cuối cùng cho một submission sau khi đã có đủ reviews.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": 1,
+      "decision": "ACCEPT",
+      "note": "Điểm trung bình cao (85/100), đồng thuận tốt giữa các reviewers. Tất cả đều recommend ACCEPT. Quyết định: Chấp nhận."
+    }
+    \`\`\`
+
+    **Các loại decision:**
+    - \`ACCEPT\`: Chấp nhận
+    - \`REJECT\`: Từ chối
+    - \`MINOR_REVISION\`: Yêu cầu chỉnh sửa nhỏ
+    - \`MAJOR_REVISION\`: Yêu cầu chỉnh sửa lớn
+
+    **Lưu ý:** Quyết định này sẽ được gửi đến submission-service để update submission status.`
+  })
+  @ApiBody({ type: CreateDecisionDto })
+  @ApiResponse({ status: 201, description: 'Cập nhật quyết định cuối cùng thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền set decision' })
   async setDecision(
     @Req() req: Request,
     @Body() dto: CreateDecisionDto,
@@ -490,6 +709,19 @@ export class ReviewsController {
    * Basic progress metrics for a single submission
    */
   @Get('progress/submission/:id')
+  @ApiOperation({
+    summary: 'Chair xem tiến độ review của một submission',
+    description: `Chair xem các metrics về tiến độ review cho một submission cụ thể.
+    
+    **Response bao gồm:**
+    - Số lượng assignments (tổng, đã accept, đã reject, đã complete)
+    - Số lượng reviews đã nộp
+    - Tỷ lệ hoàn thành
+    - Thông tin về due dates`
+  })
+  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy tiến độ review của bài báo thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getSubmissionProgress(
     @Req() req: Request,
     @Param('id', ParseIntPipe) submissionId: number,
@@ -514,6 +746,20 @@ export class ReviewsController {
    * Basic progress metrics for a conference
    */
   @Get('progress/conference/:id')
+  @ApiOperation({
+    summary: 'Chair xem tiến độ review của cả hội nghị',
+    description: `Chair xem các metrics tổng hợp về tiến độ review cho toàn bộ submissions trong một conference.
+    
+    **Response bao gồm:**
+    - Tổng số submissions
+    - Số lượng assignments (theo các status)
+    - Số lượng reviews đã nộp
+    - Tỷ lệ hoàn thành tổng thể
+    - Thống kê theo submission status`
+  })
+  @ApiParam({ name: 'id', description: 'ID của conference' })
+  @ApiResponse({ status: 200, description: 'Lấy tiến độ review của hội nghị thành công' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getConferenceProgress(
     @Req() req: Request,
     @Param('id', ParseIntPipe) conferenceId: number,
