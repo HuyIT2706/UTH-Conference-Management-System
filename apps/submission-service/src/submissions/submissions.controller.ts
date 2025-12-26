@@ -35,24 +35,71 @@ export class SubmissionsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Tạo submission mới với file PDF' })
+  @ApiOperation({
+    summary: 'Tạo submission mới (nộp bài)',
+    description: `Tạo một submission mới với file đính kèm. Chấp nhận các định dạng: PDF, DOCX, ZIP (tối đa 10MB).
+    
+**Ví dụ request (multipart/form-data):**
+- \`file\`: File PDF, DOCX hoặc ZIP (bắt buộc)
+- \`title\`: Tiêu đề bài báo (bắt buộc)
+- \`abstract\`: Tóm tắt bài báo (bắt buộc)
+- \`keywords\`: Từ khóa, phân cách bằng dấu phẩy (tùy chọn)
+- \`trackId\`: ID của track (bắt buộc)
+- \`conferenceId\`: ID của conference (bắt buộc)
+- \`coAuthors\`: Danh sách đồng tác giả (tùy chọn, JSON string hoặc array)
+
+**Lưu ý:**
+- Phải nộp trước submissionDeadline (kiểm tra qua conference-service)
+- Mỗi lần tạo submission sẽ tự động tạo version 1
+- Status mặc định: SUBMITTED`
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary', description: 'File PDF (tối đa 10MB)' },
-        title: { type: 'string', example: 'Machine Learning in Healthcare' },
-        abstract: { type: 'string', example: 'This paper presents...' },
-        keywords: { type: 'string', example: 'machine learning, healthcare, AI' },
-        trackId: { type: 'number', example: 1 },
-        conferenceId: { type: 'number', example: 1 },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File PDF, DOCX hoặc ZIP (tối đa 10MB)',
+        },
+        title: {
+          type: 'string',
+          example: 'Machine Learning in Healthcare',
+          description: 'Tiêu đề bài báo',
+        },
+        abstract: {
+          type: 'string',
+          example: 'This paper presents a novel approach to machine learning applications in healthcare...',
+          description: 'Tóm tắt bài báo',
+        },
+        keywords: {
+          type: 'string',
+          example: 'machine learning, healthcare, AI, deep learning',
+          description: 'Từ khóa (tùy chọn)',
+        },
+        trackId: {
+          type: 'number',
+          example: 1,
+          description: 'ID của track',
+        },
+        conferenceId: {
+          type: 'number',
+          example: 1,
+          description: 'ID của conference',
+        },
+        coAuthors: {
+          type: 'string',
+          example: '[{"name":"Nguyễn Văn B","email":"coauthor@example.com","affiliation":"University of Technology"}]',
+          description: 'Danh sách đồng tác giả (JSON string, tùy chọn)',
+        },
       },
       required: ['file', 'title', 'abstract', 'trackId', 'conferenceId'],
     },
   })
   @ApiResponse({ status: 201, description: 'Tạo submission thành công' })
-  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc deadline đã qua' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ, file không đúng định dạng, hoặc deadline đã qua' })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
   async create(
     @Body() createDto: CreateSubmissionDto,
     @UploadedFile() file: Express.Multer.File,
@@ -76,6 +123,50 @@ export class SubmissionsController {
   }
   @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Cập nhật submission',
+    description: `Cập nhật thông tin submission. Tất cả các trường đều tùy chọn. Nếu upload file mới, sẽ tự động tạo version mới.
+    
+**Ví dụ request (multipart/form-data):**
+- \`file\`: File PDF, DOCX hoặc ZIP mới (tùy chọn)
+- \`title\`: Tiêu đề mới (tùy chọn)
+- \`abstract\`: Tóm tắt mới (tùy chọn)
+- \`keywords\`: Từ khóa mới (tùy chọn)
+- \`trackId\`: ID track mới (tùy chọn)
+- \`coAuthors\`: Danh sách đồng tác giả mới (tùy chọn)
+
+**Lưu ý:**
+- Chỉ author của submission mới được cập nhật
+- Chỉ cho phép cập nhật trước submissionDeadline
+- Mỗi lần cập nhật file sẽ tạo version mới`
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', description: 'UUID của submission cần cập nhật' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File PDF, DOCX hoặc ZIP mới (tùy chọn)',
+        },
+        title: { type: 'string', example: 'Updated Title', description: 'Tiêu đề mới (tùy chọn)' },
+        abstract: { type: 'string', example: 'Updated abstract...', description: 'Tóm tắt mới (tùy chọn)' },
+        keywords: { type: 'string', example: 'updated, keywords', description: 'Từ khóa mới (tùy chọn)' },
+        trackId: { type: 'number', example: 2, description: 'ID track mới (tùy chọn)' },
+        coAuthors: {
+          type: 'string',
+          example: '[{"name":"New Co-author","email":"new@example.com"}]',
+          description: 'Danh sách đồng tác giả mới (JSON string, tùy chọn)',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Cập nhật submission thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ, deadline đã qua, hoặc file không đúng định dạng' })
+  @ApiResponse({ status: 403, description: 'Không có quyền cập nhật submission này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateSubmissionDto,
@@ -100,8 +191,21 @@ export class SubmissionsController {
     };
   }
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách submissions (có phân trang và filter)' })
+  @ApiOperation({
+    summary: 'Lấy danh sách submissions (có phân trang và filter)',
+    description: `Lấy danh sách submissions với phân trang và filter. RBAC: Author chỉ thấy submissions của mình, Chair/Admin thấy tất cả.
+    
+**Query parameters (tất cả đều tùy chọn):**
+- \`page\`: Số trang (mặc định: 1)
+- \`limit\`: Số lượng mỗi trang (mặc định: 10)
+- \`trackId\`: Filter theo track ID
+- \`conferenceId\`: Filter theo conference ID
+- \`status\`: Filter theo status (SUBMITTED, REVIEWING, ACCEPTED, REJECTED, etc.)
+- \`authorId\`: Filter theo author ID (chỉ Chair/Admin)
+- \`search\`: Tìm kiếm theo title/abstract/keywords`
+  })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
   async findAll(
     @Query() queryDto: QuerySubmissionsDto,
     @Req() req: Request,
@@ -130,6 +234,12 @@ export class SubmissionsController {
   }
 
   @Get('me')
+  @ApiOperation({
+    summary: 'Lấy danh sách submissions của tôi',
+    description: 'Lấy tất cả submissions của user hiện tại (không phân trang). Chỉ author mới xem được submissions của chính mình.'
+  })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách submissions của tôi thành công' })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
   async findMySubmissions(@Req() req: Request) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -145,9 +255,13 @@ export class SubmissionsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Lấy chi tiết submission kèm lịch sử versions' })
+  @ApiOperation({
+    summary: 'Lấy chi tiết submission kèm lịch sử versions',
+    description: 'Lấy thông tin chi tiết của submission bao gồm tất cả các versions đã tạo. RBAC: Author chỉ xem được submissions của mình, Chair/Admin xem được tất cả.'
+  })
   @ApiParam({ name: 'id', description: 'UUID của submission' })
   @ApiResponse({ status: 200, description: 'Lấy chi tiết thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền xem submission này' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
@@ -171,6 +285,21 @@ export class SubmissionsController {
   }
 
   @Delete(':id')
+  @ApiOperation({
+    summary: 'Rút submission (Withdraw)',
+    description: `Rút bài submission khỏi hội nghị. 
+    
+**Lưu ý:**
+- Chỉ author của submission mới được rút
+- Chỉ cho phép rút khi status là SUBMITTED hoặc REVIEWING
+- Phải rút trước submissionDeadline
+- Status sau khi rút: WITHDRAWN`
+  })
+  @ApiParam({ name: 'id', description: 'UUID của submission cần rút' })
+  @ApiResponse({ status: 200, description: 'Rút submission thành công' })
+  @ApiResponse({ status: 400, description: 'Không thể rút (status không hợp lệ hoặc deadline đã qua)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền rút submission này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async withdraw(
     @Param('id', ParseUUIDPipe) id: string,
     @Req() req: Request,
@@ -189,6 +318,30 @@ export class SubmissionsController {
   }
 
   @Patch(':id/status')
+  @ApiOperation({
+    summary: 'Cập nhật trạng thái submission (Decision)',
+    description: `Cập nhật trạng thái submission (chấp nhận/từ chối). Chỉ Chair/Admin mới có quyền.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "status": "ACCEPTED",
+  "decisionNote": "Good paper, strong results. Recommended for acceptance."
+}
+\`\`\`
+
+**Các status có thể set:**
+- \`ACCEPTED\`: Đã chấp nhận
+- \`REJECTED\`: Đã từ chối
+- \`REVIEWING\`: Đang được review
+
+**Lưu ý:** Có state machine để validate chuyển trạng thái hợp lệ.`
+  })
+  @ApiParam({ name: 'id', description: 'UUID của submission' })
+  @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành công' })
+  @ApiResponse({ status: 400, description: 'Chuyển trạng thái không hợp lệ' })
+  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền cập nhật status' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async updateStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateStatusDto: UpdateStatusDto,
@@ -214,6 +367,38 @@ export class SubmissionsController {
 
   @Post(':id/camera-ready')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'Upload camera-ready version',
+    description: `Upload bản cuối cùng (camera-ready) của submission sau khi đã được chấp nhận. Chấp nhận file PDF, DOCX, hoặc ZIP.
+    
+**Ví dụ request (multipart/form-data):**
+- \`file\`: File camera-ready (PDF, DOCX, ZIP - bắt buộc)
+
+**Lưu ý:**
+- Chỉ author của submission mới được upload
+- Chỉ khi status hiện tại là ACCEPTED
+- Phải upload trước cameraReadyDeadline
+- Status sau khi upload: CAMERA_READY`
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', description: 'UUID của submission' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'File camera-ready (PDF, DOCX, ZIP - tối đa 10MB)',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Upload camera-ready thành công' })
+  @ApiResponse({ status: 400, description: 'Submission chưa được ACCEPTED hoặc deadline đã qua, hoặc file không đúng định dạng' })
+  @ApiResponse({ status: 403, description: 'Không có quyền upload camera-ready cho submission này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async uploadCameraReady(
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -225,7 +410,7 @@ export class SubmissionsController {
     }
 
     if (!file) {
-      throw new UnauthorizedException('File PDF là bắt buộc');
+      throw new UnauthorizedException('File là bắt buộc');
     }
 
     const submission = await this.submissionsService.uploadCameraReady(
@@ -241,6 +426,21 @@ export class SubmissionsController {
   }
 
   @Get(':id/reviews')
+  @ApiOperation({
+    summary: 'Xem reviews đã ẩn danh',
+    description: `Lấy danh sách reviews đã được ẩn danh để tác giả xem sau khi có quyết định.
+    
+**Lưu ý:**
+- Chỉ author của submission mới được xem
+- Chỉ khi submission đã có status ACCEPTED hoặc REJECTED
+- Reviews đã được ẩn danh (không tiết lộ reviewer identity)
+- Chỉ hiển thị các trường: score, commentForAuthor, recommendation, createdAt`
+  })
+  @ApiParam({ name: 'id', description: 'UUID của submission' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách reviews ẩn danh thành công' })
+  @ApiResponse({ status: 400, description: 'Submission chưa có quyết định (chưa ACCEPTED/REJECTED)' })
+  @ApiResponse({ status: 403, description: 'Không có quyền xem reviews của submission này' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async getAnonymizedReviews(
     @Param('id', ParseUUIDPipe) id: string,
     @Req() req: Request,

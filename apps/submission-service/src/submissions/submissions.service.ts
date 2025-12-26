@@ -31,7 +31,7 @@ export class SubmissionsService {
   ) {}
 
   /**
-   * Upload file PDF lên Supabase Storage
+   * Upload file (PDF, DOCX, ZIP) lên Supabase Storage
    * @param file Express.Multer.File
    * @returns Public URL của file
    */
@@ -40,21 +40,39 @@ export class SubmissionsService {
       throw new BadRequestException('File không được để trống');
     }
 
-    if (file.mimetype !== 'application/pdf') {
-      throw new BadRequestException('Chỉ chấp nhận file PDF');
+    // Cho phép các file types: PDF, DOCX, ZIP
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/zip',
+    ];
+
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Chỉ chấp nhận file PDF, DOCX hoặc ZIP',
+      );
     }
+
+    // Get file extension từ mimetype
+    const getFileExtension = (mimetype: string): string => {
+      if (mimetype === 'application/pdf') return '.pdf';
+      if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return '.docx';
+      if (mimetype === 'application/zip') return '.zip';
+      return '.pdf'; // default
+    };
 
     const supabase = this.supabaseService.getClient();
     const bucketName = 'submissions';
     const timestamp = Date.now();
     const uuid = crypto.randomUUID();
-    const fileName = `${timestamp}-${uuid}.pdf`;
+    const fileExtension = getFileExtension(file.mimetype);
+    const fileName = `${timestamp}-${uuid}${fileExtension}`;
 
     try {
       const { data, error } = await supabase.storage
         .from(bucketName)
         .upload(fileName, file.buffer, {
-          contentType: 'application/pdf',
+          contentType: file.mimetype,
           upsert: false,
         });
 
@@ -104,7 +122,7 @@ export class SubmissionsService {
   /**
    * Tạo submission mới
    * @param createDto DTO chứa thông tin submission
-   * @param file File PDF (bắt buộc)
+   * @param file File PDF, DOCX hoặc ZIP (bắt buộc)
    * @param authorId ID của author (từ JWT token)
    * @returns Submission đã tạo
    */
@@ -114,7 +132,7 @@ export class SubmissionsService {
     authorId: number,
   ): Promise<Submission> {
     if (!file) {
-      throw new BadRequestException('File PDF là bắt buộc');
+      throw new BadRequestException('File là bắt buộc (PDF, DOCX hoặc ZIP)');
     }
 
     // Validate track
@@ -213,7 +231,7 @@ export class SubmissionsService {
    * Cập nhật submission
    * @param id ID của submission
    * @param updateDto DTO chứa thông tin cập nhật
-   * @param file File PDF mới (tùy chọn)
+   * @param file File PDF, DOCX hoặc ZIP mới (tùy chọn)
    * @param authorId ID của author (để kiểm tra quyền)
    * @returns Submission đã cập nhật
    */
@@ -649,6 +667,7 @@ export class SubmissionsService {
     return await this.reviewClient.getAnonymizedReviewsForAuthor(id);
   }
 }
+
 
 
 
