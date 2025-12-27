@@ -39,6 +39,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
+  message?: string;
   accessToken: string;
   refreshToken: string;
   user: {
@@ -47,6 +48,8 @@ export interface LoginResponse {
     fullName?: string;
     roles: string[];
   };
+  expiresIn?: string;
+  refreshExpiresIn?: string;
 }
 
 export interface RegisterRequest {
@@ -60,8 +63,17 @@ export interface RefreshTokenRequest {
 }
 
 export interface RefreshTokenResponse {
+  message?: string;
   accessToken: string;
   refreshToken: string;
+  user?: {
+    id: number;
+    email: string;
+    fullName?: string;
+    roles: string[];
+  };
+  expiresIn?: string;
+  refreshExpiresIn?: string;
 }
 
 // User Types
@@ -70,6 +82,7 @@ export interface User {
   email: string;
   fullName?: string;
   roles: string[];
+  isVerified?: boolean;
   createdAt: string;
   updatedAt: string;
 }

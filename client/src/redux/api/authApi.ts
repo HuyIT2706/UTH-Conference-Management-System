@@ -27,7 +27,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     refreshToken: builder.mutation<RefreshTokenResponse, RefreshTokenRequest>({
       query: (body) => ({
-        url: '/auth/refresh',
+        url: '/auth/refresh-token',
         method: 'POST',
         body,
       }),
@@ -36,12 +36,46 @@ export const authApi = apiSlice.injectEndpoints({
       query: () => '/users/profile',
       providesTags: ['User'],
     }),
-    logout: builder.mutation<void, void>({
-      query: () => ({
+    logout: builder.mutation<
+      { message: string },
+      { refreshToken: string }
+    >({
+      query: (body) => ({
         url: '/auth/logout',
         method: 'POST',
+        body,
       }),
       invalidatesTags: ['User'],
+    }),
+    verifyEmail: builder.mutation<
+      { message: string },
+      { token: string }
+    >({
+      query: ({ token }) => ({
+        url: '/auth/verify-email',
+        method: 'GET',
+        params: { token },
+      }),
+      invalidatesTags: ['User'],
+    }),
+    getVerificationToken: builder.query<
+      {
+        message: string;
+        data: {
+          email: string;
+          token: string;
+          expiresAt: string;
+          verifyUrl: string;
+          isVerified: boolean;
+        };
+      },
+      { email: string }
+    >({
+      query: ({ email }) => ({
+        url: '/auth/get-verification-token',
+        method: 'GET',
+        params: { email },
+      }),
     }),
   }),
 });
@@ -52,5 +86,7 @@ export const {
   useRefreshTokenMutation,
   useGetMeQuery,
   useLogoutMutation,
+  useVerifyEmailMutation,
+  useGetVerificationTokenQuery,
 } = authApi;
 

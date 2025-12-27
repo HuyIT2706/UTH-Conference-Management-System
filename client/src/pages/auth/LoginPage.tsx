@@ -61,7 +61,6 @@ const LoginPage = () => {
         localStorage.removeItem('rememberMe');
       }
 
-      // Redirect to dashboard/home
       navigate('/dashboard');
     } catch (err: unknown) {
       setError(formatApiError(err));

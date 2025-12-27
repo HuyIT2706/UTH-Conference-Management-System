@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
 import iconUth from '../../assets/icon_uth.svg';
-import imageUth from '../../assets/image-uth.jpg'
-// TODO: Uncomment khi sẵn sàng gọi API
-// import axios from 'axios';
-// import { API_BASE_URL } from '../../utils/constants';
-// import { formatApiError } from '../../utils/api-helpers';
+import imageUth from '../../assets/image-uth.jpg';
+import { useResetPasswordMutation } from '../../redux/api/usersApi';
+import { formatApiError } from '../../utils/api-helpers';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -22,8 +20,9 @@ const ResetPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,8 +36,6 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // Validation
     if (!formData.newPassword || !formData.confirmPassword) {
       setError('Vui lòng điền đầy đủ thông tin');
       return;
@@ -59,37 +56,22 @@ const ResetPasswordPage = () => {
       return;
     }
 
-    setIsLoading(true);
-
-    // TODO: Gọi API khi sẵn sàng
-    // try {
-    //   await axios.post(`${API_BASE_URL}/users/reset-password`, {
-    //     email,
-    //     code,
-    //     newPassword: formData.newPassword,
-    //   });
-    //   setSuccess(true);
-    //   setTimeout(() => {
-    //     navigate('/login', {
-    //       state: { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.' },
-    //     });
-    //   }, 2000);
-    // } catch (err: unknown) {
-    //   setError(formatApiError(err));
-    // } finally {
-    //   setIsLoading(false);
-    // }
-
-    // Tạm thời: Simulate API call
-    setTimeout(() => {
+    try {
+      await resetPassword({
+        email,
+        code,
+        newPassword: formData.newPassword,
+      }).unwrap();
+      
       setSuccess(true);
       setTimeout(() => {
         navigate('/login', {
           state: { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.' },
         });
       }, 2000);
-      setIsLoading(false);
-    }, 1000); // Simulate API call delay
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    }
   };
 
   if (success) {

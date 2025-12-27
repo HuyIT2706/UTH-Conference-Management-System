@@ -5,13 +5,16 @@ import { useNavigate } from 'react-router-dom';
 export const useAuth = () => {
   const navigate = useNavigate();
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
-    skip: !tokenUtils.hasToken(), // Skip query if no token
+    skip: !tokenUtils.hasToken(), 
   });
   const [logoutMutation] = useLogoutMutation();
 
   const logout = async () => {
     try {
-      await logoutMutation().unwrap();
+      const refreshToken = tokenUtils.getRefreshToken();
+      if (refreshToken) {
+        await logoutMutation({ refreshToken }).unwrap();
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

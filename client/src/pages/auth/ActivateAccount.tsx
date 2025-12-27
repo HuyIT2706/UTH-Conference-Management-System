@@ -1,10 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import bgUth from '../../assets/bg_uth.svg';
 import { Link, useNavigate } from 'react-router-dom';
-// TODO: Uncomment khi sẵn sàng gọi API
-// import axios from 'axios';
-// import { API_BASE_URL } from '../../utils/constants';
-// import { formatApiError } from '../../utils/api-helpers';
+import { useGetVerificationTokenQuery, useVerifyEmailMutation } from '../../redux/api/authApi';
+import { formatApiError } from '../../utils/api-helpers';
 
 const ActivateAccount = () => {
   const navigate = useNavigate();
@@ -12,7 +10,28 @@ const ActivateAccount = () => {
   const [isSubmit, setIsSubmit] = useState(false);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
+  
+  // Query để lấy verification token (chỉ query khi đã submit email)
+  const { data: tokenData, isLoading: isLoadingToken, error: tokenError, refetch: refetchToken } = useGetVerificationTokenQuery(
+    { email },
+    { skip: !isSubmit || !email }
+  );
+
+  // Xử lý kết quả query
+  useEffect(() => {
+    if (tokenData?.data) {
+      if (tokenData.data.isVerified) {
+        setError('Email đã được xác minh. Vui lòng đăng nhập.');
+        setIsSubmit(false);
+      }
+    }
+    if (tokenError) {
+      setError(formatApiError(tokenError));
+      setIsSubmit(false);
+    }
+  }, [tokenData, tokenError]);
+  
+  const [verifyEmail, { isLoading: isVerifying }] = useVerifyEmailMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,64 +40,36 @@ const ActivateAccount = () => {
       setError('Vui lòng nhập email hợp lệ');
       return;
     }
-
-    // TODO: Gọi API khi sẵn sàng
-    // try {
-    //   await axios.post(`${API_BASE_URL}/auth/get-verification-token`, { email });
-    //   setIsSubmit(true);
-    // } catch (err: unknown) {
-    //   setError(formatApiError(err));
-    // }
-
-    // Tạm thời: chỉ set state để test UI
     setIsSubmit(true);
   };
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsVerifying(true);
 
-    if (!code || code.length !== 6) {
-      setError('Vui lòng nhập mã xác thực 6 ký tự');
-      setIsVerifying(false);
+    if (!code || code.trim().length === 0) {
+      setError('Vui lòng nhập mã xác thực');
       return;
     }
 
-    // TODO: Gọi API verify code khi sẵn sàng
-    // try {
-    //   await axios.get(`${API_BASE_URL}/auth/verify-email`, {
-    //     params: { token: code },
-    //   });
-    //   // Nếu verify thành công, redirect về login
-    //   navigate('/login', {
-    //     state: { message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.' },
-    //   });
-    // } catch (err: unknown) {
-    //   setError(formatApiError(err));
-    // } finally {
-    //   setIsVerifying(false);
-    // }
-
-    // Tạm thời: Simulate verify code (giả sử code "123456" là code test)
-    setTimeout(() => {
-      if (code === '123456') {
-        // Code đúng, redirect về login
-        navigate('/login', {
-          state: { message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.' },
-        });
-      } else {
-        // Code sai
-        setError('Mã xác thực không đúng. Vui lòng thử lại. (Test: dùng code "123456")');
-      }
-      setIsVerifying(false);
-    }, 500); // Simulate API call delay
+    try {
+      await verifyEmail({ token: code.trim() }).unwrap();
+      
+      navigate('/login', {
+        state: { message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.' },
+      });
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    }
   };
 
-  const handleResendCode = () => {
-    // TODO: Gọi API resend code khi sẵn sàng
-    // Gọi lại handleSubmit để gửi lại mã
-    handleSubmit({ preventDefault: () => {} } as React.FormEvent);
+  const handleResendCode = async () => {
+    setError(null);
+    try {
+      await refetchToken();
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    }
   };
   if (isSubmit) {
     return (
@@ -115,9 +106,11 @@ const ActivateAccount = () => {
           <p className="text-gray-600 mb-5">
             Mã xác thực đã được gửi đến {email}.
           </p>
-          <p className="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded">
-            💡 Test mode: Nhập code <strong>"123456"</strong> để kích hoạt tài khoản
-          </p>
+          {tokenData?.data?.token && (
+            <p className="text-xs text-gray-500 mb-4 bg-blue-50 p-2 rounded">
+              💡 Development: Token verification - {tokenData.data.token.substring(0, 20)}...
+            </p>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -264,9 +257,10 @@ const ActivateAccount = () => {
 
           <button
             type="submit"
-            className="w-full bg-primary hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+            disabled={isLoadingToken}
+            className="w-full bg-primary hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Xác nhận
+            {isLoadingToken ? 'Đang xử lý...' : 'Xác nhận'}
           </button>
         </form>
       </div>

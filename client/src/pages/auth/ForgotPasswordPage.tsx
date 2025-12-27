@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
-// TODO: Uncomment khi sẵn sàng gọi API
-// import axios from 'axios';
-// import { API_BASE_URL } from '../../utils/constants';
-// import { formatApiError } from '../../utils/api-helpers';
+import { useForgotPasswordMutation } from '../../redux/api/usersApi';
+import { formatApiError } from '../../utils/api-helpers';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -13,6 +11,8 @@ const ForgotPasswordPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  
+  const [forgotPassword, { isLoading: isSending }] = useForgotPasswordMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,16 +23,12 @@ const ForgotPasswordPage = () => {
       return;
     }
 
-    // TODO: Gọi API khi sẵn sàng
-    // try {
-    //   await axios.post(`${API_BASE_URL}/users/forgot-password`, { email });
-    //   setIsSubmitted(true);
-    // } catch (err: unknown) {
-    //   setError(formatApiError(err));
-    // }
-
-    // Tạm thời: chỉ set state để test UI
-    setIsSubmitted(true);
+    try {
+      await forgotPassword({ email }).unwrap();
+      setIsSubmitted(true);
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    }
   };
 
   const handleVerifyCode = async (e: React.FormEvent) => {
@@ -45,33 +41,10 @@ const ForgotPasswordPage = () => {
       setIsVerifying(false);
       return;
     }
-
-    // TODO: Gọi API verify code khi sẵn sàng
-    // try {
-    //   await axios.post(`${API_BASE_URL}/users/verify-reset-code`, {
-    //     email,
-    //     code,
-    //   });
-    //   navigate('/reset-password', {
-    //     state: { email, code },
-    //   });
-    // } catch (err: unknown) {
-    //   setError(formatApiError(err));
-    // }
-
-    // Tạm thời: Simulate verify code (giả sử code "123456" là code test)
-    setTimeout(() => {
-      if (code === '123456') {
-        // Code đúng, redirect sang reset password
-        navigate('/reset-password', {
-          state: { email, code },
-        });
-      } else {
-        // Code sai
-        setError('Mã xác thực không đúng. Vui lòng thử lại. (Test: dùng code "123456")');
-      }
-      setIsVerifying(false);
-    }, 500); // Simulate API call delay
+    navigate('/reset-password', {
+      state: { email, code },
+    });
+    setIsVerifying(false);
   };
 
   if (isSubmitted) {
@@ -107,10 +80,7 @@ const ForgotPasswordPage = () => {
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Xác minh mã</h1>
           <p className="text-gray-600 mb-5">
-            Mã xác thực đã được gửi đến {email}.
-          </p>
-          <p className="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded">
-            💡 Test mode: Nhập code <strong>"123456"</strong> để tiếp tục
+            Mã xác thực đã được gửi đến {email}. Vui lòng kiểm tra email hoặc console (development).
           </p>
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -171,7 +141,8 @@ const ForgotPasswordPage = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="text-[16px] text-black hover:text-teal-700 font-medium cursor-pointer"
+                disabled={isSending}
+                className="text-[16px] text-black hover:text-teal-700 font-medium cursor-pointer disabled:opacity-50"
               >
                 Bạn chưa nhận được mã? <strong className='text-sm text-red-500 hover:text-teal-700'>Gửi lại</strong> 
               </button>
@@ -255,9 +226,10 @@ const ForgotPasswordPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-primary hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+            disabled={isSending}
+            className="w-full bg-primary hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Xác nhận
+            {isSending ? 'Đang gửi...' : 'Xác nhận'}
           </button>
         </form>
       </div>
