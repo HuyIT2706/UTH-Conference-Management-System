@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailService } from '../common/services/email.service';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailService],
   controllers: [AuthController],
 })
 export class AuthModule {}

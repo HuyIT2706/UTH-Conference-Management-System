@@ -87,6 +87,26 @@ services:
     networks:
       - uth-net
 
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DOCKER_ENV=true
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - CONFERENCE_SERVICE_URL=http://conference-service:3002
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003
+      - REVIEW_SERVICE_URL=http://review-service:3004
+    depends_on:
+      - identity-service
+      - conference-service
+      - submission-service
+      - review-service
+    networks:
+      - uth-net
+
 networks:
   uth-net:
     driver: bridge

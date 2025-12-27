@@ -16,6 +16,11 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface VerifyResetCodeRequest {
+  email: string;
+  code: string;
+}
+
 export interface CreateUserRequest {
   email: string;
   password: string;
@@ -47,6 +52,38 @@ export const usersApi = apiSlice.injectEndpoints({
     >({
       query: (body) => ({
         url: '/users/forgot-password',
+        method: 'POST',
+        body,
+      }),
+    }),
+    
+    // Get reset code (Dev only)
+    getResetCode: builder.query<
+      {
+        message: string;
+        data: {
+          email: string;
+          code: string;
+          expiresAt: string;
+          createdAt: string;
+        };
+      },
+      { email: string }
+    >({
+      query: ({ email }) => ({
+        url: '/users/get-reset-code',
+        method: 'GET',
+        params: { email },
+      }),
+    }),
+    
+    // Verify reset code
+    verifyResetCode: builder.mutation<
+      { message: string; valid: boolean },
+      VerifyResetCodeRequest
+    >({
+      query: (body) => ({
+        url: '/users/verify-reset-code',
         method: 'POST',
         body,
       }),
@@ -107,6 +144,8 @@ export const usersApi = apiSlice.injectEndpoints({
 export const {
   useChangePasswordMutation,
   useForgotPasswordMutation,
+  useGetResetCodeQuery,
+  useVerifyResetCodeMutation,
   useResetPasswordMutation,
   useCreateUserMutation,
   useUpdateUserRolesMutation,

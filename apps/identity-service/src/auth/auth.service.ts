@@ -17,6 +17,7 @@ import { User } from '../users/entities/user.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { EmailVerificationToken } from './entities/email-verification-token.entity';
 import { RoleName } from '../users/entities/role.entity';
+import { EmailService } from '../common/services/email.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(EmailVerificationToken)
     private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
+    private readonly emailService: EmailService,
   ) {
     this.refreshSecret =
       this.configService.get<string>('JWT_REFRESH_SECRET') || 'refresh_secret';
@@ -79,9 +81,19 @@ export class AuthService {
 
     const appUrl =
       this.configService.get<string>('APP_BASE_URL') || 'http://localhost:3000';
-    const verifyUrl = `${appUrl}/verify-email?token=${encodeURIComponent(
+    const verifyUrl = `${appUrl}/api/auth/verify-email?token=${encodeURIComponent(
       token,
     )}`;
+    
+    // Gửi email verification
+    try {
+      await this.emailService.sendVerificationEmail(user.email, token, user.fullName);
+      console.log(`[AuthService] Verification email sent to ${user.email}`);
+    } catch (error) {
+      console.error(`[AuthService] Failed to send verification email to ${user.email}:`, error);
+      // Log token để dev test nếu email fail
+      console.log(`[AuthService] Verification token (fallback): ${token} for email ${user.email}`);
+    }
   }
 // Api 3: Đăng nhập
   async login(dto: LoginDto) {

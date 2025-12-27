@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
-import { useForgotPasswordMutation } from '../../redux/api/usersApi';
+import { useForgotPasswordMutation, useGetResetCodeQuery, useVerifyResetCodeMutation } from '../../redux/api/usersApi';
 import { formatApiError } from '../../utils/api-helpers';
 
 const ForgotPasswordPage = () => {
@@ -13,6 +13,13 @@ const ForgotPasswordPage = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   
   const [forgotPassword, { isLoading: isSending }] = useForgotPasswordMutation();
+  const [verifyResetCode] = useVerifyResetCodeMutation();
+  
+  // Query để lấy reset code trong development (chỉ query khi đã submit email)
+  const { data: resetCodeData, refetch: refetchResetCode } = useGetResetCodeQuery(
+    { email },
+    { skip: !isSubmitted || !email }
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,10 +48,20 @@ const ForgotPasswordPage = () => {
       setIsVerifying(false);
       return;
     }
-    navigate('/reset-password', {
-      state: { email, code },
-    });
-    setIsVerifying(false);
+
+    try {
+      // Verify code trước khi cho phép reset password
+      await verifyResetCode({ email, code }).unwrap();
+      
+      // Code hợp lệ, chuyển sang trang reset password
+      navigate('/reset-password', {
+        state: { email, code },
+      });
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   if (isSubmitted) {
@@ -82,6 +99,17 @@ const ForgotPasswordPage = () => {
           <p className="text-gray-600 mb-5">
             Mã xác thực đã được gửi đến {email}. Vui lòng kiểm tra email hoặc console (development).
           </p>
+          {resetCodeData?.data && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800 font-semibold mb-1">💡 Development Mode:</p>
+              <p className="text-sm text-blue-700">
+                Reset code: <strong className="text-lg">{resetCodeData.data.code}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                Hết hạn: {new Date(resetCodeData.data.expiresAt).toLocaleString('vi-VN')}
+              </p>
+            </div>
+          )}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-600 text-sm">{error}</p>
@@ -140,7 +168,15 @@ const ForgotPasswordPage = () => {
             <div className="text-center">
               <button
                 type="button"
-                onClick={handleSubmit}
+                onClick={async () => {
+                  setError(null);
+                  try {
+                    await forgotPassword({ email }).unwrap();
+                    await refetchResetCode();
+                  } catch (err: unknown) {
+                    setError(formatApiError(err));
+                  }
+                }}
                 disabled={isSending}
                 className="text-[16px] text-black hover:text-teal-700 font-medium cursor-pointer disabled:opacity-50"
               >
