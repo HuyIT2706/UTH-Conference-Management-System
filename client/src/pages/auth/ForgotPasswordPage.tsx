@@ -1,11 +1,18 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
+// TODO: Uncomment khi sẵn sàng gọi API
+// import axios from 'axios';
+// import { API_BASE_URL } from '../../utils/constants';
+// import { formatApiError } from '../../utils/api-helpers';
 
 const ForgotPasswordPage = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +23,55 @@ const ForgotPasswordPage = () => {
       return;
     }
 
-    // TODO: Implement forgot password API call
+    // TODO: Gọi API khi sẵn sàng
+    // try {
+    //   await axios.post(`${API_BASE_URL}/users/forgot-password`, { email });
+    //   setIsSubmitted(true);
+    // } catch (err: unknown) {
+    //   setError(formatApiError(err));
+    // }
+
+    // Tạm thời: chỉ set state để test UI
     setIsSubmitted(true);
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsVerifying(true);
+
+    if (!code || code.length !== 6) {
+      setError('Vui lòng nhập mã xác thực 6 ký tự');
+      setIsVerifying(false);
+      return;
+    }
+
+    // TODO: Gọi API verify code khi sẵn sàng
+    // try {
+    //   await axios.post(`${API_BASE_URL}/users/verify-reset-code`, {
+    //     email,
+    //     code,
+    //   });
+    //   navigate('/reset-password', {
+    //     state: { email, code },
+    //   });
+    // } catch (err: unknown) {
+    //   setError(formatApiError(err));
+    // }
+
+    // Tạm thời: Simulate verify code (giả sử code "123456" là code test)
+    setTimeout(() => {
+      if (code === '123456') {
+        // Code đúng, redirect sang reset password
+        navigate('/reset-password', {
+          state: { email, code },
+        });
+      } else {
+        // Code sai
+        setError('Mã xác thực không đúng. Vui lòng thử lại. (Test: dùng code "123456")');
+      }
+      setIsVerifying(false);
+    }, 500); // Simulate API call delay
   };
 
   if (isSubmitted) {
@@ -55,7 +109,16 @@ const ForgotPasswordPage = () => {
           <p className="text-gray-600 mb-5">
             Mã xác thực đã được gửi đến {email}.
           </p>
-          <form className="space-y-6">
+          <p className="text-xs text-gray-500 mb-4 bg-yellow-50 p-2 rounded">
+            💡 Test mode: Nhập code <strong>"123456"</strong> để tiếp tục
+          </p>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleVerifyCode} className="space-y-6">
             <div>
               <label
                 htmlFor="code"
@@ -67,9 +130,15 @@ const ForgotPasswordPage = () => {
                 <input
                   id="code"
                   type="text"
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value);
+                    setError(null);
+                  }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition pr-12"
                   placeholder="759040"
                   maxLength={6}
+                  required
                 />
                 <button
                   type="button"
@@ -101,6 +170,7 @@ const ForgotPasswordPage = () => {
             <div className="text-center">
               <button
                 type="button"
+                onClick={handleSubmit}
                 className="text-[16px] text-black hover:text-teal-700 font-medium cursor-pointer"
               >
                 Bạn chưa nhận được mã? <strong className='text-sm text-red-500 hover:text-teal-700'>Gửi lại</strong> 
@@ -109,9 +179,10 @@ const ForgotPasswordPage = () => {
 
             <button
               type="submit"
-              className="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+              disabled={isVerifying}
+              className="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Xác thực
+              {isVerifying ? 'Đang xác thực...' : 'Xác thực'}
             </button>
           </form>
         </div>
