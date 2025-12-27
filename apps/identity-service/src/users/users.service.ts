@@ -210,19 +210,10 @@ export class UsersService {
     });
     await this.passwordResetTokenRepository.save(resetToken);
 
-    // Gửi email chứa mã reset password
     try {
       await this.emailService.sendPasswordResetCode(user.email, code);
-      console.log(
-        `[ForgotPassword] Reset code ${code} sent to email ${user.email} (expires at ${expiresAt.toISOString()})`,
-      );
     } catch (error) {
-      // Log error nhưng không throw để không tiết lộ thông tin cho client
       console.error(`[ForgotPassword] Failed to send email to ${user.email}:`, error);
-      // Vẫn log code ra console để dev test nếu email fail
-      console.log(
-        `[ForgotPassword] Reset code (fallback): ${code} for email ${user.email} (expires at ${expiresAt.toISOString()})`,
-      );
     }
   }
 

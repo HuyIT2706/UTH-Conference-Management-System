@@ -62,14 +62,12 @@ export class AuthController {
     return this.authService.logout(dto);
   }
 
-  @Get('verify-email')
-  @ApiOperation({ summary: 'Xác minh email bằng token' })
-  @ApiQuery({ name: 'token', description: 'Token xác minh email', required: true })
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Xác minh email bằng mã 6 số' })
   @ApiResponse({ status: 200, description: 'Xác minh email thành công' })
-  @ApiResponse({ status: 404, description: 'Token không hợp lệ' })
-  @ApiResponse({ status: 401, description: 'Token đã hết hạn' })
-  async verifyEmail(@Query('token') token: string) {
-    const result = await this.authService.verifyEmail(token);
+  @ApiResponse({ status: 401, description: 'Mã không hợp lệ hoặc đã hết hạn' })
+  async verifyEmail(@Body('token') code: string) {
+    const result = await this.authService.verifyEmail(code);
     return result;
   }
 

@@ -160,19 +160,17 @@ Trân trọng,
   }
 
   /**
-   * Gửi email verification
+   * Gửi email verification với mã 6 số
    */
-  async sendVerificationEmail(email: string, token: string, fullName?: string): Promise<void> {
+  async sendVerificationEmail(email: string, code: string, fullName?: string): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:3000';
-    const verifyUrl = `${appUrl}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
 
     const mailOptions = {
       from: this.configService.get<string>('SMTP_FROM') || 
             this.configService.get<string>('SMTP_USER') || 
             this.configService.get<string>('EMAIL_USER'),
       to: email,
-      subject: `[${appName}] Xác minh địa chỉ email của bạn`,
+      subject: `[${appName}] Mã xác minh email của bạn`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -201,14 +199,19 @@ Trân trọng,
               padding: 30px;
               border-radius: 0 0 10px 10px;
             }
-            .button {
-              display: inline-block;
-              background: #14b8a6;
-              color: white;
-              padding: 12px 30px;
-              text-decoration: none;
-              border-radius: 5px;
+            .code-box {
+              background: white;
+              border: 2px solid #14b8a6;
+              border-radius: 8px;
+              padding: 20px;
+              text-align: center;
               margin: 20px 0;
+            }
+            .code {
+              font-size: 32px;
+              font-weight: bold;
+              color: #14b8a6;
+              letter-spacing: 5px;
             }
             .footer {
               margin-top: 20px;
@@ -217,6 +220,13 @@ Trân trọng,
               font-size: 12px;
               color: #6b7280;
               text-align: center;
+            }
+            .warning {
+              background: #fef3c7;
+              border-left: 4px solid #f59e0b;
+              padding: 12px;
+              margin: 20px 0;
+              border-radius: 4px;
             }
           </style>
         </head>
@@ -228,17 +238,22 @@ Trân trọng,
             </div>
             <div class="content">
               <p>Xin chào ${fullName || 'bạn'},</p>
-              <p>Cảm ơn bạn đã đăng ký tài khoản tại ${appName}. Vui lòng xác minh địa chỉ email của bạn bằng cách nhấp vào nút bên dưới:</p>
+              <p>Cảm ơn bạn đã đăng ký tài khoản tại ${appName}. Vui lòng sử dụng mã xác minh sau:</p>
               
-              <div style="text-align: center;">
-                <a href="${verifyUrl}" class="button">Xác minh email</a>
+              <div class="code-box">
+                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Mã xác minh của bạn:</p>
+                <div class="code">${code}</div>
               </div>
 
-              <p>Hoặc copy và paste link sau vào trình duyệt:</p>
-              <p style="word-break: break-all; color: #14b8a6;">${verifyUrl}</p>
+              <div class="warning">
+                <strong>⚠️ Lưu ý:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                  <li>Mã này chỉ có hiệu lực trong <strong>15 phút</strong></li>
+                  <li>Không chia sẻ mã này với bất kỳ ai</li>
+                  <li>Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này</li>
+                </ul>
+              </div>
 
-              <p>Link này sẽ hết hạn sau 24 giờ.</p>
-              
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
             <div class="footer">
@@ -254,11 +269,14 @@ ${appName} - Xác minh email
 
 Xin chào ${fullName || 'bạn'},
 
-Cảm ơn bạn đã đăng ký tài khoản tại ${appName}. Vui lòng xác minh địa chỉ email của bạn bằng cách truy cập link sau:
+Cảm ơn bạn đã đăng ký tài khoản tại ${appName}. Vui lòng sử dụng mã xác minh sau:
 
-${verifyUrl}
+Mã xác minh: ${code}
 
-Link này sẽ hết hạn sau 24 giờ.
+⚠️ Lưu ý:
+- Mã này chỉ có hiệu lực trong 15 phút
+- Không chia sẻ mã này với bất kỳ ai
+- Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này
 
 Trân trọng,
 Đội ngũ ${appName}

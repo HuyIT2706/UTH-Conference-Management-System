@@ -53,8 +53,8 @@ export const authApi = apiSlice.injectEndpoints({
     >({
       query: ({ token }) => ({
         url: '/auth/verify-email',
-        method: 'GET',
-        params: { token },
+        method: 'POST',
+        body: { token },
       }),
       invalidatesTags: ['User'],
     }),
@@ -63,9 +63,9 @@ export const authApi = apiSlice.injectEndpoints({
         message: string;
         data: {
           email: string;
-          token: string;
+          code: string;
           expiresAt: string;
-          verifyUrl: string;
+          createdAt: string;
           isVerified: boolean;
         };
       },

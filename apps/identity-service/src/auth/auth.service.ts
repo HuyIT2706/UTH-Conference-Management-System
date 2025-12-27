@@ -66,33 +66,28 @@ export class AuthService {
       message: 'Vui lòng kiểm tra email để xác minh tài khoản',
     };
   }
-// Api 2: Xác tài khoản qua email viên token
+// Api 2: Xác tài khoản qua email với mã 6 số
   private async createAndSendEmailVerificationToken(user: User) {
-    const token = await bcrypt.genSalt(10);
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Tạo mã 6 chữ số
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
 
     const entity = this.emailVerificationTokenRepository.create({
-      token,
+      token: code,
       userId: user.id,
       expiresAt,
       used: false,
     });
     await this.emailVerificationTokenRepository.save(entity);
-
-    const appUrl =
-      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:3000';
-    const verifyUrl = `${appUrl}/api/auth/verify-email?token=${encodeURIComponent(
-      token,
-    )}`;
     
-    // Gửi email verification
+    // Gửi email verification với mã 6 số
     try {
-      await this.emailService.sendVerificationEmail(user.email, token, user.fullName);
-      console.log(`[AuthService] Verification email sent to ${user.email}`);
+      await this.emailService.sendVerificationEmail(user.email, code, user.fullName);
+      console.log(`[AuthService] Verification code ${code} sent to ${user.email} (expires at ${expiresAt.toISOString()})`);
     } catch (error) {
       console.error(`[AuthService] Failed to send verification email to ${user.email}:`, error);
-      // Log token để dev test nếu email fail
-      console.log(`[AuthService] Verification token (fallback): ${token} for email ${user.email}`);
+      // Log code để dev test nếu email fail
+      console.log(`[AuthService] Verification code (fallback): ${code} for email ${user.email} (expires at ${expiresAt.toISOString()})`);
     }
   }
 // Api 3: Đăng nhập
@@ -146,17 +141,18 @@ export class AuthService {
     return { message: 'Đã đăng xuất' };
   }
 // Api 6: Xác thực tk bằng token từ gmail
-  async verifyEmail(token: string) {
+  async verifyEmail(code: string) {
     const record = await this.emailVerificationTokenRepository.findOne({
-      where: { token, used: false },
+      where: { token: code, used: false },
+      order: { createdAt: 'DESC' },
     });
 
     if (!record) {
-      throw new NotFoundException('Token xác minh không hợp lệ');
+      throw new UnauthorizedException('Mã xác minh không hợp lệ');
     }
 
     if (record.expiresAt.getTime() < Date.now()) {
-      throw new UnauthorizedException('Token xác minh đã hết hạn');
+      throw new UnauthorizedException('Mã xác minh đã hết hạn');
     }
 
     const user = await this.usersService.markEmailVerified(record.userId);
@@ -197,9 +193,9 @@ export class AuthService {
 
     return {
       email: user.email,
-      token: token.token,
+      code: token.token, // Mã 6 số
       expiresAt: token.expiresAt,
-      verifyUrl: `http://localhost:3001/api/auth/verify-email?token=${encodeURIComponent(token.token)}`,
+      createdAt: token.createdAt,
       isVerified: false,
     };
   }

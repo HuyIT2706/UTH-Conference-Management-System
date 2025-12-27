@@ -106,10 +106,16 @@ const ActivateAccount = () => {
           <p className="text-gray-600 mb-5">
             Mã xác thực đã được gửi đến {email}.
           </p>
-          {tokenData?.data?.token && (
-            <p className="text-xs text-gray-500 mb-4 bg-blue-50 p-2 rounded">
-              💡 Development: Token verification - {tokenData.data.token.substring(0, 20)}...
-            </p>
+          {tokenData?.data?.code && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs text-blue-800 font-semibold mb-1">💡 Development Mode:</p>
+              <p className="text-sm text-blue-700">
+                Verification code: <strong className="text-lg">{tokenData.data.code}</strong>
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                Hết hạn: {new Date(tokenData.data.expiresAt).toLocaleString('vi-VN')}
+              </p>
+            </div>
           )}
 
           {error && (
