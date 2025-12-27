@@ -175,25 +175,24 @@ export class AuthService {
         isVerified: true,
       };
     }
-    let token = await this.emailVerificationTokenRepository.findOne({
+    await this.emailVerificationTokenRepository.delete({
+      userId: user.id,
+    });
+    
+    await this.createAndSendEmailVerificationToken(user);
+    
+    const token = await this.emailVerificationTokenRepository.findOne({
       where: { userId: user.id, used: false },
       order: { createdAt: 'DESC' },
     });
-    if (!token || token.expiresAt.getTime() < Date.now()) {
-      await this.createAndSendEmailVerificationToken(user);
-      token = await this.emailVerificationTokenRepository.findOne({
-        where: { userId: user.id, used: false },
-        order: { createdAt: 'DESC' },
-      });
 
-      if (!token) {
-        throw new NotFoundException('Không thể tạo verification token');
-      }
+    if (!token) {
+      throw new NotFoundException('Không thể tạo verification code');
     }
 
     return {
       email: user.email,
-      code: token.token, // Mã 6 số
+      code: token.token, 
       expiresAt: token.expiresAt,
       createdAt: token.createdAt,
       isVerified: false,

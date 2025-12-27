@@ -73,7 +73,7 @@ export class AuthController {
 
   @Get('get-verification-token')
   @ApiOperation({ 
-    summary: '[DEV ONLY] Lấy verification token từ database (chỉ dùng trong development)',
+    summary: 'Lấy code từ db để xác thực',
     description: 'Helper endpoint để lấy verification token cho user để test.'
   })
   @ApiQuery({ name: 'email', description: 'Email của user cần lấy token', required: true, example: 'user@example.com' })
@@ -90,8 +90,7 @@ export class AuthController {
     }
     
     return {
-      message: 'Lấy verification token thành công (chỉ dùng trong development)',
-      data: result,
+      message: 'Đã gửi mã kích hoạt tài khoản tới email (tồn tại)',
     };
   }
 }

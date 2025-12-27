@@ -55,7 +55,7 @@ export class UsersController {
 
   @Get('get-reset-code')
   @ApiOperation({ 
-    summary: '[DEV ONLY] Lấy reset code từ database (chỉ dùng trong development)',
+    summary: 'Lấy code db để xác thực email',
     description: 'Helper endpoint để lấy reset code cho user để test.'
   })
   @ApiQuery({ name: 'email', description: 'Email của user cần lấy code', required: true })
@@ -85,6 +85,10 @@ export class UsersController {
   }
 
   @Post('reset-password')
+  @ApiOperation({
+      summary: "Đặt lại password",
+      description: "Đặt lại password khi quên pass"
+  })
   async resetPassword(
     @Body('email') email: string,
     @Body('code') code: string,
