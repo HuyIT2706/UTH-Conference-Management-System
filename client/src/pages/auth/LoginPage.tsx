@@ -61,7 +61,13 @@ const LoginPage = () => {
         localStorage.removeItem('rememberMe');
       }
 
-      navigate('/dashboard');
+      // Redirect dựa trên role
+      const isChair = result.user?.roles?.includes('CHAIR') || result.user?.roles?.includes('ADMIN');
+      if (isChair) {
+        navigate('/dashboard');
+      } else {
+        navigate('/account-management');
+      }
     } catch (err: unknown) {
       setError(formatApiError(err));
     }

@@ -5,6 +5,9 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ActivateAccount from '../pages/auth/ActivateAccount';
+import DashboardPage from '../pages/DashboardPage';
+import AccountManagementPage from '../pages/AccountManagementPage';
+import RoleBasedRedirect from '../components/RoleBasedRedirect';
 
 const appRouter = createBrowserRouter([
   {
@@ -31,6 +34,18 @@ const appRouter = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      {
+        index: true,
+        element: <RoleBasedRedirect />,
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />,
+      },
+      {
+        path: 'account-management',
+        element: <AccountManagementPage />,
+      },
     ],
   },
   {
