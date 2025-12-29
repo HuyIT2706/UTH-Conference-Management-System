@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import bgUth from '../../assets/bg_uth.svg';
 import { Link, useNavigate } from 'react-router-dom';
-import { useGetVerificationTokenQuery, useVerifyEmailMutation } from '../../redux/api/authApi';
+import {
+  useGetVerificationTokenQuery,
+  useVerifyEmailMutation,
+} from '../../redux/api/authApi';
 import { formatApiError } from '../../utils/api-helpers';
 
 const ActivateAccount = () => {
@@ -10,12 +13,14 @@ const ActivateAccount = () => {
   const [isSubmit, setIsSubmit] = useState(false);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
-  
+
   // Query để lấy verification token (chỉ query khi đã submit email)
-  const { data: tokenData, isLoading: isLoadingToken, error: tokenError, refetch: refetchToken } = useGetVerificationTokenQuery(
-    { email },
-    { skip: !isSubmit || !email }
-  );
+  const {
+    data: tokenData,
+    isLoading: isLoadingToken,
+    error: tokenError,
+    refetch: refetchToken,
+  } = useGetVerificationTokenQuery({ email }, { skip: !isSubmit || !email });
 
   // Xử lý kết quả query
   useEffect(() => {
@@ -30,7 +35,7 @@ const ActivateAccount = () => {
       setIsSubmit(false);
     }
   }, [tokenData, tokenError]);
-  
+
   const [verifyEmail, { isLoading: isVerifying }] = useVerifyEmailMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,9 +59,11 @@ const ActivateAccount = () => {
 
     try {
       await verifyEmail({ token: code.trim() }).unwrap();
-      
+
       navigate('/login', {
-        state: { message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.' },
+        state: {
+          message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.',
+        },
       });
     } catch (err: unknown) {
       setError(formatApiError(err));
@@ -106,17 +113,6 @@ const ActivateAccount = () => {
           <p className="text-gray-600 mb-5">
             Mã xác thực đã được gửi đến {email}.
           </p>
-          {tokenData?.data?.code && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-blue-800 font-semibold mb-1">💡 Development Mode:</p>
-              <p className="text-sm text-blue-700">
-                Verification code: <strong className="text-lg">{tokenData.data.code}</strong>
-              </p>
-              <p className="text-xs text-blue-600 mt-1">
-                Hết hạn: {new Date(tokenData.data.expiresAt).toLocaleString('vi-VN')}
-              </p>
-            </div>
-          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">

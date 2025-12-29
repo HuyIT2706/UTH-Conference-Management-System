@@ -19,7 +19,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
   
   if (result.error && result.error.status === 401 && !isLoginRequest) {
-    const refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = sessionStorage.getItem('refreshToken');
     if (refreshToken) {
       try {
         const refreshResult = await baseQuery(
@@ -38,18 +38,18 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
             refreshToken: string;
           };
           localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', newRefreshToken);
+          sessionStorage.setItem('refreshToken', newRefreshToken);
 
           result = await baseQuery(args, api, extraOptions);
         } else {
           // Refresh failed, clear tokens
           localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('refreshToken');
           window.location.href = '/login';
         }
       } catch (error) {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('refreshToken');
         window.location.href = '/login';
       }
     } else {
