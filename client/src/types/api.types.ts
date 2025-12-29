@@ -92,11 +92,15 @@ export interface Conference {
   id: number;
   name: string;
   description?: string;
+  venue?: string;
   startDate: string;
   endDate: string;
-  submissionDeadline: string;
+  submissionDeadline?: string;
   reviewDeadline?: string;
   cameraReadyDeadline?: string;
+  notificationDate?: string;
+  shortDescription?: string;
+  contactEmail?: string;
   createdAt: string;
   updatedAt: string;
 }

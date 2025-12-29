@@ -73,6 +73,50 @@ export const conferencesApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'Conference', id: 'LIST' }],
     }),
+    // Update conference
+    updateConference: builder.mutation<
+      ApiResponse<Conference>,
+      {
+        id: number;
+        name?: string;
+        startDate?: string;
+        endDate?: string;
+        venue?: string;
+        description?: string;
+        shortDescription?: string;
+        contactEmail?: string;
+      }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/conferences/${id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Conference', id },
+        { type: 'Conference', id: 'LIST' },
+      ],
+    }),
+    // Set CFP settings
+    setCfpSettings: builder.mutation<
+      ApiResponse<any>,
+      {
+        conferenceId: number;
+        submissionDeadline: string;
+        reviewDeadline: string;
+        notificationDate: string;
+        cameraReadyDeadline: string;
+      }
+    >({
+      query: ({ conferenceId, ...body }) => ({
+        url: `/conferences/${conferenceId}/cfp`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { conferenceId }) => [
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
   }),
 });
 
@@ -83,5 +127,7 @@ export const {
   useGetTrackByIdQuery,
   useCheckDeadlineQuery,
   useCreateConferenceMutation,
+  useUpdateConferenceMutation,
+  useSetCfpSettingsMutation,
 } = conferencesApi;
 

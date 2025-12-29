@@ -1,0 +1,151 @@
+import { useState, useMemo } from 'react';
+import { useGetConferencesQuery } from '../../../redux/api/conferencesApi';
+import type { Conference } from '../../../types/api.types';
+import CreateConferenceForm from './CreateConferenceForm';
+import ConferenceList from './ConferenceList';
+import ConferenceDetail from './ConferenceDetail';
+
+const ConferenceSetupPage = () => {
+  const [view, setView] = useState<'list' | 'detail'>('list');
+  const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  
+  const { data, isLoading, error } = useGetConferencesQuery();
+
+  const conferences = useMemo(() => {
+    return (data?.data && Array.isArray(data.data)) ? data.data : [];
+  }, [data]);
+
+  // Filter conferences based on search query
+  const filteredConferences = useMemo(() => {
+    return conferences.filter((conference: Conference) =>
+      conference.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conference.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [conferences, searchQuery]);
+
+  const handleCreateSuccess = (conferenceId: number) => {
+    setShowCreateForm(false);
+    setSelectedConferenceId(conferenceId);
+    setView('detail');
+  };
+
+  const handleViewDetail = (conferenceId: number) => {
+    setSelectedConferenceId(conferenceId);
+    setView('detail');
+  };
+
+  const handleBackToList = () => {
+    setView('list');
+    setSelectedConferenceId(null);
+  };
+
+  // Detail View
+  if (view === 'detail' && selectedConferenceId) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleBackToList}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
+          </div>
+        </div>
+
+        <ConferenceDetail conferenceId={selectedConferenceId} onBack={handleBackToList} />
+      </div>
+    );
+  }
+
+  // List View
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Tìm kiếm hội nghị..."
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <button className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center shadow-lg hover:bg-teal-700 transition-colors cursor-pointer"
+            title={showCreateForm ? "Ẩn form tạo hội nghị" : "Tạo hội nghị mới"}
+          >
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={showCreateForm ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"}
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-600">Đang tải...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">Có lỗi xảy ra khi tải danh sách hội nghị</p>
+        </div>
+      )}
+
+      {!isLoading && !error && (
+        <div className="space-y-4">
+          {/* Create Conference Form */}
+          {showCreateForm && (
+            <CreateConferenceForm
+              onSuccess={handleCreateSuccess}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          )}
+
+          {/* Conference List */}
+          <ConferenceList
+            conferences={filteredConferences}
+            searchQuery={searchQuery}
+            onViewDetail={handleViewDetail}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ConferenceSetupPage;

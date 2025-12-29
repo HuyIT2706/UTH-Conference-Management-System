@@ -7,7 +7,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import ActivateAccount from '../pages/auth/ActivateAccount';
 import DashboardPage from '../pages/admin/DashboardPage';
 import AccountManagementPage from '../pages/admin/AccountManagementPage';
-import ConferenceSetupPage from '../pages/admin/ConferenceSetupPage';
+import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
 import SubmissionsPage from '../pages/admin/SubmissionsPage';
 import PcManagementPage from '../pages/admin/PcManagementPage';
 import AssignmentsPage from '../pages/admin/AssignmentsPage';
