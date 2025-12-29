@@ -11,7 +11,8 @@ const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  const isChair = user?.roles?.includes('CHAIR') || user?.roles?.includes('ADMIN');
+  const isAdmin = user?.roles?.includes('ADMIN');
+  const isChair = user?.roles?.includes('CHAIR') && !isAdmin; 
 
   const menuItems: MenuItem[] = [
     {
@@ -42,11 +43,11 @@ const Sidebar = () => {
       name: 'Báo cáo & Phân tích',
       to: '/reports',
     },
-    ...(isChair
+    ...(isAdmin
       ? [
           {
-            name: 'Công cụ hỗ trợ AI',
-            to: '/ai-tools',
+            name: 'Quản lý tài khoản',
+            to: '/account-management',
           },
         ]
       : [
@@ -58,7 +59,9 @@ const Sidebar = () => {
   ];
 
   const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    if (location.pathname === path) return true;
+    if (path !== '/' && location.pathname.startsWith(path + '/')) return true;
+    return false;
   };
 
   return (

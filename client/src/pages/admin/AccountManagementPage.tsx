@@ -12,5 +12,3 @@ const AccountManagementPage = () => {
 
 export default AccountManagementPage;
 
-
-

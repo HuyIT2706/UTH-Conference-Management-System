@@ -11,7 +11,7 @@ export const conferencesApi = apiSlice.injectEndpoints({
     getConferences: builder.query<ApiResponse<Conference[]>, void>({
       query: () => '/conferences',
       providesTags: (result) =>
-        result
+        result?.data && Array.isArray(result.data)
           ? [
               ...result.data.map(({ id }) => ({ type: 'Conference' as const, id })),
               { type: 'Conference', id: 'LIST' },
@@ -27,7 +27,7 @@ export const conferencesApi = apiSlice.injectEndpoints({
     getTracks: builder.query<ApiResponse<Track[]>, number>({
       query: (conferenceId) => `/conferences/${conferenceId}/tracks`,
       providesTags: (result, _error, conferenceId) =>
-        result
+        result?.data && Array.isArray(result.data)
           ? [
               ...result.data.map(({ id }) => ({ type: 'Track' as const, id })),
               { type: 'Track', id: `conference-${conferenceId}` },
@@ -53,6 +53,26 @@ export const conferencesApi = apiSlice.injectEndpoints({
         params: { type },
       }),
     }),
+    // Create conference
+    createConference: builder.mutation<
+      ApiResponse<Conference>,
+      {
+        name: string;
+        startDate: string;
+        endDate: string;
+        venue: string;
+        description?: string;
+        shortDescription?: string;
+        contactEmail?: string;
+      }
+    >({
+      query: (body) => ({
+        url: '/conferences',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Conference', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -62,5 +82,6 @@ export const {
   useGetTracksQuery,
   useGetTrackByIdQuery,
   useCheckDeadlineQuery,
+  useCreateConferenceMutation,
 } = conferencesApi;
 
