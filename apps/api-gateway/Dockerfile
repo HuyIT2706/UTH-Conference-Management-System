@@ -11,3 +11,5 @@ EXPOSE 3000
 CMD ["node", "dist/apps/api-gateway/main"]
 
 
+
+

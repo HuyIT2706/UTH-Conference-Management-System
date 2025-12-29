@@ -23,6 +23,10 @@ async function bootstrap() {
   const reviewServiceUrl = process.env.REVIEW_SERVICE_URL || 
     (isDocker ? 'http://review-service:3004' : 'http://localhost:3004');
 
+  // Get Express instance from NestJS
+  const httpAdapter = app.getHttpAdapter();
+  const expressApp = httpAdapter.getInstance();
+
   const proxyOptions = {
     changeOrigin: true,
     onProxyReq: (proxyReq: any, req: any, res: any) => {
@@ -41,52 +45,56 @@ async function bootstrap() {
       res.status(500).json({ message: 'Proxy error', error: err.message });
     },
   };
-  app.use(
+
+  // Configure proxy middleware
+  // When using app.use('/api/auth', proxy), Express strips the prefix
+  // So /api/auth/login becomes /login, we need to rewrite it back to /api/auth/login
+  expressApp.use(
     '/api/users',
     createProxyMiddleware({
       target: identityServiceUrl,
       pathRewrite: {
-        '^/(.*)': '/api/users/$1',
+        '^(.*)': '/api/users$1',
       },
       ...proxyOptions,
     }),
   );
-  app.use(
+  expressApp.use(
     '/api/auth',
     createProxyMiddleware({
       target: identityServiceUrl,
       pathRewrite: {
-        '^/(.*)': '/api/auth/$1', 
+        '^(.*)': '/api/auth$1',
       },
       ...proxyOptions,
     }),
   );
-  app.use(
+  expressApp.use(
     '/api/conferences',
     createProxyMiddleware({
       target: conferenceServiceUrl,
       pathRewrite: {
-        '^/(.*)': '/api/conferences/$1',
+        '^(.*)': '/api/conferences$1',
       },
       ...proxyOptions,
     }),
   );
-  app.use(
+  expressApp.use(
     '/api/submissions',
     createProxyMiddleware({
       target: submissionServiceUrl,
       pathRewrite: {
-        '^/(.*)': '/api/submissions/$1',
+        '^(.*)': '/api/submissions$1',
       },
       ...proxyOptions,
     }),
   );
-  app.use(
+  expressApp.use(
     '/api/reviews',
     createProxyMiddleware({
       target: reviewServiceUrl,
       pathRewrite: {
-        '^/(.*)': '/api/reviews/$1',
+        '^(.*)': '/api/reviews$1',
       },
       ...proxyOptions,
     }),
