@@ -18,6 +18,7 @@ import ReportsPage from '../pages/admin/ReportsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import RoleBasedRedirect from '../components/RoleBasedRedirect';
+import LayoutAppStudent from '../layouts/LayoutAppStudent';
 
 const appRouter = createBrowserRouter([
   {
@@ -26,7 +27,7 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/forgot-password',
-    element: <ForgotPasswordPage/>
+    element: <ForgotPasswordPage />,
   },
   {
     path: '/reset-password',
@@ -34,7 +35,15 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/activate-account',
-    element : <ActivateAccount/>
+    element: <ActivateAccount />,
+  },
+  {
+    path: 'profile',
+    element: <ProfilePage />,
+  },
+  {
+    path: 'change-password',
+    element: <ChangePasswordPage />,
   },
   {
     path: '/',
@@ -88,15 +97,15 @@ const appRouter = createBrowserRouter([
         path: 'tracks',
         element: <TrackManagementPage />,
       },
-      {
-        path: 'profile',
-        element: <ProfilePage />,
-      },
-      {
-        path: 'change-password',
-        element: <ChangePasswordPage />,
-      },
     ],
+  },
+  {
+    path: '/student',
+    element: (
+      <ProtectedRoute>
+        <LayoutAppStudent />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '*',

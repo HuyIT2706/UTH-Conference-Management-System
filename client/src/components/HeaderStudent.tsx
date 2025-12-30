@@ -29,43 +29,43 @@ const HeaderStudent = () => {
             alt="UTH - Trường Giao Thông Vận Tải TPHCM"
           />
         </div>
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden md:flex items-center space-x-1 ">
           <Link
             to="/dashboard"
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`p-4 rounded-lg transition-colors text-lg  ${
               location.pathname === '/dashboard'
                 ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:bg-white/10 hover:text-white'
+                : 'text-white/90 hover:text-hover hover:font-semibold'
             }`}
           >
             Trang chủ
           </Link>
           <Link
             to="/submissions"
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`p-4 rounded-lg transition-colors text-lg  ${
               location.pathname === '/submissions' || location.pathname.startsWith('/submissions/')
                 ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:bg-white/10 hover:text-white'
+                : 'text-white/90 hover:text-hover hover:font-semibold'
             }`}
           >
             Sinh viên
           </Link>
           <Link
             to="/assignments"
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`p-4 rounded-lg transition-colors text-lg  ${
               location.pathname === '/assignments' || location.pathname.startsWith('/assignments/')
                 ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:bg-white/10 hover:text-white'
+                : 'text-white/90 hover:text-hover hover:font-semibold'
             }`}
           >
             Review
           </Link>
           <Link
             to="/conference-setup"
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`p-4 rounded-lg transition-colors text-lg  ${
               location.pathname === '/conference-setup' || location.pathname.startsWith('/conference-setup/')
                 ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:bg-white/10 hover:text-white'
+                : 'text-white/90 hover:text-hover hover:font-semibold'
             }`}
           >
             Sự kiện
@@ -74,9 +74,8 @@ const HeaderStudent = () => {
             to="#"
             onClick={(e) => {
               e.preventDefault();
-              // TODO: Add contact page route when available
             }}
-            className="px-4 py-2 rounded-lg transition-colors text-white/90 hover:bg-white/10 hover:text-white"
+            className="p-4 rounded-lg transition-colors text-lg  text-white/90 hover:text-hover hover:font-semibold"
           >
             Liên hệ
           </Link>

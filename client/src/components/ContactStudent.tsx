@@ -8,7 +8,6 @@ const ContactStudent = () => {
     <div className="py-16 px-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Section - Image */}
           <div className="order-2 lg:order-1">
             <img
               src={imageUth}
@@ -17,7 +16,6 @@ const ContactStudent = () => {
             />
           </div>
 
-          {/* Right Section - Text Content */}
           <div className="order-1 lg:order-2 space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
               UTH-ConfMS
