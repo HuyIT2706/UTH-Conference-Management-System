@@ -12,7 +12,6 @@ const Sidebar = () => {
   const { user } = useAuth();
 
   const isAdmin = user?.roles?.includes('ADMIN');
-  const isChair = user?.roles?.includes('CHAIR') && !isAdmin; 
 
   const menuItems: MenuItem[] = [
     {
@@ -50,12 +49,7 @@ const Sidebar = () => {
             to: '/account-management',
           },
         ]
-      : [
-          {
-            name: 'Quản lý tài khoản',
-            to: '/account-management',
-          },
-        ]),
+      : []),
   ];
 
   const isActive = (path: string) => {

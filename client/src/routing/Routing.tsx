@@ -6,7 +6,7 @@ import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ActivateAccount from '../pages/auth/ActivateAccount';
 import DashboardPage from '../pages/admin/DashboardPage';
-import AccountManagementPage from '../pages/admin/AccountManagementPage';
+import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
 import SubmissionsPage from '../pages/admin/SubmissionsPage';
 import PcManagementPage from '../pages/admin/PcManagementPage';

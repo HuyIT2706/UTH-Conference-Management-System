@@ -103,7 +103,7 @@ export const usersApi = apiSlice.injectEndpoints({
     
     // Create user (Admin only)
     createUser: builder.mutation<
-      { message: string; user: User },
+      { message: string; data: User },
       CreateUserRequest
     >({
       query: (body) => ({
@@ -111,12 +111,12 @@ export const usersApi = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: [{ type: 'User', id: 'LIST' }],
     }),
     
     // Update user roles (Admin only)
     updateUserRoles: builder.mutation<
-      { message: string; user: User },
+      { message: string; data: User },
       { userId: number; data: UpdateUserRolesRequest }
     >({
       query: ({ userId, data }) => ({
@@ -124,7 +124,10 @@ export const usersApi = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: (_result, _error, { userId }) => [
+        { type: 'User', id: userId },
+        { type: 'User', id: 'LIST' },
+      ],
     }),
     
     // Delete user (Admin only)
@@ -138,6 +141,30 @@ export const usersApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+
+    // Get all users (Admin only)
+    getUsers: builder.query<
+      { message: string; data: User[] },
+      void
+    >({
+      query: () => '/users',
+      providesTags: (result) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'User' as const, id })),
+              { type: 'User', id: 'LIST' },
+            ]
+          : [{ type: 'User', id: 'LIST' }],
+    }),
+
+    // Get user by ID (Admin only)
+    getUserById: builder.query<
+      { message: string; data: User },
+      number
+    >({
+      query: (id) => `/users/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'User', id }],
+    }),
   }),
 });
 
@@ -150,5 +177,7 @@ export const {
   useCreateUserMutation,
   useUpdateUserRolesMutation,
   useDeleteUserMutation,
+  useGetUsersQuery,
+  useGetUserByIdQuery,
 } = usersApi;
 
