@@ -16,7 +16,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-800 text-white">
+    <footer className="bg-gray-800 text-white text-md">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -26,7 +26,7 @@ const Footer = () => {
                 UNIVERSITY OF TRANSPORT HOCHIMINH CITY
               </p>
             </div>
-            <div className="space-y-1 text-sm text-gray-300">
+            <div className="space-y-1 text-sm text-white">
               <p>Copyright © 2024 UTH ConfMS</p>
               <p>All rights reserved</p>
             </div>
@@ -99,10 +99,9 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Company Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Công ty</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
+            <ul className="space-y-2  text-white">
               <li>
                 <a href="#" className="hover:text-teal-400 transition-colors">
                   Về chúng tôi
@@ -134,7 +133,7 @@ const Footer = () => {
           {/* Support Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Hỗ trợ</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
+            <ul className="space-y-2  text-white">
               <li>
                 <a href="#" className="hover:text-teal-400 transition-colors">
                   Trung tâm trợ giúp

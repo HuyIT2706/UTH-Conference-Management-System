@@ -53,32 +53,12 @@ const FeatureStudent = () => {
     {
       icon: (
         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-        </svg>
-      ),
-      title: 'Bài hoàn thiện (Camera-ready) và Kỷ yếu',
-      description:
-        'Mở vòng thu thập phiên bản cuối cùng; xuất dữ liệu để lên lịch/tạo kỷ yếu (tùy chọn xuất bản truy cập mở - open access publishing).',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
         </svg>
       ),
       title: 'Báo cáo và Phân tích',
       description:
         'Thống kê bài nộp theo trường/phân ban, tỷ lệ chấp nhận, thỏa thuận mức dịch vụ (SLA) về phản biện, nhật ký hoạt động.',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-        </svg>
-      ),
-      title: 'Công cụ Hỗ trợ bằng AI',
-      description:
-        'Tùy chọn tham gia, có sự can thiệp của con người - Human-in-the-loop',
     },
   ];
 
