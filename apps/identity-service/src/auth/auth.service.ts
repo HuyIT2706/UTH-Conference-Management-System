@@ -80,14 +80,10 @@ export class AuthService {
     });
     await this.emailVerificationTokenRepository.save(entity);
     
-    // Gửi email verification với mã 6 số
     try {
       await this.emailService.sendVerificationEmail(user.email, code, user.fullName);
-      console.log(`[AuthService] Verification code ${code} sent to ${user.email} (expires at ${expiresAt.toISOString()})`);
     } catch (error) {
       console.error(`[AuthService] Failed to send verification email to ${user.email}:`, error);
-      // Log code để dev test nếu email fail
-      console.log(`[AuthService] Verification code (fallback): ${code} for email ${user.email} (expires at ${expiresAt.toISOString()})`);
     }
   }
 // Api 3: Đăng nhập

@@ -60,8 +60,7 @@ const LoginPage = () => {
       } else {
         localStorage.removeItem('rememberMe');
       }
-
-      navigate('/dashboard');
+      navigate('/conference-setup');
     } catch (err: unknown) {
       setError(formatApiError(err));
     }

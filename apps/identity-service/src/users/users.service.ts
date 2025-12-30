@@ -48,6 +48,13 @@ export class UsersService {
     });
   }
 
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find({
+      relations: ['roles'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async createUser(params: {
     email: string;
     password: string;

@@ -65,8 +65,12 @@ export class ConferencesController {
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách tất cả hội nghị' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
-  findAll() {
-    return this.conferencesService.findAll();
+  async findAll() {
+    const conferences = await this.conferencesService.findAll();
+    return {
+      message: 'Lấy danh sách hội nghị thành công',
+      data: conferences,
+    };
   }
 
   @Get(':id')
@@ -74,8 +78,20 @@ export class ConferencesController {
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.conferencesService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const conference = await this.conferencesService.findOne(id);
+    const conferenceData = {
+      ...conference,
+      submissionDeadline: conference.cfpSetting?.submissionDeadline?.toISOString(),
+      reviewDeadline: conference.cfpSetting?.reviewDeadline?.toISOString(),
+      notificationDate: conference.cfpSetting?.notificationDate?.toISOString(),
+      cameraReadyDeadline: conference.cfpSetting?.cameraReadyDeadline?.toISOString(),
+    };
+    
+    return {
+      message: 'Lấy thông tin hội nghị thành công',
+      data: conferenceData,
+    };
   }
 
   @Post(':id/tracks')

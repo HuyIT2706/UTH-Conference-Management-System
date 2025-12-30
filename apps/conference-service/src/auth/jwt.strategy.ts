@@ -29,3 +29,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/huybv123
