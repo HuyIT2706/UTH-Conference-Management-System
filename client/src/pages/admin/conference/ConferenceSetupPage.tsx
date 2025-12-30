@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useGetConferencesQuery } from '../../../redux/api/conferencesApi';
+import { useGetConferencesQuery, useDeleteConferenceMutation } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import CreateConferenceForm from './CreateConferenceForm';
 import ConferenceList from './ConferenceList';
@@ -12,12 +12,12 @@ const ConferenceSetupPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   
   const { data, isLoading, error } = useGetConferencesQuery();
+  const [deleteConference, { isLoading: isDeleting }] = useDeleteConferenceMutation();
 
   const conferences = useMemo(() => {
     return (data?.data && Array.isArray(data.data)) ? data.data : [];
   }, [data]);
 
-  // Filter conferences based on search query
   const filteredConferences = useMemo(() => {
     return conferences.filter((conference: Conference) =>
       conference.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,7 +41,24 @@ const ConferenceSetupPage = () => {
     setSelectedConferenceId(null);
   };
 
-  // Detail View
+  const handleDelete = async (conferenceId: number) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa hội nghị này không?')) {
+      return;
+    }
+
+    try {
+      await deleteConference(conferenceId).unwrap();
+      alert('Xóa hội nghị thành công');
+      // Nếu đang xem chi tiết của hội nghị bị xóa, quay về danh sách
+      if (selectedConferenceId === conferenceId) {
+        handleBackToList();
+      }
+    } catch (err) {
+      console.error('Error deleting conference:', err);
+      alert('Có lỗi xảy ra khi xóa hội nghị');
+    }
+  };
+
   if (view === 'detail' && selectedConferenceId) {
     return (
       <div className="p-6">
@@ -58,26 +75,23 @@ const ConferenceSetupPage = () => {
             <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
           </div>
         </div>
-
         <ConferenceDetail conferenceId={selectedConferenceId} onBack={handleBackToList} />
       </div>
     );
   }
-
-  // List View
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
-        <div className="flex items-center space-x-2">
+        <div className="relative flex items-center space-x-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm hội nghị..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <button className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+          <button className="absolute right-12 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
             <svg
               className="w-5 h-5 text-white"
               fill="none"
@@ -128,7 +142,6 @@ const ConferenceSetupPage = () => {
 
       {!isLoading && !error && (
         <div className="space-y-4">
-          {/* Create Conference Form */}
           {showCreateForm && (
             <CreateConferenceForm
               onSuccess={handleCreateSuccess}
@@ -136,11 +149,11 @@ const ConferenceSetupPage = () => {
             />
           )}
 
-          {/* Conference List */}
           <ConferenceList
             conferences={filteredConferences}
             searchQuery={searchQuery}
             onViewDetail={handleViewDetail}
+            onDelete={handleDelete}
           />
         </div>
       )}

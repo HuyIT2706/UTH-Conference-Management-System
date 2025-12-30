@@ -80,9 +80,17 @@ export class ConferencesController {
   @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const conference = await this.conferencesService.findOne(id);
+    const conferenceData = {
+      ...conference,
+      submissionDeadline: conference.cfpSetting?.submissionDeadline?.toISOString(),
+      reviewDeadline: conference.cfpSetting?.reviewDeadline?.toISOString(),
+      notificationDate: conference.cfpSetting?.notificationDate?.toISOString(),
+      cameraReadyDeadline: conference.cfpSetting?.cameraReadyDeadline?.toISOString(),
+    };
+    
     return {
       message: 'Lấy thông tin hội nghị thành công',
-      data: conference,
+      data: conferenceData,
     };
   }
 

@@ -6,7 +6,7 @@ interface ConferenceDetailProps {
   onBack: () => void;
 }
 
-const ConferenceDetail = ({ conferenceId, onBack }: ConferenceDetailProps) => {
+const ConferenceDetail = ({ conferenceId}: ConferenceDetailProps) => {
   const { data: conferenceDetail, isLoading } = useGetConferenceByIdQuery(conferenceId);
   const [updateConference, { isLoading: isUpdating }] = useUpdateConferenceMutation();
   const [setCfpSettings, { isLoading: isUpdatingCfp }] = useSetCfpSettingsMutation();
@@ -27,8 +27,6 @@ const ConferenceDetail = ({ conferenceId, onBack }: ConferenceDetailProps) => {
     notificationDate: '',
     cameraReadyDeadline: '',
   });
-
-  // Load conference detail when data changes
   useEffect(() => {
     if (conferenceDetail?.data) {
       const conf = conferenceDetail.data;
@@ -41,13 +39,22 @@ const ConferenceDetail = ({ conferenceId, onBack }: ConferenceDetailProps) => {
         shortDescription: conf.shortDescription || '',
         contactEmail: conf.contactEmail || '',
       });
-      // Load CFP settings if available
-      if (conf.submissionDeadline || conf.reviewDeadline || conf.cameraReadyDeadline) {
+      
+      // Load CFP settings (now flattened into conference object by backend)
+      if (conf.submissionDeadline || conf.reviewDeadline || conf.notificationDate || conf.cameraReadyDeadline) {
         setCfpFormData({
-          submissionDeadline: conf.submissionDeadline ? new Date(conf.submissionDeadline).toISOString().slice(0, 16) : '',
-          reviewDeadline: conf.reviewDeadline ? new Date(conf.reviewDeadline).toISOString().slice(0, 16) : '',
-          notificationDate: conf.notificationDate ? new Date(conf.notificationDate).toISOString().slice(0, 16) : '',
-          cameraReadyDeadline: conf.cameraReadyDeadline ? new Date(conf.cameraReadyDeadline).toISOString().slice(0, 16) : '',
+          submissionDeadline: conf.submissionDeadline 
+            ? new Date(conf.submissionDeadline).toISOString().slice(0, 16) 
+            : '',
+          reviewDeadline: conf.reviewDeadline 
+            ? new Date(conf.reviewDeadline).toISOString().slice(0, 16) 
+            : '',
+          notificationDate: conf.notificationDate 
+            ? new Date(conf.notificationDate).toISOString().slice(0, 16) 
+            : '',
+          cameraReadyDeadline: conf.cameraReadyDeadline 
+            ? new Date(conf.cameraReadyDeadline).toISOString().slice(0, 16) 
+            : '',
         });
       }
     }
@@ -102,7 +109,6 @@ const ConferenceDetail = ({ conferenceId, onBack }: ConferenceDetailProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Thông tin Hội nghị */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Thông tin Hội nghị</h2>
         <form onSubmit={handleUpdateConference} className="space-y-4">
@@ -165,8 +171,7 @@ const ConferenceDetail = ({ conferenceId, onBack }: ConferenceDetailProps) => {
           </div>
         </form>
       </div>
-
-      {/* Cài đặt CFP */}
+      {/* Set Thời gian deadline */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Cài đặt CFP</h2>
         <form onSubmit={handleUpdateCfp} className="space-y-4">

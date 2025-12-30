@@ -88,6 +88,15 @@ export interface User {
 }
 
 // Conference Types
+export interface CfpSetting {
+  id: number;
+  submissionDeadline: string;
+  reviewDeadline: string;
+  notificationDate: string;
+  cameraReadyDeadline: string;
+  conferenceId: number;
+}
+
 export interface Conference {
   id: number;
   name: string;
@@ -101,6 +110,7 @@ export interface Conference {
   notificationDate?: string;
   shortDescription?: string;
   contactEmail?: string;
+  cfpSetting?: CfpSetting | null;
   createdAt: string;
   updatedAt: string;
 }

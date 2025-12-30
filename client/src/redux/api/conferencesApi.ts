@@ -117,6 +117,20 @@ export const conferencesApi = apiSlice.injectEndpoints({
         { type: 'Conference', id: conferenceId },
       ],
     }),
+    // Delete conference
+    deleteConference: builder.mutation<
+      { message: string },
+      number
+    >({
+      query: (id) => ({
+        url: `/conferences/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'Conference', id },
+        { type: 'Conference', id: 'LIST' },
+      ],
+    }),
   }),
 });
 
@@ -129,5 +143,6 @@ export const {
   useCreateConferenceMutation,
   useUpdateConferenceMutation,
   useSetCfpSettingsMutation,
+  useDeleteConferenceMutation,
 } = conferencesApi;
 

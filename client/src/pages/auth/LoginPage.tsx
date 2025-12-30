@@ -60,12 +60,7 @@ const LoginPage = () => {
       } else {
         localStorage.removeItem('rememberMe');
       }
-      const isChair = result.user?.roles?.includes('CHAIR') || result.user?.roles?.includes('ADMIN');
-      if (isChair) {
-        navigate('/dashboard');
-      } else {
-        navigate('/account-management');
-      }
+      navigate('/conference-setup');
     } catch (err: unknown) {
       setError(formatApiError(err));
     }

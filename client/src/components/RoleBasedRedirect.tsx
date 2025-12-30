@@ -19,10 +19,10 @@ const RoleBasedRedirect = () => {
   const isChair = user.roles?.includes('CHAIR') || user.roles?.includes('ADMIN');
 
   if (isChair) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/conference-setup" replace />;
   }
 
-  return <Navigate to="/account-management" replace />;
+  return <Navigate to="/conference-setup" replace />;
 };
 
 export default RoleBasedRedirect;
