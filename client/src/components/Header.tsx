@@ -6,7 +6,6 @@ import iconUth from '../assets/icon_uth.svg';
 const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const initials = user?.fullName
@@ -15,12 +14,6 @@ const Header = () => {
     .join('')
     .toUpperCase()
     .slice(0, 2) || user?.email?.[0].toUpperCase() || 'U';
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement search functionality
-    console.log('Searching for:', searchQuery);
-  };
 
   return (
     <header className="bg-primary text-white shadow-md">
