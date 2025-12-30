@@ -2,6 +2,7 @@ import { apiSlice } from './apiSlice';
 import type {
   Conference,
   Track,
+  TrackMember,
   ApiResponse,
 } from '../../types/api.types';
 
@@ -177,6 +178,44 @@ export const conferencesApi = apiSlice.injectEndpoints({
         { type: 'Conference', id: conferenceId },
       ],
     }),
+    // Get track members
+    getTrackMembers: builder.query<ApiResponse<TrackMember[]>, number>({
+      query: (trackId) => `/conferences/tracks/${trackId}/members`,
+      providesTags: (result, _error, trackId) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'TrackMember' as const, id })),
+              { type: 'TrackMember', id: `track-${trackId}` },
+            ]
+          : [{ type: 'TrackMember', id: `track-${trackId}` }],
+    }),
+    // Add track member
+    addTrackMember: builder.mutation<
+      ApiResponse<TrackMember>,
+      { trackId: number; userId: number }
+    >({
+      query: ({ trackId, userId }) => ({
+        url: `/conferences/tracks/${trackId}/members`,
+        method: 'POST',
+        body: { userId },
+      }),
+      invalidatesTags: (_result, _error, { trackId }) => [
+        { type: 'TrackMember', id: `track-${trackId}` },
+      ],
+    }),
+    // Delete track member
+    deleteTrackMember: builder.mutation<
+      { message: string },
+      { trackId: number; userId: number }
+    >({
+      query: ({ trackId, userId }) => ({
+        url: `/conferences/tracks/${trackId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { trackId }) => [
+        { type: 'TrackMember', id: `track-${trackId}` },
+      ],
+    }),
   }),
 });
 
@@ -193,5 +232,8 @@ export const {
   useCreateTrackMutation,
   useUpdateTrackMutation,
   useDeleteTrackMutation,
+  useGetTrackMembersQuery,
+  useAddTrackMemberMutation,
+  useDeleteTrackMemberMutation,
 } = conferencesApi;
 

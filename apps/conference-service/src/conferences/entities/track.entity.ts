@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Conference } from './conference.entity';
+import { TrackMember } from './track-member.entity';
 
 @Entity({ name: 'tracks' })
 export class Track {
@@ -32,4 +34,7 @@ export class Track {
     onDelete: 'CASCADE',
   })
   conference: Conference;
+
+  @OneToMany(() => TrackMember, (member) => member.track)
+  members: TrackMember[];
 }

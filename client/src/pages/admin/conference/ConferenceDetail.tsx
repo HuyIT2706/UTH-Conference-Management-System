@@ -10,7 +10,6 @@ interface ConferenceDetailProps {
   onBack: () => void;
 }
 
-// Helper function to format ISO date string to datetime-local format (local timezone)
 const formatDateForInput = (isoString: string): string => {
   const date = new Date(isoString);
   // Get local date components to avoid timezone conversion issues

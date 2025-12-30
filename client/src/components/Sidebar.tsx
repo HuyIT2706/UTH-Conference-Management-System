@@ -27,7 +27,7 @@ const Sidebar = () => {
       to: '/pc-management',
     },
     {
-      name: 'Phân công & Phản biện',
+      name: 'Bài nộp & Phản biện',
       to: '/assignments',
     },
     {

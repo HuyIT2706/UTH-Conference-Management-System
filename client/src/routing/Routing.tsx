@@ -10,11 +10,13 @@ import AccountManagementPage from '../pages/admin/account/AccountManagementPage'
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
 import TrackManagementPage from '../pages/admin/tracks/TrackManagementPage';
 import SubmissionsPage from '../pages/admin/SubmissionsPage';
-import PcManagementPage from '../pages/admin/PcManagementPage';
+import PCManagementPage from '../pages/admin/pc-management/PCManagementPage';
 import AssignmentsPage from '../pages/admin/AssignmentsPage';
 import DecisionsPage from '../pages/admin/DecisionsPage';
 import CameraReadyPage from '../pages/admin/CameraReadyPage';
 import ReportsPage from '../pages/admin/ReportsPage';
+import ProfilePage from '../pages/profile/ProfilePage';
+import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import RoleBasedRedirect from '../components/RoleBasedRedirect';
 
 const appRouter = createBrowserRouter([
@@ -60,7 +62,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: 'pc-management',
-        element: <PcManagementPage />,
+        element: <PCManagementPage />,
       },
       {
         path: 'assignments',
@@ -85,6 +87,14 @@ const appRouter = createBrowserRouter([
       {
         path: 'tracks',
         element: <TrackManagementPage />,
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />,
+      },
+      {
+        path: 'change-password',
+        element: <ChangePasswordPage />,
       },
     ],
   },

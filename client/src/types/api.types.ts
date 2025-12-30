@@ -124,6 +124,14 @@ export interface Track {
   updatedAt: string;
 }
 
+export interface TrackMember {
+  id: number;
+  trackId: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Submission Types
 export const SubmissionStatus = {
   DRAFT: 'DRAFT',
