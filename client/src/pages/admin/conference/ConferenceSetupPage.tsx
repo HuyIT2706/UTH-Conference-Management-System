@@ -5,6 +5,15 @@ import CreateConferenceForm from './CreateConferenceForm';
 import ConferenceList from './ConferenceList';
 import ConferenceDetail from './ConferenceDetail';
 
+const removeVietnameseTones = (str: string): string => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+};
+
 const ConferenceSetupPage = () => {
   const [view, setView] = useState<'list' | 'detail'>('list');
   const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
@@ -12,17 +21,27 @@ const ConferenceSetupPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   
   const { data, isLoading, error } = useGetConferencesQuery();
-  const [deleteConference, { isLoading: isDeleting }] = useDeleteConferenceMutation();
+  const [deleteConference] = useDeleteConferenceMutation();
 
   const conferences = useMemo(() => {
     return (data?.data && Array.isArray(data.data)) ? data.data : [];
   }, [data]);
 
   const filteredConferences = useMemo(() => {
-    return conferences.filter((conference: Conference) =>
-      conference.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conference.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    if (!searchQuery.trim()) {
+      return conferences;
+    }
+    
+    const normalizedQuery = removeVietnameseTones(searchQuery);
+    return conferences.filter((conference: Conference) => {
+      const normalizedName = removeVietnameseTones(conference.name);
+      const normalizedDescription = conference.description 
+        ? removeVietnameseTones(conference.description) 
+        : '';
+      
+      return normalizedName.includes(normalizedQuery) || 
+             normalizedDescription.includes(normalizedQuery);
+    });
   }, [conferences, searchQuery]);
 
   const handleCreateSuccess = (conferenceId: number) => {
