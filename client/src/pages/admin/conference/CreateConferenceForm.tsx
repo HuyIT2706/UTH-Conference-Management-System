@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCreateConferenceMutation } from '../../../redux/api/conferencesApi';
+import { showToast } from '../../../utils/toast';
 
 interface CreateConferenceFormProps {
   onSuccess: (conferenceId: number) => void;
@@ -47,7 +48,7 @@ const CreateConferenceForm = ({ onSuccess, onCancel }: CreateConferenceFormProps
       }
     } catch (err) {
       console.error('Error creating conference:', err);
-      alert('Có lỗi xảy ra khi tạo hội nghị');
+      showToast.error('Có lỗi xảy ra khi tạo hội nghị');
     }
   };
 

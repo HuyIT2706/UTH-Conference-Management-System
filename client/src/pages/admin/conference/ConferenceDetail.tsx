@@ -4,6 +4,7 @@ import {
   useUpdateConferenceMutation,
   useSetCfpSettingsMutation,
 } from '../../../redux/api/conferencesApi';
+import { showToast } from '../../../utils/toast';
 
 interface ConferenceDetailProps {
   conferenceId: number;
@@ -104,10 +105,10 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
         contactEmail: conferenceFormData.contactEmail || undefined,
       }).unwrap();
 
-      alert('Cập nhật hội nghị thành công');
+      showToast.success('Cập nhật hội nghị thành công');
     } catch (err) {
       console.error('Error updating conference:', err);
-      alert('Có lỗi xảy ra khi cập nhật hội nghị');
+      showToast.error('Có lỗi xảy ra khi cập nhật hội nghị');
     }
   };
 
@@ -126,10 +127,10 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
         ).toISOString(),
       }).unwrap();
 
-      alert('Cập nhật CFP thành công');
+      showToast.success('Cập nhật CFP thành công');
     } catch (err) {
       console.error('Error updating CFP:', err);
-      alert('Có lỗi xảy ra khi cập nhật CFP');
+      showToast.error('Có lỗi xảy ra khi cập nhật CFP');
     }
   };
 

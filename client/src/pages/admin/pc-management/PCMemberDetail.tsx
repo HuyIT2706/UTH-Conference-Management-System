@@ -5,6 +5,7 @@ import {
 } from '../../../redux/api/conferencesApi';
 import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import type { TrackMember, User } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import PCMemberList from './PCMemberList';
 import CreatePCMemberForm from './CreatePCMemberForm';
 
@@ -42,10 +43,10 @@ const PCMemberDetail = ({
 
     try {
       await deleteMember({ trackId, userId }).unwrap();
-      alert('Xóa thành viên thành công');
+      showToast.success('Xóa thành viên thành công');
     } catch (err) {
       console.error('Error deleting member:', err);
-      alert('Có lỗi xảy ra khi xóa thành viên');
+      showToast.error('Có lỗi xảy ra khi xóa thành viên');
     }
   };
 

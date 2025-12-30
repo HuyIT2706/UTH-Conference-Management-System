@@ -3,6 +3,7 @@ import {
   useGetUserByIdQuery,
   useUpdateUserRolesMutation,
 } from '../../../redux/api/usersApi';
+import { showToast } from '../../../utils/toast';
 
 interface AccountDetailProps {
   userId: number;
@@ -53,10 +54,10 @@ const AccountDetail = ({ userId }: AccountDetailProps) => {
         data: { role: formData.role },
       }).unwrap();
 
-      alert('Cập nhật vai trò thành công');
+      showToast.success('Cập nhật vai trò thành công');
     } catch (err) {
       console.error('Error updating user role:', err);
-      alert('Có lỗi xảy ra khi cập nhật vai trò');
+      showToast.error('Có lỗi xảy ra khi cập nhật vai trò');
     }
   };
 

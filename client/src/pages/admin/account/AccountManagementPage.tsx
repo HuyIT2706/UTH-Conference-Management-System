@@ -4,6 +4,7 @@ import {
   useDeleteUserMutation,
 } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import CreateAccountForm from './CreateAccountForm';
 import AccountList from './AccountList';
 import AccountDetail from './AccountDetail';
@@ -76,13 +77,13 @@ const AccountManagementPage = () => {
 
     try {
       await deleteUser(userId).unwrap();
-      alert('Xóa tài khoản thành công');
+      showToast.success('Xóa tài khoản thành công');
       if (selectedUserId === userId) {
         handleBackToList();
       }
     } catch (err) {
       console.error('Error deleting user:', err);
-      alert('Có lỗi xảy ra khi xóa tài khoản');
+      showToast.error('Có lỗi xảy ra khi xóa tài khoản');
     }
   };
 

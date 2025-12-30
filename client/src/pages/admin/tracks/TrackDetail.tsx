@@ -5,6 +5,7 @@ import {
   useDeleteTrackMutation,
 } from '../../../redux/api/conferencesApi';
 import type { Track } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import TrackList from './TrackList';
 import CreateTrackForm from './CreateTrackForm';
 
@@ -50,11 +51,11 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
         trackId: editingTrack.id,
         name: editName,
       }).unwrap();
-      alert('Cập nhật chủ đề thành công');
+      showToast.success('Cập nhật chủ đề thành công');
       handleCancelEdit();
     } catch (err) {
       console.error('Error updating track:', err);
-      alert('Có lỗi xảy ra khi cập nhật chủ đề');
+      showToast.error('Có lỗi xảy ra khi cập nhật chủ đề');
     }
   };
 
@@ -65,10 +66,10 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
 
     try {
       await deleteTrack({ conferenceId, trackId }).unwrap();
-      alert('Xóa chủ đề thành công');
+      showToast.success('Xóa chủ đề thành công');
     } catch (err) {
       console.error('Error deleting track:', err);
-      alert('Có lỗi xảy ra khi xóa chủ đề');
+      showToast.error('Có lỗi xảy ra khi xóa chủ đề');
     }
   };
 

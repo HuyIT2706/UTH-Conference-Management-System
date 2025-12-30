@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCreateTrackMutation } from '../../../redux/api/conferencesApi';
+import { showToast } from '../../../utils/toast';
 
 interface CreateTrackFormProps {
   conferenceId: number;
@@ -23,7 +24,7 @@ const CreateTrackForm = ({
       onSuccess();
     } catch (err) {
       console.error('Error creating track:', err);
-      alert('Có lỗi xảy ra khi tạo chủ đề');
+      showToast.error('Có lỗi xảy ra khi tạo chủ đề');
     }
   };
 

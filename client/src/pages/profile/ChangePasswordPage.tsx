@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useChangePasswordMutation } from '../../redux/api/usersApi';
 import { useNavigate } from 'react-router-dom';
+import { showToast } from '../../utils/toast';
 
 const ChangePasswordPage = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const ChangePasswordPage = () => {
         newPassword: formData.newPassword,
       }).unwrap();
 
-      alert('Đổi mật khẩu thành công!');
+      showToast.success('Đổi mật khẩu thành công!');
       setFormData({
         oldPassword: '',
         newPassword: '',

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useGetConferencesQuery, useDeleteConferenceMutation } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import CreateConferenceForm from './CreateConferenceForm';
 import ConferenceList from './ConferenceList';
 import ConferenceDetail from './ConferenceDetail';
@@ -67,14 +68,14 @@ const ConferenceSetupPage = () => {
 
     try {
       await deleteConference(conferenceId).unwrap();
-      alert('Xóa hội nghị thành công');
+      showToast.success('Xóa hội nghị thành công');
       // Nếu đang xem chi tiết của hội nghị bị xóa, quay về danh sách
       if (selectedConferenceId === conferenceId) {
         handleBackToList();
       }
     } catch (err) {
       console.error('Error deleting conference:', err);
-      alert('Có lỗi xảy ra khi xóa hội nghị');
+      showToast.error('Có lỗi xảy ra khi xóa hội nghị');
     }
   };
 

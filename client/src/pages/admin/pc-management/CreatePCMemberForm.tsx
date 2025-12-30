@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAddTrackMemberMutation } from '../../../redux/api/conferencesApi';
 import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 
 interface CreatePCMemberFormProps {
   trackId: number;
@@ -28,7 +29,7 @@ const CreatePCMemberForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUserId) {
-      alert('Vui lòng chọn người dùng');
+      showToast.warning('Vui lòng chọn người dùng');
       return;
     }
 
@@ -39,7 +40,7 @@ const CreatePCMemberForm = ({
     } catch (err: any) {
       console.error('Error adding member:', err);
       const errorMessage = err?.data?.message || 'Có lỗi xảy ra khi thêm thành viên';
-      alert(errorMessage);
+      showToast.error(errorMessage);
     }
   };
 

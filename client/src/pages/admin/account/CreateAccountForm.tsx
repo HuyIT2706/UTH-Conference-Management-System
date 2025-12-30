@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCreateUserMutation } from '../../../redux/api/usersApi';
+import { showToast } from '../../../utils/toast';
 import type { CreateUserRequest } from '../../../redux/api/usersApi';
 
 interface CreateAccountFormProps {
@@ -36,7 +37,7 @@ const CreateAccountForm = ({ onSuccess, onCancel }: CreateAccountFormProps) => {
       onSuccess(result.data.id);
     } catch (err) {
       console.error('Error creating user:', err);
-      alert('Có lỗi xảy ra khi tạo tài khoản');
+      showToast.error('Có lỗi xảy ra khi tạo tài khoản');
     }
   };
 
