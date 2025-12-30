@@ -4,9 +4,9 @@ import Sidebar from '../components/Sidebar';
 
 const LayoutApp = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Header />
-      <div className="flex">
+      <div className="flex flex-1">
         <Sidebar />
         <main className="flex-1">
           <Outlet />
