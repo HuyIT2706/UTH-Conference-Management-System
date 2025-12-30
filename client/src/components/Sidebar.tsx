@@ -42,6 +42,10 @@ const Sidebar = () => {
       name: 'Báo cáo & Phân tích',
       to: '/reports',
     },
+    {
+      name: 'Quản lý chủ đề',
+      to: '/tracks',
+    },
     ...(isAdmin
       ? [
           {

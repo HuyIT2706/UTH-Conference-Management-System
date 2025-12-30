@@ -94,6 +94,19 @@ export class ConferencesController {
     };
   }
 
+  @Get(':id/tracks')
+  @ApiOperation({ summary: 'Lấy danh sách tracks của hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách tracks thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
+  async getTracks(@Param('id', ParseIntPipe) id: number) {
+    const tracks = await this.conferencesService.findAllTracks(id);
+    return {
+      message: 'Lấy danh sách tracks thành công',
+      data: tracks,
+    };
+  }
+
   @Post(':id/tracks')
   @ApiOperation({ 
     summary: 'Thêm track vào hội nghị',

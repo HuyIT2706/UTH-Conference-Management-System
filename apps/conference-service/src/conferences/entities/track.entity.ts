@@ -1,8 +1,10 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Conference } from './conference.entity';
 
@@ -16,6 +18,15 @@ export class Track {
 
   @Column({ type: 'int' })
   conferenceId: number;
+
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   @ManyToOne(() => Conference, (conference) => conference.tracks, {
     onDelete: 'CASCADE',

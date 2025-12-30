@@ -131,6 +131,52 @@ export const conferencesApi = apiSlice.injectEndpoints({
         { type: 'Conference', id: 'LIST' },
       ],
     }),
+    // Create track
+    createTrack: builder.mutation<
+      ApiResponse<Track>,
+      { conferenceId: number; name: string }
+    >({
+      query: ({ conferenceId, name }) => ({
+        url: `/conferences/${conferenceId}/tracks`,
+        method: 'POST',
+        body: { name },
+      }),
+      invalidatesTags: (_result, _error, { conferenceId }) => [
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
+    // Update track
+    updateTrack: builder.mutation<
+      ApiResponse<Track>,
+      { conferenceId: number; trackId: number; name?: string }
+    >({
+      query: ({ conferenceId, trackId, ...body }) => ({
+        url: `/conferences/${conferenceId}/tracks/${trackId}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { conferenceId, trackId }) => [
+        { type: 'Track', id: trackId },
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
+    // Delete track
+    deleteTrack: builder.mutation<
+      { message: string },
+      { conferenceId: number; trackId: number }
+    >({
+      query: ({ conferenceId, trackId }) => ({
+        url: `/conferences/${conferenceId}/tracks/${trackId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { conferenceId, trackId }) => [
+        { type: 'Track', id: trackId },
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
   }),
 });
 
@@ -144,5 +190,8 @@ export const {
   useUpdateConferenceMutation,
   useSetCfpSettingsMutation,
   useDeleteConferenceMutation,
+  useCreateTrackMutation,
+  useUpdateTrackMutation,
+  useDeleteTrackMutation,
 } = conferencesApi;
 

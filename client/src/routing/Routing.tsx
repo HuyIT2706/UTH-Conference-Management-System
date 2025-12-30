@@ -8,6 +8,7 @@ import ActivateAccount from '../pages/auth/ActivateAccount';
 import DashboardPage from '../pages/admin/DashboardPage';
 import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
+import TrackManagementPage from '../pages/admin/tracks/TrackManagementPage';
 import SubmissionsPage from '../pages/admin/SubmissionsPage';
 import PcManagementPage from '../pages/admin/PcManagementPage';
 import AssignmentsPage from '../pages/admin/AssignmentsPage';
@@ -80,6 +81,10 @@ const appRouter = createBrowserRouter([
       {
         path: 'account-management',
         element: <AccountManagementPage />,
+      },
+      {
+        path: 'tracks',
+        element: <TrackManagementPage />,
       },
     ],
   },

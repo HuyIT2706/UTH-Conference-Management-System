@@ -131,7 +131,7 @@ const AccountManagementPage = () => {
             placeholder="Tìm kiếm tài khoản..."
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <button className="absolute right-12 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+          <button className="absolute right-12 w-8 h-8 bg-button rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
             <svg
               className="w-5 h-5 text-white"
               fill="none"
