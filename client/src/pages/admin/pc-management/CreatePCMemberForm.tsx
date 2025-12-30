@@ -22,7 +22,15 @@ const CreatePCMemberForm = ({
   const { data: usersData, isLoading: isLoadingUsers } = useGetUsersQuery();
 
   const users = usersData?.data && Array.isArray(usersData.data) ? usersData.data : [];
-  const availableUsers = users.filter(
+  
+  // Filter users: chỉ hiển thị REVIEWER và PC_MEMBER
+  const eligibleUsers = users.filter((user: User) => {
+    const roles = user.roles || [];
+    return roles.includes('REVIEWER') || roles.includes('PC_MEMBER');
+  });
+  
+  // Filter out users who are already members
+  const availableUsers = eligibleUsers.filter(
     (user: User) => !existingMemberIds.includes(user.id)
   );
 
@@ -35,6 +43,9 @@ const CreatePCMemberForm = ({
 
     try {
       await addMember({ trackId, userId: Number(selectedUserId) }).unwrap();
+      const selectedUser = availableUsers.find((u: User) => u.id === Number(selectedUserId));
+      const userName = selectedUser?.fullName || selectedUser?.email || 'thành viên';
+      showToast.success(`Thêm ${userName} vào ban chương trình thành công`);
       setSelectedUserId('');
       onSuccess();
     } catch (err: any) {
@@ -76,11 +87,26 @@ const CreatePCMemberForm = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="">-- Chọn người dùng --</option>
-              {availableUsers.map((user: User) => (
-                <option key={user.id} value={user.id}>
-                  {user.fullName || user.email} {user.email && user.fullName ? `(${user.email})` : ''}
-                </option>
-              ))}
+              {availableUsers.map((user: User) => {
+                const roles = user.roles || [];
+                const roleLabels = roles
+                  .filter((r: string) => r === 'REVIEWER' || r === 'PC_MEMBER')
+                  .map((r: string) => {
+                    if (r === 'REVIEWER') return 'Reviewer';
+                    if (r === 'PC_MEMBER') return 'PC Member';
+                    return r;
+                  })
+                  .join(', ');
+                const displayName = user.fullName || user.email;
+                const emailDisplay = user.email && user.fullName ? ` (${user.email})` : '';
+                const roleDisplay = roleLabels ? ` (${roleLabels})` : '';
+                
+                return (
+                  <option key={user.id} value={user.id}>
+                    {displayName}{roleDisplay}{emailDisplay}
+                  </option>
+                );
+              })}
             </select>
           )}
         </div>

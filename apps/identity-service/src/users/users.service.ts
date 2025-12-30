@@ -189,7 +189,7 @@ export class UsersService {
       user.password,
     );
     if (!isOldPasswordValid) {
-      throw new UnauthorizedException('Old password is incorrect');
+      throw new UnauthorizedException('Mật khẩu cũ không chính xác');
     }
 
     const hashed = await bcrypt.hash(dto.newPassword, 10);
@@ -200,7 +200,6 @@ export class UsersService {
   async forgotPassword(email: string): Promise<void> {
     const user = await this.findByEmail(email);
     if (!user) {
-      // Không tiết lộ thông tin tồn tại của email cho client
       return;
     }
 
@@ -287,7 +286,7 @@ export class UsersService {
   ): Promise<void> {
     const user = await this.findByEmail(email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Không tìm thấy tài khoản');
     }
 
     const token = await this.passwordResetTokenRepository.findOne({
@@ -318,7 +317,7 @@ export class UsersService {
   async deleteUser(userId: number): Promise<void> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Không tìm thấy tài khoản');
     }
 
     await this.usersRepository.remove(user);

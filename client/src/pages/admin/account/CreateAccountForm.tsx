@@ -28,6 +28,8 @@ const CreateAccountForm = ({ onSuccess, onCancel }: CreateAccountFormProps) => {
     e.preventDefault();
     try {
       const result = await createUser(formData).unwrap();
+      const userName = formData.fullName || formData.email;
+      showToast.success(`Tạo tài khoản "${userName}" thành công`);
       setFormData({
         email: '',
         password: '',

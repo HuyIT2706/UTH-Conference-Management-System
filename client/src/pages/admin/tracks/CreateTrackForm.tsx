@@ -20,6 +20,7 @@ const CreateTrackForm = ({
     e.preventDefault();
     try {
       await createTrack({ conferenceId, name }).unwrap();
+      showToast.success(`Tạo chủ đề "${name}" thành công`);
       setName('');
       onSuccess();
     } catch (err) {

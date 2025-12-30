@@ -44,6 +44,7 @@ const CreateConferenceForm = ({ onSuccess, onCancel }: CreateConferenceFormProps
       });
 
       if (result.data?.id) {
+        showToast.success(`Tạo hội nghị "${formData.name}" thành công`);
         onSuccess(result.data.id);
       }
     } catch (err) {
