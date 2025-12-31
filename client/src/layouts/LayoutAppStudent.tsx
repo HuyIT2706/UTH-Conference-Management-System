@@ -6,13 +6,13 @@ import HeroStudent from "../components/HeroStudent";
 
 const LayoutAppStudent = () => {
     return (
-        <div>
+        <>
             <HeaderStudent/>
             <HeroStudent/>
             <FeatureStudent/>
             <ContactStudent/>
             <Footer/>
-        </div>
+        </>
     );
 }
 

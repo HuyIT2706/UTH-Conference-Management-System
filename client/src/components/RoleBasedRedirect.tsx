@@ -21,7 +21,7 @@ const RoleBasedRedirect = () => {
   if (isChairOrAdmin) {
     return <Navigate to="/conference-setup" replace />;
   }
-  return <Navigate to="/student" replace />;
+  return <Navigate to="/home" replace />;
 };
 
 export default RoleBasedRedirect;

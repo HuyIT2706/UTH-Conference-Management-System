@@ -1,7 +1,5 @@
-import { useNavigate } from 'react-router-dom';
 import HeorUth from '../assets/image-hero.jpg';
 const HeroStudent = () => {
-  const navigate = useNavigate();
 
   return (
     <div className="bg-white from-gray-50 to-gray-100 py-16 px-6">
@@ -16,12 +14,16 @@ const HeroStudent = () => {
                 Hệ thống quản lý giấy tờ Hội nghị Nghiên cứu khoa học dành cho
                 Trường Đại Học UTH
               </p>
+              <button className='px-5 py-5 min-w-[180px] border-3 border-solid border-primary text-primary rounded-2xl text-lg transition duration-200 hover:bg-primary hover:text-white hover:font-semibold cursor-pointer'>
+                Tìm hiểu thêm
+              </button>
             </div>
           </div>
           <figure>
             <img src={HeorUth} alt="Hero" className="rounded-lg shadow-lg" />
           </figure>
         </div>
+
         <div className="flex justify-center space-x-2 mt-20">
           <div className="w-3 h-3 bg-teal-600 rounded-full"></div>
           <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
@@ -33,3 +35,4 @@ const HeroStudent = () => {
 };
 
 export default HeroStudent;
+

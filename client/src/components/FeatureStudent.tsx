@@ -3,42 +3,12 @@ const FeatureStudent = () => {
     {
       icon: (
         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z" />
-        </svg>
-      ),
-      title: 'Thiết lập Hội nghị và Lời mời nộp bài (CFP)',
-      description:
-        'Tạo trang CFP, thiết lập hạn chót (deadlines), các phân ban chủ đề (tracks/topics), mẫu email/mẫu biểu (form templates).',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
         </svg>
       ),
       title: 'Nộp bài/Tóm tắt và Cập nhật',
       description:
         'Nhập siêu dữ liệu tác giả, đồng tác giả, tải lên file PDF; rút chỉnh sửa bài trước hạn chót.',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-        </svg>
-      ),
-      title: 'Quản lý Ban Chương trình (PC)',
-      description:
-        'Mời thành viên PC, theo dõi tiến độ phản biện, phát hiện và chặn xung đột lợi ích (COI).',
-    },
-    {
-      icon: (
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
-        </svg>
-      ),
-      title: 'Phân công và Phản biện',
-      description:
-        'Phân công thủ công/tự động theo chủ đề/từ khóa: nhập điểm số và bình luận; thảo luận nội bộ; cửa sổ phúc đáp (rebuttal window) (tùy chọn).',
     },
     {
       icon: (
@@ -90,4 +60,5 @@ const FeatureStudent = () => {
 };
 
 export default FeatureStudent;
+
 

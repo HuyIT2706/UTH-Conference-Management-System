@@ -19,6 +19,7 @@ import ProfilePage from '../pages/profile/ProfilePage';
 import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import RoleBasedRedirect from '../components/RoleBasedRedirect';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
+import ContactStudent from '../components/ContactStudent';
 
 const appRouter = createBrowserRouter([
   {
@@ -100,12 +101,34 @@ const appRouter = createBrowserRouter([
     ],
   },
   {
-    path: '/student',
+    path: '/home',
     element: (
       <ProtectedRoute>
         <LayoutAppStudent />
       </ProtectedRoute>
     ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/home" replace />,
+      },
+      { 
+        path: 'student',
+        element: <h1>Xin chào trang này dành cho sinh viên nộp bài</h1>
+      },
+      {
+        path: 'review',
+        element: <h1>Xin chào trang này dành cho người phản biện</h1>
+      },
+      {
+        path: 'publicconference',
+        element: <h1>Xin chào trang này dành cho cuộc thi</h1>
+      },
+      {
+        path: 'contact',
+        element: <ContactStudent/>
+      }
+    ],
   },
   {
     path: '*',

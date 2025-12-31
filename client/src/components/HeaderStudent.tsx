@@ -21,61 +21,41 @@ const HeaderStudent = () => {
 
   return (
     <header className="bg-primary text-white shadow-md">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center">
-          <img
-            className="w-2/3 h-2/3"
-            src={iconUth}
-            alt="UTH - Trường Giao Thông Vận Tải TPHCM"
-          />
+      <div className="flex items-center justify-between px-6 py-4 gap-5">
+        <div className="flex items-center w-52">
+          <Link to="/home">
+            <img
+              className="w-full h-auto"
+              src={iconUth}
+              alt="UTH - Trường Giao Thông Vận Tải TPHCM"
+            />
+          </Link>
         </div>
         <nav className="hidden md:flex items-center space-x-1 ">
-          <Link
-            to="/dashboard"
-            className={`p-4 rounded-lg transition-colors text-lg  ${
-              location.pathname === '/dashboard'
-                ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:text-hover hover:font-semibold'
-            }`}
-          >
+          <Link to="/home" className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold">
             Trang chủ
           </Link>
           <Link
-            to="/submissions"
-            className={`p-4 rounded-lg transition-colors text-lg  ${
-              location.pathname === '/submissions' || location.pathname.startsWith('/submissions/')
-                ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:text-hover hover:font-semibold'
-            }`}
+            to="/student"
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
-            Sinh viên
+            Nộp bài
           </Link>
           <Link
-            to="/assignments"
-            className={`p-4 rounded-lg transition-colors text-lg  ${
-              location.pathname === '/assignments' || location.pathname.startsWith('/assignments/')
-                ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:text-hover hover:font-semibold'
-            }`}
+            to="/review"
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
-            Review
+            Phản biện
           </Link>
           <Link
-            to="/conference-setup"
-            className={`p-4 rounded-lg transition-colors text-lg  ${
-              location.pathname === '/conference-setup' || location.pathname.startsWith('/conference-setup/')
-                ? 'bg-white/20 text-white font-semibold'
-                : 'text-white/90 hover:text-hover hover:font-semibold'
-            }`}
+            to="/publicconference"
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
-            Sự kiện
+            Cuộc thi
           </Link>
           <Link
-            to="#"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-            className="p-4 rounded-lg transition-colors text-lg  text-white/90 hover:text-hover hover:font-semibold"
+            to="/contact"
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
             Liên hệ
           </Link>
