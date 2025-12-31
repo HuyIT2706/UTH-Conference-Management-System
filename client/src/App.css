@@ -3,7 +3,8 @@
 @theme{
     --color-primary: #008689;
     --color-button: #ED1B24;
-    --color-hover: #ff6f61
+    --color-hover: #ff6f61;
+    --max-width-custom: calc(100% - 48px);
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');

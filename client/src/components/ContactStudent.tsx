@@ -3,8 +3,8 @@ import imageUth from '../assets/image-uth.jpg';
 const ContactStudent = () => {
 
   return (
-    <div className="py-16 px-6 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <div id="contact" className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="max-w-7xl mx-auto" id='contact'>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center ">
           <div className="order-2 lg:order-1">
             <img

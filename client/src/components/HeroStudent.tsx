@@ -2,7 +2,7 @@ import HeorUth from '../assets/image-hero.jpg';
 const HeroStudent = () => {
 
   return (
-    <div className="bg-white from-gray-50 to-gray-100 py-16 px-6">
+    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center">
           <div className="space-y-8 w-[660px]">

@@ -1,3 +1,4 @@
+import Competition from "../components/Competition";
 import ContactStudent from "../components/ContactStudent";
 import FeatureStudent from "../components/FeatureStudent";
 import Footer from "../components/Footer";
@@ -10,6 +11,7 @@ const LayoutAppStudent = () => {
             <HeaderStudent/>
             <HeroStudent/>
             <FeatureStudent/>
+            <Competition/>
             <ContactStudent/>
             <Footer/>
         </>

@@ -20,6 +20,7 @@ import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import RoleBasedRedirect from '../components/RoleBasedRedirect';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
 import ContactStudent from '../components/ContactStudent';
+import Competition from '../components/Competition';
 
 const appRouter = createBrowserRouter([
   {
@@ -122,7 +123,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: 'publicconference',
-        element: <h1>Xin chào trang này dành cho cuộc thi</h1>
+        element: <Competition />
       },
       {
         path: 'contact',

@@ -9,6 +9,19 @@ const HeaderStudent = () => {
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      // If not on the student page, navigate there then scroll after content mounts
+      navigate('/home');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  };
+
   const initials =
     user?.fullName
       ?.split(' ')
@@ -47,18 +60,18 @@ const HeaderStudent = () => {
           >
             Phản biện
           </Link>
-          <Link
-            to="/publicconference"
-            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
+          <button
+            onClick={() => scrollToSection('conferences')}
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold cursor-pointer"
           >
             Cuộc thi
-          </Link>
-          <Link
-            to="/contact"
-            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
+          </button>
+          <button
+            onClick={() => scrollToSection('contact')}
+            className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold cursor-pointer"
           >
             Liên hệ
-          </Link>
+          </button>
         </nav>
         <div className="flex items-center">
           <div className="relative">
