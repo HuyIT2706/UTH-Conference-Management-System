@@ -55,7 +55,7 @@ const HeaderStudent = () => {
             Nộp bài
           </Link>
           <Link
-            to="/review"
+            to="/reviewer"
             className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
             Phản biện

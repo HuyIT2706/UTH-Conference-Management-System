@@ -6,7 +6,7 @@ import HeroStudent from "../components/HeroStudent";
 
 const LayoutAppStudent = () => {
     const location = useLocation();
-    const hideHeroFeature = location.pathname.startsWith('/student');
+    const hideHeroFeature = location.pathname.startsWith('/student') || location.pathname.startsWith('/reviewer');
 
     return (
         <>

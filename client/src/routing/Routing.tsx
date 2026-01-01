@@ -23,6 +23,8 @@ import ContactStudent from '../components/ContactStudent';
 import Competition from '../components/Competition';
 import StudentSubmissionLanding from '../pages/student/StudentSubmissionLanding';
 import StudentSubmitForm from '../pages/student/StudentSubmitForm';
+import ReviewerDashboard from '../pages/reviewer/ReviewerDashboard';
+import RoleProtectedRoute from '../components/RoleProtectedRoute';
 
 const appRouter = createBrowserRouter([
   {
@@ -106,9 +108,9 @@ const appRouter = createBrowserRouter([
   {
     path: '/student',
     element: (
-      <ProtectedRoute>
+      <RoleProtectedRoute allowedRoles={['AUTHOR', 'ADMIN', 'CHAIR']}>
         <LayoutAppStudent />
-      </ProtectedRoute>
+      </RoleProtectedRoute>
     ),
     children: [
       {
@@ -118,6 +120,20 @@ const appRouter = createBrowserRouter([
       {
         path: 'submit',
         element: <StudentSubmitForm />,
+      },
+    ],
+  },
+  {
+    path: '/reviewer',
+    element: (
+      <RoleProtectedRoute allowedRoles={['REVIEWER']}>
+        <LayoutAppStudent />
+      </RoleProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <ReviewerDashboard />,
       },
     ],
   },

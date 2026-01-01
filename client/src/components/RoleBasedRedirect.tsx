@@ -17,11 +17,19 @@ const RoleBasedRedirect = () => {
   }
 
   const isChairOrAdmin = user.roles?.includes('CHAIR') || user.roles?.includes('ADMIN');
+  const isReviewer = user.roles?.includes('REVIEWER');
+  const isAuthor = user.roles?.includes('AUTHOR');
 
   if (isChairOrAdmin) {
     return <Navigate to="/conference-setup" replace />;
   }
-  return <Navigate to="/home" replace />;
+  
+  if (isReviewer) {
+    return <Navigate to="/reviewer" replace />;
+  }
+  if (isAuthor) {
+    return <Navigate to="/student" replace />;
+  }
 };
 
 export default RoleBasedRedirect;
