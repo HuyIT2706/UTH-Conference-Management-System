@@ -49,7 +49,7 @@ const HeaderStudent = () => {
             Trang chủ
           </Link>
           <Link
-            to="/student"
+            to="/home/student"
             className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold"
           >
             Nộp bài

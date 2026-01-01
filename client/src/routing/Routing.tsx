@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromChildren, Navigate } from 'react-router-dom';
 import LayoutApp from '../layouts/LayoutApp';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -21,6 +21,8 @@ import RoleBasedRedirect from '../components/RoleBasedRedirect';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
 import ContactStudent from '../components/ContactStudent';
 import Competition from '../components/Competition';
+import StudentSubmissionLanding from '../pages/student/StudentSubmissionLanding';
+import StudentSubmitForm from '../pages/student/StudentSubmitForm';
 
 const appRouter = createBrowserRouter([
   {
@@ -111,11 +113,18 @@ const appRouter = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/home" replace />,
+        element: <>
+          <Competition />
+          <ContactStudent />
+        </>,
       },
       { 
         path: 'student',
-        element: <h1>Xin chào trang này dành cho sinh viên nộp bài</h1>
+        element: <StudentSubmissionLanding />
+      },
+      {
+        path: 'student/submit',
+        element: <StudentSubmitForm />,
       },
       {
         path: 'review',

@@ -35,6 +35,17 @@ export const conferencesApi = apiSlice.injectEndpoints({
             ]
           : [{ type: 'Track', id: `conference-${conferenceId}` }],
     }),
+    // Get public tracks for a conference (no auth required)
+    getPublicTracks: builder.query<ApiResponse<Track[]>, number>({
+      query: (conferenceId) => `/public/conferences/${conferenceId}/tracks`,
+      providesTags: (result, _error, conferenceId) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'Track' as const, id })),
+              { type: 'Track', id: `public-conference-${conferenceId}` },
+            ]
+          : [{ type: 'Track', id: `public-conference-${conferenceId}` }],
+    }),
     // Get track by ID
     getTrackById: builder.query<
       ApiResponse<Track>,
@@ -223,6 +234,7 @@ export const {
   useGetConferencesQuery,
   useGetConferenceByIdQuery,
   useGetTracksQuery,
+  useGetPublicTracksQuery,
   useGetTrackByIdQuery,
   useCheckDeadlineQuery,
   useCreateConferenceMutation,
