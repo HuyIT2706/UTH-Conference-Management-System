@@ -104,6 +104,24 @@ const appRouter = createBrowserRouter([
     ],
   },
   {
+    path: '/student',
+    element: (
+      <ProtectedRoute>
+        <LayoutAppStudent />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <StudentSubmissionLanding />
+      },
+      {
+        path: 'submit',
+        element: <StudentSubmitForm />,
+      },
+    ],
+  },
+  {
     path: '/home',
     element: (
       <ProtectedRoute>
@@ -117,14 +135,6 @@ const appRouter = createBrowserRouter([
           <Competition />
           <ContactStudent />
         </>,
-      },
-      { 
-        path: 'student',
-        element: <StudentSubmissionLanding />
-      },
-      {
-        path: 'student/submit',
-        element: <StudentSubmitForm />,
       },
       {
         path: 'review',

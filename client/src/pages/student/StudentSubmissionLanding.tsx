@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetConferencesQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
+import {
+  useGetConferencesQuery,
+  useGetPublicTracksQuery,
+} from '../../redux/api/conferencesApi';
 import type { Conference, Track } from '../../types/api.types';
 
 const StudentSubmissionLanding = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useGetConferencesQuery();
   const conferences: Conference[] = data?.data || [];
-  const [expandedConference, setExpandedConference] = useState<number | null>(null);
+  const [expandedConference, setExpandedConference] = useState<number | null>(
+    null,
+  );
 
   if (isLoading) return <div className="p-6">Đang tải...</div>;
   if (error) return <div className="p-6 text-red-600">Lỗi tải dữ liệu</div>;
@@ -19,17 +24,21 @@ const StudentSubmissionLanding = () => {
 
   const handleSubmit = (conferenceId: number, trackId?: number) => {
     if (trackId) {
-      navigate(`/home/student/submit?conferenceId=${conferenceId}&trackId=${trackId}`);
+      navigate(
+        `/student/submit?conferenceId=${conferenceId}&trackId=${trackId}`,
+      );
     } else {
-      navigate(`/home/student/submit?conferenceId=${conferenceId}`);
+      navigate(`/student/submit?conferenceId=${conferenceId}`);
     }
   };
 
   return (
     <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
       <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-6">Nộp bài / Tóm tắt</h1>
-        <p className="text-gray-600 mb-6">Chọn hội nghị và chủ đề (track) để nộp bài.</p>
+        <h1 className="text-3xl font-bold mb-6 text-center">Danh Sách Cuộc Thi Nghiên Cứu</h1>
+        <p className="text-gray-600 mb-6 text-center text-lg">
+          Chọn cuộc thi và chủ đề để nộp bài.
+        </p>
 
         <div className="space-y-4">
           {conferences.map((c) => (
@@ -37,7 +46,9 @@ const StudentSubmissionLanding = () => {
               key={c.id}
               conference={c}
               isExpanded={expandedConference === c.id}
-              onToggle={() => setExpandedConference(expandedConference === c.id ? null : c.id)}
+              onToggle={() =>
+                setExpandedConference(expandedConference === c.id ? null : c.id)
+              }
               onSubmit={handleSubmit}
             />
           ))}
@@ -54,20 +65,31 @@ interface ConferenceCardProps {
   onSubmit: (conferenceId: number, trackId?: number) => void;
 }
 
-const ConferenceCard = ({ conference, isExpanded, onToggle, onSubmit }: ConferenceCardProps) => {
-  const { data: tracksData, isLoading: tracksLoading } = useGetPublicTracksQuery(conference.id, {
-    skip: !isExpanded,
-  });
+const ConferenceCard = ({
+  conference,
+  isExpanded,
+  onToggle,
+  onSubmit,
+}: ConferenceCardProps) => {
+  const { data: tracksData, isLoading: tracksLoading } =
+    useGetPublicTracksQuery(conference.id, {
+      skip: !isExpanded,
+    });
   const tracks: Track[] = tracksData?.data || [];
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
       <div className="flex items-center justify-between p-4">
         <div className="flex-1">
-          <h2 className="font-semibold text-lg text-gray-800">{conference.name}</h2>
+          <h2 className="font-semibold text-lg text-gray-800">
+            {conference.name}
+          </h2>
           {conference.submissionDeadline && (
             <p className="text-sm text-gray-500 mt-1">
-              Hạn nộp: {new Date(conference.submissionDeadline).toLocaleDateString('vi-VN')}
+              Hạn nộp:{' '}
+              {new Date(conference.submissionDeadline).toLocaleDateString(
+                'vi-VN',
+              )}
             </p>
           )}
         </div>
@@ -79,12 +101,6 @@ const ConferenceCard = ({ conference, isExpanded, onToggle, onSubmit }: Conferen
           >
             {isExpanded ? 'Ẩn chủ đề' : 'Xem chủ đề'}
           </button>
-          <button
-            onClick={() => onSubmit(conference.id)}
-            className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
-          >
-            Nộp bài
-          </button>
         </div>
       </div>
 
@@ -95,8 +111,10 @@ const ConferenceCard = ({ conference, isExpanded, onToggle, onSubmit }: Conferen
           ) : tracks.length === 0 ? (
             <p className="text-sm text-gray-500">Chưa có chủ đề nào</p>
           ) : (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700 mb-2">Các chủ đề (tracks):</p>
+            <div className="w-full">
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Các chủ đề:
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {tracks.map((track) => (
                   <div
@@ -106,7 +124,7 @@ const ConferenceCard = ({ conference, isExpanded, onToggle, onSubmit }: Conferen
                     <span className="text-sm text-gray-800">{track.name}</span>
                     <button
                       onClick={() => onSubmit(conference.id, track.id)}
-                      className="px-3 py-1 text-xs bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
+                      className="p-3 text-xs bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors cursor-pointer"
                     >
                       Nộp bài
                     </button>

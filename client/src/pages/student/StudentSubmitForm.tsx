@@ -46,7 +46,7 @@ const StudentSubmitForm = () => {
   useEffect(() => {
     if (!conferenceId) {
       showToast.error('Vui lòng chọn hội nghị');
-      navigate('/home/student');
+      navigate('/student');
     }
   }, [conferenceId, navigate]);
 
@@ -58,11 +58,27 @@ const StudentSubmitForm = () => {
     return diffDays > 0 ? diffDays : 0;
   };
 
+  const isValidFileType = (file: File): boolean => {
+    const validTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', // .doc
+      'application/zip', // .zip
+    ];
+    const validExtensions = ['.pdf', '.docx', '.doc', '.zip'];
+    const fileName = file.name.toLowerCase();
+    
+    return (
+      validTypes.includes(file.type) ||
+      validExtensions.some((ext) => fileName.endsWith(ext))
+    );
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') {
-        showToast.error('Chỉ chấp nhận file PDF');
+      if (!isValidFileType(selectedFile)) {
+        showToast.error('Chỉ chấp nhận file PDF, DOCX, DOC hoặc ZIP');
         return;
       }
       if (selectedFile.size > 20 * 1024 * 1024) {
@@ -84,8 +100,8 @@ const StudentSubmitForm = () => {
     e.stopPropagation();
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
-      if (droppedFile.type !== 'application/pdf') {
-        showToast.error('Chỉ chấp nhận file PDF');
+      if (!isValidFileType(droppedFile)) {
+        showToast.error('Chỉ chấp nhận file PDF, DOCX, DOC hoặc ZIP');
         return;
       }
       if (droppedFile.size > 20 * 1024 * 1024) {
@@ -132,7 +148,7 @@ const StudentSubmitForm = () => {
         return;
       }
       if (!file) {
-        showToast.error('Vui lòng tải lên file PDF');
+        showToast.error('Vui lòng tải lên file (PDF, DOCX, DOC hoặc ZIP)');
         return;
       }
     }
@@ -161,7 +177,7 @@ const StudentSubmitForm = () => {
 
       await createSubmission(formData).unwrap();
       showToast.success(saveAsDraft ? 'Đã lưu bản nháp thành công' : 'Nộp bài thành công');
-      navigate('/home/student');
+      navigate('/student');
     } catch (error) {
       showToast.error(formatApiError(error));
     }
@@ -197,7 +213,7 @@ const StudentSubmitForm = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Nộp Bài / Tóm Tắt và Cập Nhật</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">Nộp Bài</h1>
               <p className="text-gray-600">
                 Vui lòng điền đầy đủ thông tin bên dưới để nộp bài nghiên cứu của bạn
               </p>
@@ -325,11 +341,11 @@ const StudentSubmitForm = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cơ quan / Tổ chức <span className="text-red-500">*</span>
+                  Tổ chức/Trường đại học<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="Tên cơ quan"
+                  placeholder="Tên trường đại học hoặc tổ chức"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
@@ -381,12 +397,12 @@ const StudentSubmitForm = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Cơ quan</label>
+                      <label className="block text-xs text-gray-600 mb-1">Tổ chức/ Trường đại học</label>
                       <input
                         type="text"
                         value={coAuthor.affiliation || ''}
                         onChange={(e) => updateCoAuthor(index, 'affiliation', e.target.value)}
-                        placeholder="Tên cơ quan"
+                        placeholder="Tên tổ chức hoặc trường đại học"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                       />
                     </div>
@@ -398,7 +414,7 @@ const StudentSubmitForm = () => {
 
           {/* File Upload */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Tải lên file PDF</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Tải lên file</h2>
             <div
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -406,7 +422,7 @@ const StudentSubmitForm = () => {
             >
               <input
                 type="file"
-                accept="application/pdf"
+                accept=".pdf,.doc,.docx,.zip,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
@@ -429,7 +445,7 @@ const StudentSubmitForm = () => {
                   <p className="text-gray-600 mb-2">
                     {filePreview || 'hoặc kéo thả file vào đây'}
                   </p>
-                  <p className="text-sm text-gray-500">Chỉ chấp nhận file PDF, tối đa 20MB</p>
+                  <p className="text-sm text-gray-500">Chỉ chấp nhận file PDF, DOCX, DOC hoặc ZIP, tối đa 20MB</p>
                 </div>
               </label>
             </div>

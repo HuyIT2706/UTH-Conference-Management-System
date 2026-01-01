@@ -1,5 +1,3 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { useGetConferencesQuery } from '../redux/api/conferencesApi';
 import type { Conference } from '../types/api.types';
 
@@ -52,7 +50,7 @@ const Competition = () => {
     return (
       <div
         id="conferences"
-        className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16"
+        className="bg-white max-w-custom w-[1360px] ml-auto mr-auto"
       >
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600">Chưa có hội nghị nào để hiển thị.</p>
