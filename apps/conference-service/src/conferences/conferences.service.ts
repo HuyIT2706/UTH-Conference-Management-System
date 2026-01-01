@@ -12,12 +12,14 @@ import {
   ConferenceMember,
   ConferenceMemberRole,
 } from './entities/conference-member.entity';
+import { TrackMember } from './entities/track-member.entity';
 import { CreateConferenceDto } from './dto/create-conference.dto';
 import { UpdateConferenceDto } from './dto/update-conference.dto';
 import { CfpSetting } from '../cfp/entities/cfp-setting.entity';
 import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
+import { AddTrackMemberDto } from './dto/add-track-member.dto';
 
 @Injectable()
 export class ConferencesService {
@@ -28,6 +30,8 @@ export class ConferencesService {
     private readonly trackRepository: Repository<Track>,
     @InjectRepository(ConferenceMember)
     private readonly conferenceMemberRepository: Repository<ConferenceMember>,
+    @InjectRepository(TrackMember)
+    private readonly trackMemberRepository: Repository<TrackMember>,
     @InjectRepository(CfpSetting)
     private readonly cfpSettingRepository: Repository<CfpSetting>,
   ) {}
@@ -329,5 +333,72 @@ export class ConferencesService {
       throw new NotFoundException('Không tìm thấy hội nghị');
     }
     return conference;
+  }
+
+  async listTrackMembers(
+    trackId: number,
+    user: { id: number; roles: string[] },
+  ): Promise<TrackMember[]> {
+    const track = await this.trackRepository.findOne({
+      where: { id: trackId },
+    });
+    if (!track) {
+      throw new NotFoundException('Không tìm thấy chủ đề');
+    }
+    await this.ensureCanManageConference(track.conferenceId, user);
+    return this.trackMemberRepository.find({
+      where: { trackId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async addTrackMember(
+    trackId: number,
+    dto: AddTrackMemberDto,
+    user: { id: number; roles: string[] },
+  ): Promise<TrackMember> {
+    const track = await this.trackRepository.findOne({
+      where: { id: trackId },
+    });
+    if (!track) {
+      throw new NotFoundException('Không tìm thấy chủ đề');
+    }
+    await this.ensureCanManageConference(track.conferenceId, user);
+
+    const existing = await this.trackMemberRepository.findOne({
+      where: { trackId, userId: dto.userId },
+    });
+    if (existing) {
+      throw new BadRequestException('Người dùng đã là thành viên của chủ đề này');
+    }
+
+    const member = this.trackMemberRepository.create({
+      trackId,
+      userId: dto.userId,
+      track,
+    });
+    return this.trackMemberRepository.save(member);
+  }
+
+  async removeTrackMember(
+    trackId: number,
+    memberUserId: number,
+    user: { id: number; roles: string[] },
+  ): Promise<void> {
+    const track = await this.trackRepository.findOne({
+      where: { id: trackId },
+    });
+    if (!track) {
+      throw new NotFoundException('Không tìm thấy chủ đề');
+    }
+    await this.ensureCanManageConference(track.conferenceId, user);
+
+    const member = await this.trackMemberRepository.findOne({
+      where: { trackId, userId: memberUserId },
+    });
+    if (!member) {
+      throw new NotFoundException('Không tìm thấy thành viên này');
+    }
+    await this.trackMemberRepository.remove(member);
   }
 }

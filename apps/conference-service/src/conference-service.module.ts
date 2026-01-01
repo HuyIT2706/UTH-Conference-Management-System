@@ -18,6 +18,7 @@ import { ValidationController } from './validation/validation.controller';
 import { Conference } from './conferences/entities/conference.entity';
 import { Track } from './conferences/entities/track.entity';
 import { ConferenceMember } from './conferences/entities/conference-member.entity';
+import { TrackMember } from './conferences/entities/track-member.entity';
 import { CfpSetting } from './cfp/entities/cfp-setting.entity';
 import { EmailTemplate } from './template/entities/email-template.entity';
 import { FormTemplate } from './template/entities/form-template.entity';
@@ -61,6 +62,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
             Conference,
             Track,
             ConferenceMember,
+            TrackMember,
             CfpSetting,
             EmailTemplate,
             FormTemplate,
@@ -75,6 +77,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
       Conference,
       Track,
       ConferenceMember,
+      TrackMember,
       CfpSetting,
       EmailTemplate,
       FormTemplate,

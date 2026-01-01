@@ -69,10 +69,3 @@ export class PublicController {
 
 
 
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> origin/huybv123

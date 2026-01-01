@@ -60,7 +60,22 @@ const LoginPage = () => {
       } else {
         localStorage.removeItem('rememberMe');
       }
-      navigate('/conference-setup');
+
+      // Small delay to ensure token is set and query can start
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Redirect based on user role from login response
+      const userRoles = result.user?.roles || [];
+      const isChairOrAdmin = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
+      const isReviewer = userRoles.includes('REVIEWER');
+
+      if (isChairOrAdmin) {
+        navigate('/conference-setup', { replace: true });
+      } else if (isReviewer) {
+        navigate('/reviewer', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
     } catch (err: unknown) {
       setError(formatApiError(err));
     }

@@ -8,9 +8,3 @@ export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 
 
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> origin/huybv123

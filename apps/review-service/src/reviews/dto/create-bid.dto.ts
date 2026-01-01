@@ -35,10 +35,3 @@ export class CreateBidDto {
 
 
 
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> origin/huybv123

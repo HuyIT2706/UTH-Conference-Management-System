@@ -3,7 +3,7 @@ import { tokenUtils } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { apiSlice } from '../redux/api/apiSlice';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -13,6 +13,24 @@ export const useAuth = () => {
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
     skip: !hasToken, 
   });
+
+  // Update hasToken when token changes
+  useEffect(() => {
+    const checkToken = () => {
+      const currentHasToken = tokenUtils.hasToken();
+      if (currentHasToken !== hasToken) {
+        setHasToken(currentHasToken);
+      }
+    };
+    
+    // Check immediately
+    checkToken();
+    
+    // Also check periodically (in case token is set from another tab/window)
+    const interval = setInterval(checkToken, 100);
+    
+    return () => clearInterval(interval);
+  }, [hasToken]);
   const [logoutMutation] = useLogoutMutation();
 
   const logout = async () => {

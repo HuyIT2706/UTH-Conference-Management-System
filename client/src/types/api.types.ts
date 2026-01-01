@@ -124,6 +124,14 @@ export interface Track {
   updatedAt: string;
 }
 
+export interface TrackMember {
+  id: number;
+  trackId: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Submission Types
 export const SubmissionStatus = {
   DRAFT: 'DRAFT',
@@ -197,12 +205,15 @@ export interface QuerySubmissionsDto extends PaginationParams {
 // Review Types
 export interface Review {
   id: number;
+  assignmentId: number;
   submissionId: string;
   reviewerId: number;
   score: number;
+  confidence?: 'LOW' | 'MEDIUM' | 'HIGH';
   commentForAuthor: string;
+  commentForPC?: string;
   commentForChair?: string;
-  recommendation: 'ACCEPT' | 'REJECT' | 'MAJOR_REVISION' | 'MINOR_REVISION';
+  recommendation: 'ACCEPT' | 'WEAK_ACCEPT' | 'REJECT' | 'WEAK_REJECT';
   createdAt: string;
   updatedAt: string;
 }
@@ -217,7 +228,11 @@ export interface ReviewAssignment {
   id: number;
   submissionId: string;
   reviewerId: number;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COMPLETED';
   createdAt: string;
+  submission?: Submission;
+  conferenceId?: number;
+  trackId?: number;
+  dueDate?: string;
 }
 

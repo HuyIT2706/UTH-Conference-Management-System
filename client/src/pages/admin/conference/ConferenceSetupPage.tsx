@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useGetConferencesQuery, useDeleteConferenceMutation } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import CreateConferenceForm from './CreateConferenceForm';
 import ConferenceList from './ConferenceList';
 import ConferenceDetail from './ConferenceDetail';
@@ -67,14 +68,14 @@ const ConferenceSetupPage = () => {
 
     try {
       await deleteConference(conferenceId).unwrap();
-      alert('Xóa hội nghị thành công');
+      showToast.success('Xóa hội nghị thành công');
       // Nếu đang xem chi tiết của hội nghị bị xóa, quay về danh sách
       if (selectedConferenceId === conferenceId) {
         handleBackToList();
       }
     } catch (err) {
       console.error('Error deleting conference:', err);
-      alert('Có lỗi xảy ra khi xóa hội nghị');
+      showToast.error('Có lỗi xảy ra khi xóa hội nghị');
     }
   };
 
@@ -91,7 +92,7 @@ const ConferenceSetupPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & Thời gian</h1>
           </div>
         </div>
         <ConferenceDetail conferenceId={selectedConferenceId} onBack={handleBackToList} />
@@ -101,7 +102,7 @@ const ConferenceSetupPage = () => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & CFP</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Thiết lập Hội nghị & Thời gian</h1>
         <div className="relative flex items-center space-x-2">
           <input
             type="text"
@@ -110,7 +111,7 @@ const ConferenceSetupPage = () => {
             placeholder="Tìm kiếm hội nghị..."
             className="px-4 py-2 border  border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <button className="absolute right-12 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+          <button className="absolute right-12 w-8 h-8 bg-button rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
             <svg
               className="w-5 h-5 text-white"
               fill="none"

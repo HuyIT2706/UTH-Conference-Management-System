@@ -96,10 +96,3 @@ export class ReportingService {
 
 
 
-
-
-<<<<<<< HEAD
-=======
-
-
->>>>>>> origin/huybv123

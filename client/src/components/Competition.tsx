@@ -1,0 +1,120 @@
+import { useGetConferencesQuery } from '../redux/api/conferencesApi';
+import type { Conference } from '../types/api.types';
+
+const Competition = () => {
+  const { data, isLoading, error } = useGetConferencesQuery();
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+
+  const formatDateTime = (dateString: string) =>
+    new Date(dateString).toLocaleString('en-US', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+  const isSubmissionOpen = (c: Conference) => {
+    if (!c.submissionDeadline) return false;
+    return new Date() <= new Date(c.submissionDeadline);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <p className="text-gray-600">Đang tải danh sách hội nghị...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <p className="text-red-600">
+          Lỗi khi tải hội nghị. Vui lòng thử lại sau.
+        </p>
+      </div>
+    );
+  }
+
+  const conferences = data?.data || [];
+
+  if (conferences.length === 0) {
+    return (
+      <div
+        id="conferences"
+        className="bg-white max-w-custom w-[1360px] ml-auto mr-auto"
+      >
+        <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-600">Chưa có hội nghị nào để hiển thị.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="max-w-7xl mx-auto" id='conferences'>
+        <h1 className="text-2xl font-semibold mb-6 text-center">
+          Hội nghị gần đây
+        </h1>
+
+        <div className="space-y-4">
+          {conferences.map((c: Conference) => (
+            <div
+              key={c.id}
+              className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-start justify-between"
+            >
+              <div className="flex-1 pr-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6 ">
+                  {c.name}
+                </h2>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                  <svg
+                    className="w-4 h-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span>
+                    {formatDate(c.startDate)} - {formatDate(c.endDate)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end justify-between">
+                <div className="mb-3">
+                  {isSubmissionOpen(c) ? (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-500 text-black text-sm font-medium">
+                      Đang mở nộp bài
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-300 text-black text-sm font-medium">
+                      Đã đóng
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Competition;

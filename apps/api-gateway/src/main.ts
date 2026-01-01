@@ -69,6 +69,17 @@ async function bootstrap() {
       ...proxyOptions,
     }),
   );
+  // Public endpoints (no auth required) - must be before /api/conferences
+  expressApp.use(
+    '/api/public/conferences',
+    createProxyMiddleware({
+      target: conferenceServiceUrl,
+      pathRewrite: {
+        '^(.*)': '/api/public/conferences$1',
+      },
+      ...proxyOptions,
+    }),
+  );
   expressApp.use(
     '/api/conferences',
     createProxyMiddleware({

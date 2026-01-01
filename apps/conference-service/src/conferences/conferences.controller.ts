@@ -17,6 +17,7 @@ import { UpdateConferenceDto } from './dto/update-conference.dto';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
+import { AddTrackMemberDto } from './dto/add-track-member.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { JwtPayload } from '../auth/jwt.strategy';
@@ -91,6 +92,19 @@ export class ConferencesController {
     return {
       message: 'Lấy thông tin hội nghị thành công',
       data: conferenceData,
+    };
+  }
+
+  @Get(':id/tracks')
+  @ApiOperation({ summary: 'Lấy danh sách tracks của hội nghị' })
+  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách tracks thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
+  async getTracks(@Param('id', ParseIntPipe) id: number) {
+    const tracks = await this.conferencesService.findAllTracks(id);
+    return {
+      message: 'Lấy danh sách tracks thành công',
+      data: tracks,
     };
   }
 
@@ -332,6 +346,71 @@ export class ConferencesController {
     @CurrentUser() user: JwtPayload,
   ) {
     await this.conferencesService.removeMember(id, userId, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Xóa thành viên thành công' };
+  }
+
+  @Get('tracks/:trackId/members')
+  @ApiOperation({ summary: 'Lấy danh sách thành viên ban chương trình của chủ đề' })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách thành viên thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy chủ đề' })
+  async listTrackMembers(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const members = await this.conferencesService.listTrackMembers(trackId, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Lấy danh sách thành viên thành công', data: members };
+  }
+
+  @Post('tracks/:trackId/members')
+  @ApiOperation({ 
+    summary: 'Thêm thành viên ban chương trình vào chủ đề',
+    description: `Thêm một user vào chủ đề với vai trò PC member.
+    
+**Ví dụ request body:**
+\`\`\`json
+{
+  "userId": 5
+}
+\`\`\``
+  })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiResponse({ status: 201, description: 'Thêm thành viên thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc user đã là thành viên' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy chủ đề' })
+  async addTrackMember(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @Body() dto: AddTrackMemberDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const member = await this.conferencesService.addTrackMember(trackId, dto, {
+      id: user.sub,
+      roles: user.roles ?? [],
+    });
+    return { message: 'Thêm thành viên thành công', data: member };
+  }
+
+  @Delete('tracks/:trackId/members/:userId')
+  @ApiOperation({ summary: 'Xóa thành viên khỏi chủ đề' })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiParam({ name: 'userId', description: 'ID của user cần xóa khỏi chủ đề' })
+  @ApiResponse({ status: 200, description: 'Xóa thành viên thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy chủ đề hoặc thành viên' })
+  async removeTrackMember(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    await this.conferencesService.removeTrackMember(trackId, userId, {
       id: user.sub,
       roles: user.roles ?? [],
     });

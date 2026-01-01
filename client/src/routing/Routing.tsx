@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromChildren, Navigate } from 'react-router-dom';
 import LayoutApp from '../layouts/LayoutApp';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -8,13 +8,23 @@ import ActivateAccount from '../pages/auth/ActivateAccount';
 import DashboardPage from '../pages/admin/DashboardPage';
 import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
+import TrackManagementPage from '../pages/admin/tracks/TrackManagementPage';
 import SubmissionsPage from '../pages/admin/SubmissionsPage';
-import PcManagementPage from '../pages/admin/PcManagementPage';
+import PCManagementPage from '../pages/admin/pc-management/PCManagementPage';
 import AssignmentsPage from '../pages/admin/AssignmentsPage';
 import DecisionsPage from '../pages/admin/DecisionsPage';
 import CameraReadyPage from '../pages/admin/CameraReadyPage';
 import ReportsPage from '../pages/admin/ReportsPage';
+import ProfilePage from '../pages/profile/ProfilePage';
+import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import RoleBasedRedirect from '../components/RoleBasedRedirect';
+import LayoutAppStudent from '../layouts/LayoutAppStudent';
+import ContactStudent from '../components/ContactStudent';
+import Competition from '../components/Competition';
+import StudentSubmissionLanding from '../pages/student/StudentSubmissionLanding';
+import StudentSubmitForm from '../pages/student/StudentSubmitForm';
+import ReviewerDashboard from '../pages/reviewer/ReviewerDashboard';
+import RoleProtectedRoute from '../components/RoleProtectedRoute';
 
 const appRouter = createBrowserRouter([
   {
@@ -23,7 +33,7 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/forgot-password',
-    element: <ForgotPasswordPage/>
+    element: <ForgotPasswordPage />,
   },
   {
     path: '/reset-password',
@@ -31,7 +41,15 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/activate-account',
-    element : <ActivateAccount/>
+    element: <ActivateAccount />,
+  },
+  {
+    path: 'profile',
+    element: <ProfilePage />,
+  },
+  {
+    path: 'change-password',
+    element: <ChangePasswordPage />,
   },
   {
     path: '/',
@@ -59,7 +77,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: 'pc-management',
-        element: <PcManagementPage />,
+        element: <PCManagementPage />,
       },
       {
         path: 'assignments',
@@ -81,6 +99,71 @@ const appRouter = createBrowserRouter([
         path: 'account-management',
         element: <AccountManagementPage />,
       },
+      {
+        path: 'tracks',
+        element: <TrackManagementPage />,
+      },
+    ],
+  },
+  {
+    path: '/student',
+    element: (
+      <RoleProtectedRoute allowedRoles={['AUTHOR', 'ADMIN', 'CHAIR']}>
+        <LayoutAppStudent />
+      </RoleProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <StudentSubmissionLanding />
+      },
+      {
+        path: 'submit',
+        element: <StudentSubmitForm />,
+      },
+    ],
+  },
+  {
+    path: '/reviewer',
+    element: (
+      <RoleProtectedRoute allowedRoles={['REVIEWER']}>
+        <LayoutAppStudent />
+      </RoleProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <ReviewerDashboard />,
+      },
+    ],
+  },
+  {
+    path: '/home',
+    element: (
+      <ProtectedRoute>
+        <LayoutAppStudent />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <>
+          <Competition />
+          <ContactStudent />
+        </>,
+      },
+      {
+        path: 'review',
+        element: <h1>Xin chào trang này dành cho người phản biện</h1>
+      },
+      {
+        path: 'publicconference',
+        element: <Competition />
+      },
+      {
+        path: 'contact',
+        element: <ContactStudent/>
+      }
     ],
   },
   {

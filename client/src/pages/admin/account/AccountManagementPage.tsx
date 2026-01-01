@@ -4,6 +4,7 @@ import {
   useDeleteUserMutation,
 } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
+import { showToast } from '../../../utils/toast';
 import CreateAccountForm from './CreateAccountForm';
 import AccountList from './AccountList';
 import AccountDetail from './AccountDetail';
@@ -76,13 +77,13 @@ const AccountManagementPage = () => {
 
     try {
       await deleteUser(userId).unwrap();
-      alert('Xóa tài khoản thành công');
+      showToast.success('Xóa tài khoản thành công');
       if (selectedUserId === userId) {
         handleBackToList();
       }
     } catch (err) {
       console.error('Error deleting user:', err);
-      alert('Có lỗi xảy ra khi xóa tài khoản');
+      showToast.error('Có lỗi xảy ra khi xóa tài khoản');
     }
   };
 
@@ -131,7 +132,7 @@ const AccountManagementPage = () => {
             placeholder="Tìm kiếm tài khoản..."
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <button className="absolute right-12 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
+          <button className="absolute right-12 w-8 h-8 bg-button rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
             <svg
               className="w-5 h-5 text-white"
               fill="none"

@@ -27,7 +27,7 @@ const Sidebar = () => {
       to: '/pc-management',
     },
     {
-      name: 'Phân công & Phản biện',
+      name: 'Bài nộp & Phản biện',
       to: '/assignments',
     },
     {
@@ -41,6 +41,10 @@ const Sidebar = () => {
     {
       name: 'Báo cáo & Phân tích',
       to: '/reports',
+    },
+    {
+      name: 'Quản lý chủ đề',
+      to: '/tracks',
     },
     ...(isAdmin
       ? [

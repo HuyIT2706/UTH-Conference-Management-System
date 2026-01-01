@@ -2,6 +2,7 @@ import { apiSlice } from './apiSlice';
 import type {
   Conference,
   Track,
+  TrackMember,
   ApiResponse,
 } from '../../types/api.types';
 
@@ -33,6 +34,17 @@ export const conferencesApi = apiSlice.injectEndpoints({
               { type: 'Track', id: `conference-${conferenceId}` },
             ]
           : [{ type: 'Track', id: `conference-${conferenceId}` }],
+    }),
+    // Get public tracks for a conference (no auth required)
+    getPublicTracks: builder.query<ApiResponse<Track[]>, number>({
+      query: (conferenceId) => `/public/conferences/${conferenceId}/tracks`,
+      providesTags: (result, _error, conferenceId) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'Track' as const, id })),
+              { type: 'Track', id: `public-conference-${conferenceId}` },
+            ]
+          : [{ type: 'Track', id: `public-conference-${conferenceId}` }],
     }),
     // Get track by ID
     getTrackById: builder.query<
@@ -131,6 +143,90 @@ export const conferencesApi = apiSlice.injectEndpoints({
         { type: 'Conference', id: 'LIST' },
       ],
     }),
+    // Create track
+    createTrack: builder.mutation<
+      ApiResponse<Track>,
+      { conferenceId: number; name: string }
+    >({
+      query: ({ conferenceId, name }) => ({
+        url: `/conferences/${conferenceId}/tracks`,
+        method: 'POST',
+        body: { name },
+      }),
+      invalidatesTags: (_result, _error, { conferenceId }) => [
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
+    // Update track
+    updateTrack: builder.mutation<
+      ApiResponse<Track>,
+      { conferenceId: number; trackId: number; name?: string }
+    >({
+      query: ({ conferenceId, trackId, ...body }) => ({
+        url: `/conferences/${conferenceId}/tracks/${trackId}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: (_result, _error, { conferenceId, trackId }) => [
+        { type: 'Track', id: trackId },
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
+    // Delete track
+    deleteTrack: builder.mutation<
+      { message: string },
+      { conferenceId: number; trackId: number }
+    >({
+      query: ({ conferenceId, trackId }) => ({
+        url: `/conferences/${conferenceId}/tracks/${trackId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { conferenceId, trackId }) => [
+        { type: 'Track', id: trackId },
+        { type: 'Track', id: `conference-${conferenceId}` },
+        { type: 'Conference', id: conferenceId },
+      ],
+    }),
+    // Get track members
+    getTrackMembers: builder.query<ApiResponse<TrackMember[]>, number>({
+      query: (trackId) => `/conferences/tracks/${trackId}/members`,
+      providesTags: (result, _error, trackId) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'TrackMember' as const, id })),
+              { type: 'TrackMember', id: `track-${trackId}` },
+            ]
+          : [{ type: 'TrackMember', id: `track-${trackId}` }],
+    }),
+    // Add track member
+    addTrackMember: builder.mutation<
+      ApiResponse<TrackMember>,
+      { trackId: number; userId: number }
+    >({
+      query: ({ trackId, userId }) => ({
+        url: `/conferences/tracks/${trackId}/members`,
+        method: 'POST',
+        body: { userId },
+      }),
+      invalidatesTags: (_result, _error, { trackId }) => [
+        { type: 'TrackMember', id: `track-${trackId}` },
+      ],
+    }),
+    // Delete track member
+    deleteTrackMember: builder.mutation<
+      { message: string },
+      { trackId: number; userId: number }
+    >({
+      query: ({ trackId, userId }) => ({
+        url: `/conferences/tracks/${trackId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { trackId }) => [
+        { type: 'TrackMember', id: `track-${trackId}` },
+      ],
+    }),
   }),
 });
 
@@ -138,11 +234,18 @@ export const {
   useGetConferencesQuery,
   useGetConferenceByIdQuery,
   useGetTracksQuery,
+  useGetPublicTracksQuery,
   useGetTrackByIdQuery,
   useCheckDeadlineQuery,
   useCreateConferenceMutation,
   useUpdateConferenceMutation,
   useSetCfpSettingsMutation,
   useDeleteConferenceMutation,
+  useCreateTrackMutation,
+  useUpdateTrackMutation,
+  useDeleteTrackMutation,
+  useGetTrackMembersQuery,
+  useAddTrackMemberMutation,
+  useDeleteTrackMemberMutation,
 } = conferencesApi;
 
