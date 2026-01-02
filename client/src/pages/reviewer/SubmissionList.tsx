@@ -11,7 +11,7 @@ interface SubmissionListProps {
 const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Filter accepted assignments
+  // Filter accepted assignments (only show submissions for accepted tracks)
   const acceptedAssignments = assignments.filter((a) => a.status === 'ACCEPTED');
   
   // Get submissions from assignments (either from assignment.submission or fetch by ID)

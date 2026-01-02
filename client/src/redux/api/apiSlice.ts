@@ -45,16 +45,19 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
           // Refresh failed, clear tokens
           localStorage.removeItem('accessToken');
           sessionStorage.removeItem('refreshToken');
-          window.location.href = '/login';
+          // Dispatch event to trigger navigation without reload
+          window.dispatchEvent(new CustomEvent('auth:logout'));
         }
       } catch (error) {
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        // Dispatch event to trigger navigation without reload
+        window.dispatchEvent(new CustomEvent('auth:logout'));
       }
     } else {
       localStorage.removeItem('accessToken');
-      window.location.href = '/login';
+      // Dispatch event to trigger navigation without reload
+      window.dispatchEvent(new CustomEvent('auth:logout'));
     }
   }
 

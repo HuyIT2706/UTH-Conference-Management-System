@@ -40,7 +40,8 @@ axiosInstance.interceptors.response.use(
         if (!refreshToken) {
           localStorage.removeItem('accessToken');
           sessionStorage.removeItem('refreshToken');
-          window.location.href = '/login';
+          // Dispatch event to trigger navigation without reload
+          window.dispatchEvent(new CustomEvent('auth:logout'));
           return Promise.reject(error);
         }
 
@@ -62,7 +63,8 @@ axiosInstance.interceptors.response.use(
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        // Dispatch event to trigger navigation without reload
+        window.dispatchEvent(new CustomEvent('auth:logout'));
         return Promise.reject(refreshError);
       }
     }
