@@ -60,15 +60,14 @@ const LoginPage = () => {
       } else {
         localStorage.removeItem('rememberMe');
       }
-
-      // Small delay to ensure token is set and query can start
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Redirect based on user role from login response
       const userRoles = result.user?.roles || [];
-      const isChairOrAdmin = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
-      const isReviewer = userRoles.includes('REVIEWER');
-
+      
+      const roleNames = userRoles.map((role: any) => 
+        typeof role === 'string' ? role : role?.name || role?.role || role
+      );
+      const isChairOrAdmin = roleNames.includes('CHAIR') || roleNames.includes('ADMIN');
+      const isReviewer = roleNames.includes('REVIEWER');
+      await new Promise(resolve => setTimeout(resolve, 100));
       if (isChairOrAdmin) {
         navigate('/conference-setup', { replace: true });
       } else if (isReviewer) {

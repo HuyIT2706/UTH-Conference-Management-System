@@ -17,7 +17,6 @@ import CameraReadyPage from '../pages/admin/CameraReadyPage';
 import ReportsPage from '../pages/admin/ReportsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
-import RoleBasedRedirect from '../components/RoleBasedRedirect';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
 import ContactStudent from '../components/ContactStudent';
 import Competition from '../components/Competition';
@@ -61,7 +60,7 @@ const appRouter = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <RoleBasedRedirect />,
+        element: <ConferenceSetupPage />,
       },
       {
         path: 'dashboard',
@@ -151,10 +150,6 @@ const appRouter = createBrowserRouter([
           <Competition />
           <ContactStudent />
         </>,
-      },
-      {
-        path: 'review',
-        element: <h1>Xin chào trang này dành cho người phản biện</h1>
       },
       {
         path: 'publicconference',
