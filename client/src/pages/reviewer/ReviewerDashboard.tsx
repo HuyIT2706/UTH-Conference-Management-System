@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
-import { useGetTracksQuery } from '../../redux/api/conferencesApi';
 import { showToast } from '../../utils/toast';
 import TrackAssignmentList from './TrackAssignmentList';
 import SubmissionList from './SubmissionList';
@@ -28,11 +27,6 @@ const ReviewerDashboard = () => {
 
   const { data: assignmentsData, isLoading: assignmentsLoading, error: assignmentsError } = useGetMyAssignmentsQuery();
   const assignments = assignmentsData?.data || [];
-
-  // Get unique conference IDs from assignments
-  const conferenceIds = Array.from(
-    new Set(assignments.map((a: any) => a.conferenceId).filter(Boolean))
-  );
 
   if (assignmentsLoading) {
     return (

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useGetMyAssignmentsQuery, useAcceptAssignmentMutation, useRejectAssignmentMutation } from '../../redux/api/reviewsApi';
 import { useGetConferencesQuery, useGetTracksQuery } from '../../redux/api/conferencesApi';
-import { useGetSubmissionsQuery } from '../../redux/api/submissionsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 import type { Track, Conference } from '../../types/api.types';
@@ -54,10 +53,11 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
     }
   });
 
-  const handleAccept = async (assignmentId: number, trackId: number, conferenceId: number) => {
+  const handleAccept = async (assignments: any[], trackId: number, conferenceId: number) => {
     try {
-      await acceptAssignment(assignmentId).unwrap();
-      showToast.success('Đã chấp nhận phân công thành công');
+      // Accept all assignments in this track
+      await Promise.all(assignments.map((assignment) => acceptAssignment(assignment.id).unwrap()));
+      showToast.success(`Đã chấp nhận ${assignments.length} phân công thành công`);
       if (onAcceptTrack) {
         onAcceptTrack(trackId, conferenceId);
       }
@@ -100,15 +100,24 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => {
+                    if (!track) return;
                     const [conferenceId, trackId] = key.split('-').map(Number);
-                    handleAccept(assignments[0].id, trackId, conferenceId);
+                    handleAccept(assignments, trackId, conferenceId);
                   }}
                   className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
                 >
                   Chấp nhận
                 </button>
                 <button
-                  onClick={() => handleReject(assignments[0].id)}
+                  onClick={async () => {
+                    // Reject all assignments in this track
+                    try {
+                      await Promise.all(assignments.map((assignment) => rejectAssignment(assignment.id).unwrap()));
+                      showToast.success(`Đã từ chối ${assignments.length} phân công`);
+                    } catch (error) {
+                      showToast.error(formatApiError(error));
+                    }
+                  }}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Từ chối
