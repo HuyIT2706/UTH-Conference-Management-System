@@ -244,14 +244,20 @@ export class SubmissionsService {
         submission.status === SubmissionStatus.SUBMITTED ||
         submission.status === SubmissionStatus.REVIEWING
       ) {
-        const deadlineCheck = await this.conferenceClient.checkDeadline(
-          submission.conferenceId,
-          'submission',
-        );
-        if (!deadlineCheck.valid) {
-          throw new BadRequestException(
-            `Không thể chỉnh sửa sau hạn nộp bài: ${deadlineCheck.message}`,
+        try {
+          const deadlineCheck = await this.conferenceClient.checkDeadline(
+            submission.conferenceId,
+            'submission',
           );
+          if (!deadlineCheck.valid) {
+            throw new BadRequestException(
+              `Không thể chỉnh sửa sau hạn nộp bài: ${deadlineCheck.message}`,
+            );
+          }
+        } catch (e) {
+          if (e instanceof BadRequestException) {
+            throw e;
+          }
         }
       }
 
@@ -335,8 +341,6 @@ export class SubmissionsService {
     }
 
     // Validate deadline - chỉ cho phép withdraw trước deadline
-    // Tạm thời bỏ qua check deadline khi withdraw để tránh lỗi
-    // Frontend đã validate deadline trước khi cho phép withdraw
     try {
       const deadlineCheck = await this.conferenceClient.checkDeadline(
         submission.conferenceId,
@@ -348,12 +352,9 @@ export class SubmissionsService {
         );
       }
     } catch (e) {
-      // Nếu check deadline fail (service unavailable), log warning nhưng không block withdraw
-      // Vì frontend đã validate deadline
       if (e instanceof BadRequestException) {
-        throw e; // Re-throw nếu là deadline đã qua
+        throw e;
       }
-      console.warn('[SubmissionService] Deadline check failed during withdraw (non-blocking):', e);
     }
 
     submission.status = SubmissionStatus.WITHDRAWN;
