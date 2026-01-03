@@ -11,19 +11,36 @@ const Competition = () => {
       day: '2-digit',
     });
 
-  const formatDateTime = (dateString: string) =>
-    new Date(dateString).toLocaleString('en-US', {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const getConferenceStatus = (c: Conference) => {
+    const now = new Date();
+    const submissionDeadline = c.cfpSetting?.submissionDeadline || c.submissionDeadline;
+    const notificationDate = c.cfpSetting?.notificationDate || c.notificationDate;
+    const cameraReadyDeadline = c.cfpSetting?.cameraReadyDeadline || c.cameraReadyDeadline;
 
-  const isSubmissionOpen = (c: Conference) => {
-    if (!c.submissionDeadline) return false;
-    return new Date() <= new Date(c.submissionDeadline);
+    if (!submissionDeadline && !notificationDate && !cameraReadyDeadline) {
+      return { text: 'Đã đóng', color: 'bg-red-300' };
+    }
+    if (submissionDeadline) {
+      const submissionDate = new Date(submissionDeadline);
+      if (now < submissionDate) {
+        return { text: 'Đang nhận bài nộp', color: 'bg-green-500' };
+      }
+    }
+    if (submissionDeadline && notificationDate) {
+      const submissionDate = new Date(submissionDeadline);
+      const notificationDateObj = new Date(notificationDate);
+      if (now >= submissionDate && now < notificationDateObj) {
+        return { text: 'Đang phản biện', color: 'bg-blue-500' };
+      }
+    }
+    if (notificationDate && cameraReadyDeadline) {
+      const notificationDateObj = new Date(notificationDate);
+      const cameraReadyDate = new Date(cameraReadyDeadline);
+      if (now >= notificationDateObj && now < cameraReadyDate) {
+        return { text: 'Nộp bản hoàn thiện', color: 'bg-yellow-500' };
+      }
+    }
+    return { text: 'Đã đóng', color: 'bg-red-300' };
   };
 
   if (isLoading) {
@@ -98,15 +115,14 @@ const Competition = () => {
 
               <div className="flex flex-col items-end justify-between">
                 <div className="mb-3">
-                  {isSubmissionOpen(c) ? (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-500 text-black text-sm font-medium">
-                      Đang mở nộp bài
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-300 text-black text-sm font-medium">
-                      Đã đóng
-                    </span>
-                  )}
+                  {(() => {
+                    const status = getConferenceStatus(c);
+                    return (
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full ${status.color} text-black text-sm font-medium`}>
+                        {status.text}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

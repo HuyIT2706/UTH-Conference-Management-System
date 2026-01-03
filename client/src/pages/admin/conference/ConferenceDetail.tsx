@@ -127,7 +127,7 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
         ).toISOString(),
       }).unwrap();
 
-      showToast.success('Cập nhật CFP thành công');
+      showToast.success('Cập nhật thời gian thành công');
     } catch (err) {
       console.error('Error updating CFP:', err);
       showToast.error('Có lỗi xảy ra khi cập nhật CFP');
@@ -336,7 +336,7 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
               disabled={isUpdatingCfp}
               className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isUpdatingCfp ? 'Đang cập nhật...' : 'Cập nhật CFP'}
+              {isUpdatingCfp ? 'Đang cập nhật...' : 'Cập nhật thời gian'}
             </button>
           </div>
         </form>

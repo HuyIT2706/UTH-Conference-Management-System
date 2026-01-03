@@ -68,9 +68,16 @@ export class ConferencesController {
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
   async findAll() {
     const conferences = await this.conferencesService.findAll();
+    const conferencesWithDeadlines = conferences.map((conference) => ({
+      ...conference,
+      submissionDeadline: conference.cfpSetting?.submissionDeadline?.toISOString(),
+      reviewDeadline: conference.cfpSetting?.reviewDeadline?.toISOString(),
+      notificationDate: conference.cfpSetting?.notificationDate?.toISOString(),
+      cameraReadyDeadline: conference.cfpSetting?.cameraReadyDeadline?.toISOString(),
+    }));
     return {
       message: 'Lấy danh sách hội nghị thành công',
-      data: conferences,
+      data: conferencesWithDeadlines,
     };
   }
 

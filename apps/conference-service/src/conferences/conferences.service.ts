@@ -66,7 +66,7 @@ export class ConferencesService {
   }
 
   async findAll(): Promise<Conference[]> {
-    return this.conferenceRepository.find({ relations: ['tracks', 'members'] });
+    return this.conferenceRepository.find({ relations: ['tracks', 'members', 'cfpSetting'] });
   }
 
   async findOne(id: number): Promise<Conference> {

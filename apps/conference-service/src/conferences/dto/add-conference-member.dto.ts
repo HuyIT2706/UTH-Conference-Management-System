@@ -23,20 +23,3 @@ export class AddConferenceMemberDto {
   role: ConferenceMemberRole;
 }
 
-
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
->>>>>>> origin/huybv123
-
