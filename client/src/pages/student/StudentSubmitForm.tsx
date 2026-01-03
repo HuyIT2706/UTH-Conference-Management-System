@@ -47,6 +47,7 @@ const StudentSubmitForm = () => {
   const [abstract, setAbstract] = useState('');
   const [keywords, setKeywords] = useState('');
   const [selectedTrackId, setSelectedTrackId] = useState<number | undefined>(trackId);
+  const [authorAffiliation, setAuthorAffiliation] = useState('');
   const [coAuthors, setCoAuthors] = useState<CoAuthor[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -65,6 +66,7 @@ const StudentSubmitForm = () => {
       setAbstract(submission.abstract);
       setKeywords(submission.keywords || '');
       setSelectedTrackId(submission.trackId);
+      setAuthorAffiliation(submission.authorAffiliation || '');
       if (submission.fileUrl) {
         setFilePreview('File đã tải lên');
       }
@@ -196,18 +198,19 @@ const StudentSubmitForm = () => {
       formData.append('trackId', selectedTrackId.toString());
       formData.append('conferenceId', conferenceId.toString());
       formData.append('isDraft', saveAsDraft.toString());
-
-      // Note: coAuthors không được hỗ trợ trong backend hiện tại
-      // Có thể thêm sau khi backend hỗ trợ
-      // if (coAuthors.length > 0) {
-      //   const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
-      //   if (validCoAuthors.length > 0) {
-      //     formData.append('coAuthors', JSON.stringify(validCoAuthors));
-      //   }
-      // }
+      if (authorAffiliation) {
+        formData.append('authorAffiliation', authorAffiliation);
+      }
+      if (coAuthors.length > 0) {
+        const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
+        if (validCoAuthors.length > 0) {
+          formData.append('coAuthors', JSON.stringify(validCoAuthors));
+        }
+      }
 
       if (isEditMode && submissionId) {
         // Update existing submission
+        const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
         await updateSubmission({
           id: submissionId,
           data: {
@@ -215,6 +218,8 @@ const StudentSubmitForm = () => {
             abstract: abstract || '',
             keywords: keywords || undefined,
             trackId: selectedTrackId!,
+            authorAffiliation: authorAffiliation || undefined,
+            coAuthors: validCoAuthors.length > 0 ? JSON.stringify(validCoAuthors) : undefined,
           },
           file: file || undefined,
         }).unwrap();
@@ -439,6 +444,8 @@ const StudentSubmitForm = () => {
                 </label>
                 <input
                   type="text"
+                  value={authorAffiliation}
+                  onChange={(e) => setAuthorAffiliation(e.target.value)}
                   placeholder="Tên trường đại học hoặc tổ chức"
                   className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />

@@ -155,6 +155,7 @@ export interface Submission {
   status: SubmissionStatus;
   authorId: number;
   authorName?: string;
+  authorAffiliation?: string;
   trackId: number;
   conferenceId: number;
   coAuthors?: Array<{ name: string; email: string; affiliation?: string }>;

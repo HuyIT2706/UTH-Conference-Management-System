@@ -71,6 +71,25 @@ export class CreateSubmissionDto {
   })
   @IsBoolean()
   isDraft?: boolean;
+
+  @ApiProperty({
+    description: 'Tổ chức/Trường đại học của tác giả chính',
+    example: 'Đại học Công nghệ Thông tin',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  authorAffiliation?: string;
+
+  @ApiProperty({
+    description: 'Danh sách đồng tác giả (JSON string)',
+    example: '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  coAuthors?: string;
 }
 
 

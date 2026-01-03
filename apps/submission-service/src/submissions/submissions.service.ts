@@ -162,6 +162,16 @@ export class SubmissionsService {
       // 1. Upload file lên Supabase
       const fileUrl = await this.uploadFile(file);
 
+      // Parse coAuthors từ JSON string nếu có
+      let parsedCoAuthors: Array<{ name: string; email: string; affiliation?: string }> | null = null;
+      if (createDto.coAuthors) {
+        try {
+          parsedCoAuthors = JSON.parse(createDto.coAuthors);
+        } catch (e) {
+          console.warn('[SubmissionService] Failed to parse coAuthors:', e);
+        }
+      }
+
       // 2. Tạo submission mới với status = DRAFT hoặc SUBMITTED
       const submission = this.submissionRepository.create({
         title: createDto.title,
@@ -171,9 +181,10 @@ export class SubmissionsService {
         status: isDraft ? SubmissionStatus.DRAFT : SubmissionStatus.SUBMITTED,
         authorId,
         authorName: authorName || null, // Lưu tên từ JWT token
+        authorAffiliation: createDto.authorAffiliation || null,
         trackId: createDto.trackId,
         conferenceId: createDto.conferenceId,
-        coAuthors: null, // Không dùng coAuthors nữa, chỉ dùng authorId từ token
+        coAuthors: parsedCoAuthors,
       });
 
       const savedSubmission = await queryRunner.manager.save(submission);
@@ -289,12 +300,28 @@ export class SubmissionsService {
         newFileUrl = await this.uploadFile(file);
       }
 
+      // Parse coAuthors từ JSON string nếu có
+      let parsedCoAuthors: Array<{ name: string; email: string; affiliation?: string }> | null = submission.coAuthors;
+      if (updateDto.coAuthors !== undefined) {
+        if (updateDto.coAuthors) {
+          try {
+            parsedCoAuthors = JSON.parse(updateDto.coAuthors);
+          } catch (e) {
+            console.warn('[SubmissionService] Failed to parse coAuthors:', e);
+          }
+        } else {
+          parsedCoAuthors = null;
+        }
+      }
+
       Object.assign(submission, {
         title: updateDto.title ?? submission.title,
         abstract: updateDto.abstract ?? submission.abstract,
         keywords: updateDto.keywords ?? submission.keywords,
         trackId: updateDto.trackId ?? submission.trackId,
         fileUrl: newFileUrl,
+        authorAffiliation: updateDto.authorAffiliation !== undefined ? updateDto.authorAffiliation : submission.authorAffiliation,
+        coAuthors: parsedCoAuthors,
       });
 
       const updatedSubmission = await queryRunner.manager.save(submission);

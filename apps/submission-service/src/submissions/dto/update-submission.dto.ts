@@ -48,6 +48,25 @@ export class UpdateSubmissionDto {
   @IsInt()
   @IsOptional()
   trackId?: number;
+
+  @ApiProperty({
+    description: 'Tổ chức/Trường đại học của tác giả chính (tùy chọn)',
+    example: 'Đại học Công nghệ Thông tin',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  authorAffiliation?: string;
+
+  @ApiProperty({
+    description: 'Danh sách đồng tác giả (JSON string, tùy chọn)',
+    example: '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  coAuthors?: string;
 }
 
 
