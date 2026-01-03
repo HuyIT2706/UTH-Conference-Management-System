@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useChangePasswordMutation } from '../../redux/api/usersApi';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
@@ -217,7 +218,14 @@ const ChangePasswordPage = () => {
                   disabled={isLoading}
                   className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <CircularProgress size={16} disableShrink />
+                      Đang xử lý...
+                    </span>
+                  ) : (
+                    'Đổi mật khẩu'
+                  )}
                 </button>
               </div>
             </form>

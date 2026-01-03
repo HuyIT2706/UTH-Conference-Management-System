@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import type { ReviewAssignment, Submission } from '../../types/api.types';
@@ -103,7 +104,9 @@ const SubmissionItem = ({ assignment, submission, onEvaluate }: SubmissionItemPr
   if (!finalSubmission) {
     return (
       <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <div className="text-center text-gray-500">Đang tải thông tin bài viết...</div>
+        <div className="flex justify-center items-center py-8">
+          <CircularProgress disableShrink />
+        </div>
       </div>
     );
   }

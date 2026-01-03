@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetTracksQuery,
   useUpdateTrackMutation,
@@ -76,7 +77,9 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">Đang tải...</p>
+        <div className="flex justify-center items-center py-8">
+          <CircularProgress disableShrink />
+        </div>
       </div>
     );
   }

@@ -188,6 +188,8 @@ export interface UpdateSubmissionDto {
   abstract?: string;
   keywords?: string;
   trackId?: number;
+  authorAffiliation?: string;
+  coAuthors?: string;
 }
 
 export interface UpdateStatusDto {

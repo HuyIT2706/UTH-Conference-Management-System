@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../../hooks/useAuth';
 import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
 import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation } from '../../redux/api/submissionsApi';
@@ -224,12 +225,15 @@ const StudentSubmitForm = () => {
           file: file || undefined,
         }).unwrap();
         showToast.success(saveAsDraft ? 'Đã cập nhật bản nháp thành công' : 'Đã cập nhật bài nộp thành công');
+        // Refresh danh sách và chuyển về trang nộp bài
+        navigate('/student');
       } else {
         // Create new submission
         await createSubmission(formData).unwrap();
         showToast.success(saveAsDraft ? 'Đã lưu bản nháp thành công' : 'Nộp bài thành công');
+        // Refresh danh sách và chuyển về trang nộp bài
+        navigate('/student');
       }
-      navigate('/student');
     } catch (error) {
       showToast.error(formatApiError(error));
     }
@@ -241,7 +245,9 @@ const StudentSubmitForm = () => {
     return (
       <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center">Đang tải...</div>
+          <div className="flex justify-center items-center py-8">
+            <CircularProgress disableShrink />
+          </div>
         </div>
       </div>
     );
@@ -295,20 +301,6 @@ const StudentSubmitForm = () => {
             )}
           </div>
 
-          {/* Status Bar
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-blue-600 font-medium">• Bản nháp</span>
-            </div>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
-                Chỉnh sửa
-              </button>
-              <button className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50">
-                Rút bài
-              </button>
-            </div>
-          </div> */}
           
           {/* Deadline Warning */}
           {isDeadlinePassed && (
@@ -359,7 +351,7 @@ const StudentSubmitForm = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Nhập tiêu đề nghiên cứu của bạn"
-                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                 />
               </div>
 
@@ -372,7 +364,7 @@ const StudentSubmitForm = () => {
                   onChange={(e) => setAbstract(e.target.value)}
                   placeholder="Nhập tóm tắt nghiên cứu (200 - 300 từ)"
                   rows={6}
-                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                 />
               </div>
 
@@ -385,7 +377,7 @@ const StudentSubmitForm = () => {
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   placeholder="Nhập các từ khóa, phân cách bằng dấu phẩy"
-                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Ví dụ: machine learning, artificial intelligence, deep learning
@@ -399,7 +391,7 @@ const StudentSubmitForm = () => {
                 <select
                   value={selectedTrackId || ''}
                   onChange={(e) => setSelectedTrackId(parseInt(e.target.value))}
-                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                 >
                   <option value="">Chọn chủ đề</option>
                   {tracks.map((track) => (
@@ -447,7 +439,7 @@ const StudentSubmitForm = () => {
                   value={authorAffiliation}
                   onChange={(e) => setAuthorAffiliation(e.target.value)}
                   placeholder="Tên trường đại học hoặc tổ chức"
-                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -484,7 +476,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.name}
                         onChange={(e) => updateCoAuthor(index, 'name', e.target.value)}
                         placeholder="Họ và tên"
-                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -494,7 +486,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.email}
                         onChange={(e) => updateCoAuthor(index, 'email', e.target.value)}
                         placeholder="Email"
-                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -504,7 +496,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.affiliation || ''}
                         onChange={(e) => updateCoAuthor(index, 'affiliation', e.target.value)}
                         placeholder="Tên tổ chức hoặc trường đại học"
-                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -566,13 +558,18 @@ const StudentSubmitForm = () => {
               disabled={isLoading || isDeadlinePassed}
               className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading
-                ? 'Đang xử lý...'
-                : isDeadlinePassed
-                ? 'Đã hết hạn nộp bài'
-                : isEditMode
-                ? 'Cập nhật bài nộp'
-                : 'Nộp bài'}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <CircularProgress size={16} disableShrink />
+                  Đang xử lý...
+                </span>
+              ) : isDeadlinePassed ? (
+                'Đã hết hạn nộp bài'
+              ) : isEditMode ? (
+                'Cập nhật bài nộp'
+              ) : (
+                'Nộp bài'
+              )}
             </button>
           </div>
         </div>

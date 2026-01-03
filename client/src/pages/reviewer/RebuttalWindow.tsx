@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
 
@@ -37,7 +38,11 @@ const RebuttalWindow = ({ submissionId }: RebuttalWindowProps) => {
   };
 
   if (!submission) {
-    return <div className="text-center py-8">Đang tải thông tin...</div>;
+    return (
+      <div className="flex justify-center items-center py-8">
+        <CircularProgress disableShrink />
+      </div>
+    );
   }
 
   const submissionDeadline = submission.submissionDeadline;

@@ -1,3 +1,4 @@
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetConferencesQuery } from '../redux/api/conferencesApi';
 import type { Conference } from '../types/api.types';
 
@@ -45,8 +46,8 @@ const Competition = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <p className="text-gray-600">Đang tải danh sách hội nghị...</p>
+      <div className="p-6 flex justify-center items-center">
+        <CircularProgress disableShrink />
       </div>
     );
   }

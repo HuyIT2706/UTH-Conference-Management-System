@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../hooks/useAuth';
 import { showToast } from '../utils/toast';
 import { useEffect, useState } from 'react';
@@ -26,7 +27,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-600">Đang tải...</div>
+        <CircularProgress disableShrink />
       </div>
     );
   }
@@ -38,7 +39,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-600">Đang tải thông tin người dùng...</div>
+        <CircularProgress disableShrink />
       </div>
     );
   }

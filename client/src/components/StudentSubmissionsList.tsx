@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetMySubmissionsQuery,
   useWithdrawSubmissionMutation,
@@ -109,7 +110,9 @@ const StudentSubmissionsList = () => {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="text-center text-gray-600">Đang tải...</div>
+        <div className="flex justify-center items-center py-8">
+          <CircularProgress disableShrink />
+        </div>
       </div>
     );
   }

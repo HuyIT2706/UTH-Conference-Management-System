@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetConferencesQuery, useDeleteConferenceMutation } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
@@ -150,7 +151,9 @@ const ConferenceSetupPage = () => {
 
       {isLoading && (
         <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">Đang tải...</p>
+          <div className="flex justify-center items-center py-8">
+            <CircularProgress disableShrink />
+          </div>
         </div>
       )}
 

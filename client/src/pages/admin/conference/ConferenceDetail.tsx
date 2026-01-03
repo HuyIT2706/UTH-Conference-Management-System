@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetConferenceByIdQuery,
   useUpdateConferenceMutation,
@@ -137,7 +138,9 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">Đang tải...</p>
+        <div className="flex justify-center items-center py-8">
+          <CircularProgress disableShrink />
+        </div>
       </div>
     );
   }

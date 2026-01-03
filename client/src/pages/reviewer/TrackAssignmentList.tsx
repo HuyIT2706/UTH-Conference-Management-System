@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetMyAssignmentsQuery, useAcceptAssignmentMutation, useRejectAssignmentMutation } from '../../redux/api/reviewsApi';
 import { useGetConferencesQuery, useGetTracksQuery } from '../../redux/api/conferencesApi';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
@@ -138,7 +139,9 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
       {trackAssignments.size === 0 ? (
         <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
           {submissionIds.length > 0 && submissionsMap.size === 0 ? (
-            <div>Đang tải thông tin phân công...</div>
+            <div className="flex justify-center items-center py-4">
+              <CircularProgress size={24} disableShrink />
+            </div>
           ) : (
             <div>Chưa có phân công nào</div>
           )}

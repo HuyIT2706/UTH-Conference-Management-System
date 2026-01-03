@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import { useCreateReviewMutation } from '../../redux/api/reviewsApi';
 import { showToast } from '../../utils/toast';
@@ -53,7 +54,11 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   };
 
   if (!submission) {
-    return <div className="text-center py-8">Đang tải thông tin bài viết...</div>;
+    return (
+      <div className="flex justify-center items-center py-8">
+        <CircularProgress disableShrink />
+      </div>
+    );
   }
 
   return (
@@ -160,7 +165,14 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
             disabled={isLoading}
             className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
           >
-            {isLoading ? 'Đang xử lý...' : 'Nộp đánh giá'}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <CircularProgress size={16} disableShrink />
+                Đang xử lý...
+              </span>
+            ) : (
+              'Nộp đánh giá'
+            )}
           </button>
         </div>
       </div>

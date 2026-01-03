@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetConferencesQuery,
   useGetPublicTracksQuery,
@@ -14,7 +15,11 @@ const StudentSubmissionLanding = () => {
     null,
   );
 
-  if (isLoading) return <div className="p-6">Đang tải...</div>;
+  if (isLoading) return (
+    <div className="p-6 flex justify-center items-center">
+      <CircularProgress disableShrink />
+    </div>
+  );
   if (error) return <div className="p-6 text-red-600">Lỗi tải dữ liệu</div>;
 
   const isSubmissionOpen = (c: Conference) => {
@@ -107,7 +112,9 @@ const ConferenceCard = ({
       {isExpanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50">
           {tracksLoading ? (
-            <p className="text-sm text-gray-500">Đang tải chủ đề...</p>
+            <div className="flex justify-center items-center py-2">
+              <CircularProgress size={20} disableShrink />
+            </div>
           ) : tracks.length === 0 ? (
             <p className="text-sm text-gray-500">Chưa có chủ đề nào</p>
           ) : (

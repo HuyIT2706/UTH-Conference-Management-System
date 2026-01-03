@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetTracksQuery } from '../../../redux/api/conferencesApi';
 import type { Conference, Track } from '../../../types/api.types';
 
@@ -86,7 +87,9 @@ const ConferenceTracks = ({
       {isExpanded && (
         <div className="mt-4 border-t pt-4">
           {isLoading ? (
-            <p className="text-gray-600">Đang tải chủ đề...</p>
+            <div className="flex justify-center items-center py-4">
+              <CircularProgress size={20} disableShrink />
+            </div>
           ) : tracks.length === 0 ? (
             <p className="text-gray-600">Chưa có chủ đề nào</p>
           ) : (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import bgUth from '../../assets/bg_uth.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -262,7 +263,14 @@ const ActivateAccount = () => {
             disabled={isLoadingToken}
             className="w-full bg-primary hover:bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoadingToken ? 'Đang xử lý...' : 'Xác nhận'}
+            {isLoadingToken ? (
+              <span className="flex items-center gap-2 justify-center">
+                <CircularProgress size={16} disableShrink />
+                Đang xử lý...
+              </span>
+            ) : (
+              'Xác nhận'
+            )}
           </button>
         </form>
       </div>

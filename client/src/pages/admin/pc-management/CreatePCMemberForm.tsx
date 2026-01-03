@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAddTrackMemberMutation } from '../../../redux/api/conferencesApi';
 import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
@@ -76,7 +77,9 @@ const CreatePCMemberForm = ({
             Chọn người dùng <span className="text-red-500">*</span>
           </label>
           {isLoadingUsers ? (
-            <p className="text-gray-600">Đang tải danh sách người dùng...</p>
+            <div className="flex justify-center items-center py-4">
+              <CircularProgress size={24} disableShrink />
+            </div>
           ) : availableUsers.length === 0 ? (
             <p className="text-gray-600">Không còn người dùng nào để thêm</p>
           ) : (

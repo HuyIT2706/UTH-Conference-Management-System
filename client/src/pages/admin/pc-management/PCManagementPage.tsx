@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetConferencesQuery } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import TrackListForPC from './TrackListForPC';
@@ -124,7 +125,9 @@ const PCManagementPage = () => {
 
       {isLoading && (
         <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">Đang tải...</p>
+          <div className="flex justify-center items-center py-8">
+            <CircularProgress disableShrink />
+          </div>
         </div>
       )}
 

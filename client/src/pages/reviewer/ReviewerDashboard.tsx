@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
 import { showToast } from '../../utils/toast';
 import TrackAssignmentList from './TrackAssignmentList';
@@ -32,8 +33,8 @@ const ReviewerDashboard = () => {
     return (
       <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center py-8">
-            <div className="text-gray-600">Đang tải...</div>
+          <div className="flex justify-center items-center py-8">
+            <CircularProgress disableShrink />
           </div>
         </div>
       </div>

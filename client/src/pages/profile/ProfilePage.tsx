@@ -1,3 +1,4 @@
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
@@ -36,7 +37,9 @@ const ProfilePage = () => {
     return (
       <div className="p-6">
         <div className="bg-white rounded-lg shadow p-6 max-w-3xl mx-auto">
-          <p className="text-gray-600">Đang tải thông tin...</p>
+          <div className="flex justify-center items-center py-8">
+            <CircularProgress disableShrink />
+          </div>
         </div>
       </div>
     );
