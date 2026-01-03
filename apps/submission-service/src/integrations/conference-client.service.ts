@@ -53,12 +53,40 @@ export class ConferenceClientService {
     }
 
     try {
+      console.log('[ConferenceClient] Calling validateTrack:', {
+        url: `/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
+        conferenceId,
+        trackId,
+      });
       const response = await firstValueFrom(
         this.httpService.get(
-          `/conferences/${conferenceId}/tracks/${trackId}/validate`,
+          `/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
         ),
       );
-      const result = response.data;
+      console.log('[ConferenceClient] Raw response:', {
+        status: response.status,
+        data: response.data,
+        headers: response.headers,
+      });
+      
+      // Handle both direct response and wrapped response
+      let result = response.data;
+      if (result && result.data && typeof result.data.valid === 'boolean') {
+        console.log('[ConferenceClient] Response wrapped in data field, unwrapping...');
+        result = result.data;
+      }
+      
+      if (!result || typeof result.valid !== 'boolean') {
+        console.error('[ConferenceClient] Invalid response structure:', {
+          result,
+          type: typeof result,
+          hasValid: result?.valid !== undefined,
+        });
+        return { valid: false };
+      }
+      
+      console.log('[ConferenceClient] Track validation result:', result);
+      
       if (result.valid) {
         this.trackCache.set(cacheKey, {
           data: result,
@@ -73,6 +101,21 @@ export class ConferenceClientService {
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi validate track';
+      
+      console.error('[ConferenceClient] validateTrack error:', {
+        status,
+        message,
+        error: error.response?.data || error.message,
+        conferenceId,
+        trackId,
+      });
+      
+      // Nếu là 401/403, có thể endpoint cần auth
+      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+        console.warn('[ConferenceClient] Validation endpoint requires auth, returning invalid');
+        return { valid: false };
+      }
+      
       if (status === HttpStatus.NOT_FOUND) {
         const result = { valid: false };
         this.trackCache.set(cacheKey, {
@@ -81,6 +124,14 @@ export class ConferenceClientService {
         });
         return result;
       }
+      
+      // Nếu là 400 Bad Request, có thể track không hợp lệ
+      if (status === HttpStatus.BAD_REQUEST) {
+        console.warn('[ConferenceClient] Bad request from validation endpoint, track may be invalid');
+        return { valid: false };
+      }
+      
+      // Với các lỗi khác, throw exception để submission service xử lý
       throw new HttpException(
         `Conference-service validateTrack lỗi: ${message}`,
         status && status >= 400 && status < 600
@@ -102,7 +153,7 @@ export class ConferenceClientService {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          `/conferences/${conferenceId}/cfp/check-deadline`,
+          `/public/conferences/${conferenceId}/cfp/check-deadline`,
           {
             params: { type },
           },

@@ -82,8 +82,10 @@ services:
       - DB_DATABASE=db_submission
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
+      - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
     depends_on:
       - postgres
+      - conference-service
     networks:
       - uth-net
 

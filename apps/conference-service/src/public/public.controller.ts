@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ConferencesService } from '../conferences/conferences.service';
 import { TemplatesService } from '../template/templates.service';
 
@@ -8,6 +8,74 @@ export class PublicController {
     private readonly conferencesService: ConferencesService,
     private readonly templatesService: TemplatesService,
   ) {}
+
+  // Đặt các route cụ thể trước route generic để tránh conflict
+  @Get(':conferenceId/tracks/:trackId/validate')
+  async validateTrack(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @Param('trackId', ParseIntPipe) trackId: number,
+  ) {
+    const tracks = await this.conferencesService.findAllTracks(conferenceId);
+    const track = tracks.find((t) => t.id === trackId);
+
+    return {
+      valid: !!track,
+      track: track || undefined,
+    };
+  }
+
+  @Get(':conferenceId/cfp/check-deadline')
+  async checkDeadline(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @Query('type') type: 'submission' | 'review' | 'notification' | 'camera-ready',
+  ) {
+    const cfpSetting = await this.conferencesService.getCfpSetting(conferenceId);
+
+    if (!cfpSetting) {
+      return {
+        valid: false,
+        message: 'CFP settings chưa được thiết lập',
+      };
+    }
+
+    const now = new Date();
+    let deadline: Date;
+    let deadlineName: string;
+
+    switch (type) {
+      case 'submission':
+        deadline = cfpSetting.submissionDeadline;
+        deadlineName = 'Submission deadline';
+        break;
+      case 'review':
+        deadline = cfpSetting.reviewDeadline;
+        deadlineName = 'Review deadline';
+        break;
+      case 'notification':
+        deadline = cfpSetting.notificationDate;
+        deadlineName = 'Notification date';
+        break;
+      case 'camera-ready':
+        deadline = cfpSetting.cameraReadyDeadline;
+        deadlineName = 'Camera-ready deadline';
+        break;
+      default:
+        return {
+          valid: false,
+          message: 'Invalid deadline type',
+        };
+    }
+
+    const valid = now <= deadline;
+
+    return {
+      valid,
+      deadline,
+      message: valid
+        ? `${deadlineName} chưa qua`
+        : `${deadlineName} đã qua`,
+    };
+  }
 
   @Get(':id/cfp')
   async getPublicCfp(@Param('id', ParseIntPipe) conferenceId: number) {

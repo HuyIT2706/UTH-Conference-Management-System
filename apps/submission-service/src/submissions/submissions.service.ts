@@ -131,45 +131,37 @@ export class SubmissionsService {
       throw new BadRequestException('File là bắt buộc (PDF, DOCX hoặc ZIP)');
     }
 
-    // Validate track
+    // Validate track - Tạm thời bỏ qua vì frontend đã validate khi user chọn track
+    // Chỉ log warning nếu validation fail, không block submit
     try {
       const trackValidation = await this.conferenceClient.validateTrack(
         createDto.conferenceId,
         createDto.trackId,
       );
-      console.log('validateTrack', {
-        conferenceId: createDto.conferenceId,
-        trackId: createDto.trackId,
-        result: trackValidation,
-      });
-      // if (!trackValidation.valid) {
-      //   throw new BadRequestException('Track không hợp lệ hoặc không thuộc conference này');
-      // }
+      if (!trackValidation || !trackValidation.valid) {
+        console.warn('[SubmissionService] Track validation failed, but allowing submit (frontend already validated):', {
+          conferenceId: createDto.conferenceId,
+          trackId: createDto.trackId,
+        });
+      }
     } catch (e) {
-      console.warn(
-        'Không gọi được conference-service validateTrack, bỏ qua để không chặn submit',
-        e,
-      );
+      // Log warning nhưng không block submit
+      console.warn('[SubmissionService] Track validation error (non-blocking, frontend already validated):', e);
     }
     try {
       const deadlineCheck = await this.conferenceClient.checkDeadline(
         createDto.conferenceId,
         'submission',
       );
-      console.log('checkDeadline', {
-        conferenceId: createDto.conferenceId,
-        result: deadlineCheck,
-      });
-      // if (!deadlineCheck.valid) {
-      //   throw new BadRequestException(
-      //     `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
-      //   );
-      // }
+      if (!deadlineCheck.valid) {
+        throw new BadRequestException(
+          `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
+        );
+      }
     } catch (e) {
-      console.warn(
-        'Không gọi được conference-service checkDeadline, bỏ qua để không chặn submit',
-        e,
-      );
+      if (e instanceof BadRequestException) {
+        throw e;
+      }
     }
 
     const queryRunner = this.dataSource.createQueryRunner();

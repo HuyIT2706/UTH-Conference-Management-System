@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
-import { useCreateSubmissionMutation } from '../../redux/api/submissionsApi';
+import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation } from '../../redux/api/submissionsApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
+import StudentSubmissionsList from '../../components/StudentSubmissionsList';
 import type { Track } from '../../types/api.types';
 
 interface CoAuthor {
@@ -20,6 +21,8 @@ const StudentSubmitForm = () => {
   const conferenceId = parseInt(searchParams.get('conferenceId') || '0');
   const trackIdParam = searchParams.get('trackId');
   const trackId = trackIdParam ? parseInt(trackIdParam) : undefined;
+  const submissionId = searchParams.get('submissionId') || undefined;
+  const isEditMode = !!submissionId;
 
   const { data: conferenceData, isLoading: conferenceLoading } = useGetConferenceByIdQuery(conferenceId, {
     skip: !conferenceId,
@@ -27,12 +30,17 @@ const StudentSubmitForm = () => {
   const { data: tracksData } = useGetPublicTracksQuery(conferenceId, {
     skip: !conferenceId,
   });
+  const { data: submissionData, isLoading: submissionLoading } = useGetSubmissionByIdQuery(submissionId!, {
+    skip: !submissionId,
+  });
 
   const conference = conferenceData?.data;
   const tracks: Track[] = tracksData?.data || [];
   const selectedTrack = trackId ? tracks.find((t) => t.id === trackId) : undefined;
+  const submission = submissionData?.data;
 
   const [createSubmission, { isLoading: isSubmitting }] = useCreateSubmissionMutation();
+  const [updateSubmission, { isLoading: isUpdating }] = useUpdateSubmissionMutation();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -49,6 +57,22 @@ const StudentSubmitForm = () => {
       navigate('/student');
     }
   }, [conferenceId, navigate]);
+
+  // Load submission data when editing
+  useEffect(() => {
+    if (submission && isEditMode) {
+      setTitle(submission.title);
+      setAbstract(submission.abstract);
+      setKeywords(submission.keywords || '');
+      setSelectedTrackId(submission.trackId);
+      if (submission.fileUrl) {
+        setFilePreview('File đã tải lên');
+      }
+      if (submission.coAuthors && submission.coAuthors.length > 0) {
+        setCoAuthors(submission.coAuthors);
+      }
+    }
+  }, [submission, isEditMode]);
 
   const calculateDaysLeft = (deadline: string): number => {
     const now = new Date();
@@ -138,6 +162,12 @@ const StudentSubmitForm = () => {
       return;
     }
 
+    // Check deadline trước khi submit
+    if (!saveAsDraft && isDeadlinePassed) {
+      showToast.error('Hạn nộp bài đã qua. Vui lòng liên hệ ban tổ chức nếu cần hỗ trợ.');
+      return;
+    }
+
     if (!saveAsDraft) {
       if (!title.trim()) {
         showToast.error('Vui lòng nhập tiêu đề bài viết');
@@ -175,13 +205,31 @@ const StudentSubmitForm = () => {
       //   }
       // }
 
-      await createSubmission(formData).unwrap();
-      showToast.success(saveAsDraft ? 'Đã lưu bản nháp thành công' : 'Nộp bài thành công');
+      if (isEditMode && submissionId) {
+        // Update existing submission
+        await updateSubmission({
+          id: submissionId,
+          data: {
+            title: title || 'Draft',
+            abstract: abstract || '',
+            keywords: keywords || undefined,
+            trackId: selectedTrackId!,
+          },
+          file: file || undefined,
+        }).unwrap();
+        showToast.success(saveAsDraft ? 'Đã cập nhật bản nháp thành công' : 'Đã cập nhật bài nộp thành công');
+      } else {
+        // Create new submission
+        await createSubmission(formData).unwrap();
+        showToast.success(saveAsDraft ? 'Đã lưu bản nháp thành công' : 'Nộp bài thành công');
+      }
       navigate('/student');
     } catch (error) {
       showToast.error(formatApiError(error));
     }
   };
+
+  const isLoading = isSubmitting || isUpdating;
 
   if (conferenceLoading) {
     return (
@@ -205,17 +253,25 @@ const StudentSubmitForm = () => {
 
   const submissionDeadline = conference.cfpSetting?.submissionDeadline || conference.submissionDeadline;
   const daysLeft = submissionDeadline ? calculateDaysLeft(submissionDeadline) : 0;
+  const isDeadlinePassed = submissionDeadline ? new Date() > new Date(submissionDeadline) : false;
 
   return (
     <div className="bg-gradient-to-br from-teal-50 to-blue-50 min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4">
+        {/* Submissions List */}
+        <StudentSubmissionsList />
+
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Nộp Bài</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                {isEditMode ? 'Chỉnh sửa bài nộp' : 'Nộp Bài'}
+              </h1>
               <p className="text-gray-600">
-                Vui lòng điền đầy đủ thông tin bên dưới để nộp bài nghiên cứu của bạn
+                {isEditMode
+                  ? 'Chỉnh sửa thông tin bài nghiên cứu của bạn'
+                  : 'Vui lòng điền đầy đủ thông tin bên dưới để nộp bài nghiên cứu của bạn'}
               </p>
             </div>
             {submissionDeadline && (
@@ -224,12 +280,16 @@ const StudentSubmitForm = () => {
                 <div className="text-lg font-semibold text-gray-800">
                   {new Date(submissionDeadline).toLocaleDateString('vi-VN')}
                 </div>
-                <div className="text-sm text-teal-600 font-medium">Còn {daysLeft} ngày</div>
+                {isDeadlinePassed ? (
+                  <div className="text-sm text-red-600 font-medium">Đã hết hạn</div>
+                ) : (
+                  <div className="text-sm text-teal-600 font-medium">Còn {daysLeft} ngày</div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Status Bar */}
+          {/* Status Bar
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="text-blue-600 font-medium">• Bản nháp</span>
@@ -242,7 +302,40 @@ const StudentSubmitForm = () => {
                 Rút bài
               </button>
             </div>
-          </div>
+          </div> */}
+          
+          {/* Deadline Warning */}
+          {isDeadlinePassed && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <div>
+                  <h3 className="text-red-800 font-semibold mb-1">Hạn nộp bài đã qua</h3>
+                  <p className="text-red-700 text-sm">
+                    Hạn nộp bài là {new Date(submissionDeadline!).toLocaleDateString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}. Bạn không thể nộp bài mới nữa. Vui lòng liên hệ ban tổ chức nếu cần hỗ trợ.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Form */}
@@ -260,7 +353,7 @@ const StudentSubmitForm = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Nhập tiêu đề nghiên cứu của bạn"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
 
@@ -273,7 +366,7 @@ const StudentSubmitForm = () => {
                   onChange={(e) => setAbstract(e.target.value)}
                   placeholder="Nhập tóm tắt nghiên cứu (200 - 300 từ)"
                   rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
 
@@ -286,7 +379,7 @@ const StudentSubmitForm = () => {
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
                   placeholder="Nhập các từ khóa, phân cách bằng dấu phẩy"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Ví dụ: machine learning, artificial intelligence, deep learning
@@ -300,7 +393,7 @@ const StudentSubmitForm = () => {
                 <select
                   value={selectedTrackId || ''}
                   onChange={(e) => setSelectedTrackId(parseInt(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   <option value="">Chọn chủ đề</option>
                   {tracks.map((track) => (
@@ -346,7 +439,7 @@ const StudentSubmitForm = () => {
                 <input
                   type="text"
                   placeholder="Tên trường đại học hoặc tổ chức"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-teal-500 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
             </div>
@@ -383,7 +476,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.name}
                         onChange={(e) => updateCoAuthor(index, 'name', e.target.value)}
                         placeholder="Họ và tên"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -393,7 +486,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.email}
                         onChange={(e) => updateCoAuthor(index, 'email', e.target.value)}
                         placeholder="Email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                       />
                     </div>
                     <div>
@@ -403,7 +496,7 @@ const StudentSubmitForm = () => {
                         value={coAuthor.affiliation || ''}
                         onChange={(e) => updateCoAuthor(index, 'affiliation', e.target.value)}
                         placeholder="Tên tổ chức hoặc trường đại học"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full px-3 py-2 border border-teal-500 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                       />
                     </div>
                   </div>
@@ -455,17 +548,23 @@ const StudentSubmitForm = () => {
           <div className="flex justify-between pt-6 border-t border-gray-200">
             <button
               onClick={() => handleSubmit(true)}
-              disabled={isSubmitting}
+              disabled={isLoading}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              Lưu bản nháp
+              {isEditMode ? 'Cập nhật bản nháp' : 'Lưu bản nháp'}
             </button>
             <button
               onClick={() => handleSubmit(false)}
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+              disabled={isLoading || isDeadlinePassed}
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Đang xử lý...' : 'Nộp bài'}
+              {isLoading
+                ? 'Đang xử lý...'
+                : isDeadlinePassed
+                ? 'Đã hết hạn nộp bài'
+                : isEditMode
+                ? 'Cập nhật bài nộp'
+                : 'Nộp bài'}
             </button>
           </div>
         </div>
