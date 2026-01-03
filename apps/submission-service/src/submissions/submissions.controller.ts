@@ -37,7 +37,7 @@ export class SubmissionsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Tạo submission mới (nộp bài)',
-    description: `Tạo một submission mới với file đính kèm. Chấp nhận các định dạng: PDF, DOCX, ZIP (tối đa 10MB).
+    description: `Tạo một submission mới với file đính kèm. Chấp nhận các định dạng: PDF, DOCX, ZIP (tối đa 20MB).
     
     **Ví dụ request (multipart/form-data):**
     - \`file\`: File PDF, DOCX hoặc ZIP (bắt buộc)
@@ -62,7 +62,7 @@ export class SubmissionsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'File PDF, DOCX hoặc ZIP (tối đa 10MB)',
+          description: 'File PDF, DOCX hoặc ZIP (tối đa 20MB)',
         },
         title: {
           type: 'string',
@@ -89,6 +89,11 @@ export class SubmissionsController {
           example: 1,
           description: 'ID của conference',
         },
+        isDraft: {
+          type: 'boolean',
+          example: false,
+          description: 'Lưu bản nháp (true) hay nộp bài (false)',
+        },
       },
       required: ['file', 'title', 'abstract', 'trackId', 'conferenceId'],
     },
@@ -113,8 +118,10 @@ export class SubmissionsController {
       user.fullName, 
     );
 
+    const isDraft = createDto.isDraft ?? false;
+
     return {
-      message: 'Nộp bài dự thi thành công',
+      message: isDraft ? 'Lưu bản nháp thành công' : 'Nộp bài dự thi thành công',
       data: submission,
     };
   }
@@ -380,7 +387,7 @@ export class SubmissionsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'File camera-ready (PDF, DOCX, ZIP - tối đa 10MB)',
+          description: 'File camera-ready (PDF, DOCX, ZIP - tối đa 20MB)',
         },
       },
       required: ['file'],

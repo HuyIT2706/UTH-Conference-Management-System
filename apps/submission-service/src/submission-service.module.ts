@@ -62,7 +62,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     MulterModule.register({
       storage: memoryStorage(),
       limits: {
-        fileSize: 10 * 1024 * 1024, 
+        fileSize: 20 * 1024 * 1024, // 20MB
       },
     }),
   ],

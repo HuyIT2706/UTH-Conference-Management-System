@@ -10,20 +10,7 @@ export class PublicController {
   ) {}
 
   // Đặt các route cụ thể trước route generic để tránh conflict
-  @Get(':conferenceId/tracks/:trackId/validate')
-  async validateTrack(
-    @Param('conferenceId', ParseIntPipe) conferenceId: number,
-    @Param('trackId', ParseIntPipe) trackId: number,
-  ) {
-    const tracks = await this.conferencesService.findAllTracks(conferenceId);
-    const track = tracks.find((t) => t.id === trackId);
-
-    return {
-      valid: !!track,
-      track: track || undefined,
-    };
-  }
-
+  // Route check-deadline phải đặt trước route :id/cfp để tránh conflict
   @Get(':conferenceId/cfp/check-deadline')
   async checkDeadline(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -74,6 +61,20 @@ export class PublicController {
       message: valid
         ? `${deadlineName} chưa qua`
         : `${deadlineName} đã qua`,
+    };
+  }
+
+  @Get(':conferenceId/tracks/:trackId/validate')
+  async validateTrack(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @Param('trackId', ParseIntPipe) trackId: number,
+  ) {
+    const tracks = await this.conferencesService.findAllTracks(conferenceId);
+    const track = tracks.find((t) => t.id === trackId);
+
+    return {
+      valid: !!track,
+      track: track || undefined,
     };
   }
 

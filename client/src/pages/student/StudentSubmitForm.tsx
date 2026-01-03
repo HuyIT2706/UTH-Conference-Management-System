@@ -195,6 +195,7 @@ const StudentSubmitForm = () => {
       }
       formData.append('trackId', selectedTrackId.toString());
       formData.append('conferenceId', conferenceId.toString());
+      formData.append('isDraft', saveAsDraft.toString());
 
       // Note: coAuthors không được hỗ trợ trong backend hiện tại
       // Có thể thêm sau khi backend hỗ trợ
