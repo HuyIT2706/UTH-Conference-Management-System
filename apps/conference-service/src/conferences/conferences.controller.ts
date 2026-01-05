@@ -423,4 +423,40 @@ export class ConferencesController {
     });
     return { message: 'Xóa thành viên thành công' };
   }
+
+  @Get('tracks/my-assignments')
+  @ApiOperation({ summary: 'Lấy danh sách chủ đề được phân công cho reviewer hiện tại' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách phân công thành công' })
+  async getMyTrackAssignments(@CurrentUser() user: JwtPayload) {
+    const assignments = await this.conferencesService.getMyTrackAssignments(user.sub);
+    return { message: 'Lấy danh sách phân công thành công', data: assignments };
+  }
+
+  @Post('tracks/:trackId/accept')
+  @ApiOperation({ summary: 'Chấp nhận phân công chủ đề' })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiResponse({ status: 200, description: 'Chấp nhận phân công thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy phân công' })
+  @ApiResponse({ status: 400, description: 'Phân công đã được xử lý' })
+  async acceptTrackAssignment(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const member = await this.conferencesService.acceptTrackAssignment(trackId, user.sub);
+    return { message: 'Chấp nhận phân công thành công', data: member };
+  }
+
+  @Post('tracks/:trackId/reject')
+  @ApiOperation({ summary: 'Từ chối phân công chủ đề' })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiResponse({ status: 200, description: 'Từ chối phân công thành công' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy phân công' })
+  @ApiResponse({ status: 400, description: 'Phân công đã được xử lý' })
+  async rejectTrackAssignment(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const member = await this.conferencesService.rejectTrackAssignment(trackId, user.sub);
+    return { message: 'Từ chối phân công thành công', data: member };
+  }
 }

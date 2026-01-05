@@ -12,12 +12,13 @@ interface SubmissionListProps {
 const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Filter accepted assignments (only show submissions for accepted tracks)
-  const acceptedAssignments = assignments.filter((a) => a.status === 'ACCEPTED');
+  // Show all assignments (including PENDING ones for submissions without review assignment yet)
+  // Filter out only REJECTED assignments
+  const visibleAssignments = assignments.filter((a) => a.status !== 'REJECTED');
   
   // Get submissions from assignments (either from assignment.submission or fetch by ID)
   const submissionsWithAssignments = useMemo(() => {
-    return acceptedAssignments.map((assignment) => {
+    return visibleAssignments.map((assignment) => {
       // If assignment has submission object, use it
       if (assignment.submission) {
         return { submission: assignment.submission, assignment };
@@ -25,7 +26,7 @@ const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
       // Otherwise, we'll need to fetch it (handled by SubmissionItem component)
       return { submission: null, assignment };
     });
-  }, [acceptedAssignments]);
+  }, [visibleAssignments]);
 
   // Apply search filter
   const searchedItems = submissionsWithAssignments.filter((item) => {
@@ -37,10 +38,10 @@ const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
     );
   });
 
-  if (acceptedAssignments.length === 0) {
+  if (visibleAssignments.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-        Chưa có bài nộp nào được chấp nhận
+        Chưa có bài nộp nào
       </div>
     );
   }
@@ -111,11 +112,20 @@ const SubmissionItem = ({ assignment, submission, onEvaluate }: SubmissionItemPr
     );
   }
 
-  const status = assignment.status === 'ACCEPTED' ? 'Đã phân công' : 'Chưa phân công';
-  const statusClass =
-    assignment.status === 'ACCEPTED'
-      ? 'bg-black text-white'
-      : 'bg-gray-200 text-gray-700';
+  // Determine status text and class
+  let status = 'Chưa phân công';
+  let statusClass = 'bg-gray-200 text-gray-700';
+  
+  if (assignment.status === 'ACCEPTED') {
+    status = 'Đã phân công';
+    statusClass = 'bg-green-600 text-white';
+  } else if (assignment.status === 'PENDING') {
+    status = 'Chờ chấp nhận';
+    statusClass = 'bg-yellow-500 text-white';
+  } else if (assignment.status === 'COMPLETED') {
+    status = 'Đã hoàn thành';
+    statusClass = 'bg-blue-600 text-white';
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-6 border border-gray-200">

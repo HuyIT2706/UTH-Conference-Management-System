@@ -227,6 +227,45 @@ export const conferencesApi = apiSlice.injectEndpoints({
         { type: 'TrackMember', id: `track-${trackId}` },
       ],
     }),
+    // Get my track assignments (for reviewers)
+    getMyTrackAssignments: builder.query<ApiResponse<TrackMember[]>, void>({
+      query: () => '/conferences/tracks/my-assignments',
+      providesTags: (result) =>
+        result?.data && Array.isArray(result.data)
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'TrackMember' as const, id })),
+              { type: 'TrackMember', id: 'MY_ASSIGNMENTS' },
+            ]
+          : [{ type: 'TrackMember', id: 'MY_ASSIGNMENTS' }],
+    }),
+    // Accept track assignment
+    acceptTrackAssignment: builder.mutation<
+      ApiResponse<TrackMember>,
+      number
+    >({
+      query: (trackId) => ({
+        url: `/conferences/tracks/${trackId}/accept`,
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'TrackMember', id: 'MY_ASSIGNMENTS' },
+        (_result, _error, trackId) => ({ type: 'TrackMember', id: `track-${trackId}` }),
+      ],
+    }),
+    // Reject track assignment
+    rejectTrackAssignment: builder.mutation<
+      ApiResponse<TrackMember>,
+      number
+    >({
+      query: (trackId) => ({
+        url: `/conferences/tracks/${trackId}/reject`,
+        method: 'POST',
+      }),
+      invalidatesTags: [
+        { type: 'TrackMember', id: 'MY_ASSIGNMENTS' },
+        (_result, _error, trackId) => ({ type: 'TrackMember', id: `track-${trackId}` }),
+      ],
+    }),
   }),
 });
 
@@ -247,5 +286,8 @@ export const {
   useGetTrackMembersQuery,
   useAddTrackMemberMutation,
   useDeleteTrackMemberMutation,
+  useGetMyTrackAssignmentsQuery,
+  useAcceptTrackAssignmentMutation,
+  useRejectTrackAssignmentMutation,
 } = conferencesApi;
 

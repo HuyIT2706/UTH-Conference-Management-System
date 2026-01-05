@@ -401,4 +401,57 @@ export class ConferencesService {
     }
     await this.trackMemberRepository.remove(member);
   }
+
+  // Get tracks assigned to a reviewer
+  async getMyTrackAssignments(userId: number): Promise<TrackMember[]> {
+    return this.trackMemberRepository.find({
+      where: { userId },
+      relations: ['track', 'track.conference'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  // Accept track assignment
+  async acceptTrackAssignment(
+    trackId: number,
+    userId: number,
+  ): Promise<TrackMember> {
+    const member = await this.trackMemberRepository.findOne({
+      where: { trackId, userId },
+      relations: ['track'],
+    });
+    if (!member) {
+      throw new NotFoundException('Không tìm thấy phân công này');
+    }
+    if (member.status === 'ACCEPTED') {
+      throw new BadRequestException('Phân công đã được chấp nhận');
+    }
+    if (member.status === 'REJECTED') {
+      throw new BadRequestException('Phân công đã bị từ chối');
+    }
+    member.status = 'ACCEPTED';
+    return this.trackMemberRepository.save(member);
+  }
+
+  // Reject track assignment
+  async rejectTrackAssignment(
+    trackId: number,
+    userId: number,
+  ): Promise<TrackMember> {
+    const member = await this.trackMemberRepository.findOne({
+      where: { trackId, userId },
+      relations: ['track'],
+    });
+    if (!member) {
+      throw new NotFoundException('Không tìm thấy phân công này');
+    }
+    if (member.status === 'REJECTED') {
+      throw new BadRequestException('Phân công đã bị từ chối');
+    }
+    if (member.status === 'ACCEPTED') {
+      throw new BadRequestException('Không thể từ chối phân công đã được chấp nhận');
+    }
+    member.status = 'REJECTED';
+    return this.trackMemberRepository.save(member);
+  }
 }

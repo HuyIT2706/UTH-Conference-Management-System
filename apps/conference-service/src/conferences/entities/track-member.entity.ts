@@ -19,6 +19,13 @@ export class TrackMember {
   @Column({ type: 'int' })
   userId: number;
 
+  @Column({
+    type: 'enum',
+    enum: ['PENDING', 'ACCEPTED', 'REJECTED'],
+    default: 'PENDING',
+  })
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

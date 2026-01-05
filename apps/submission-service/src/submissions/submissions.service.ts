@@ -480,9 +480,23 @@ export class SubmissionsService {
 
     const queryBuilder =
       this.submissionRepository.createQueryBuilder('submission');
-    if (!userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
+    
+    // RBAC Logic:
+    // - CHAIR/ADMIN: see all submissions
+    // - REVIEWER/PC_MEMBER: see all submissions in tracks they've accepted (if trackId is provided)
+    // - AUTHOR: see only their own submissions
+    const isChairOrAdmin = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
+    const isReviewer = userRoles.includes('REVIEWER') || userRoles.includes('PC_MEMBER');
+    
+    if (!isChairOrAdmin && !isReviewer) {
+      // Author: only see their own submissions
+      queryBuilder.where('submission.authorId = :userId', { userId });
+    } else if (isReviewer && !queryDto.trackId) {
+      // Reviewer without trackId: only see their own submissions (fallback)
       queryBuilder.where('submission.authorId = :userId', { userId });
     }
+    // If reviewer with trackId: see all submissions in that track (no author filter)
+    
     if (queryDto.trackId) {
       queryBuilder.andWhere('submission.trackId = :trackId', {
         trackId: queryDto.trackId,

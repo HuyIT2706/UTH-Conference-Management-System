@@ -120,6 +120,7 @@ export interface Track {
   conferenceId: number;
   name: string;
   description?: string;
+  conference?: Conference;
   createdAt: string;
   updatedAt: string;
 }
@@ -128,6 +129,8 @@ export interface TrackMember {
   id: number;
   trackId: number;
   userId: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  track?: Track;
   createdAt: string;
   updatedAt: string;
 }

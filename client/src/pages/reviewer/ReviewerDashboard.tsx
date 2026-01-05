@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
+import { useGetMyTrackAssignmentsQuery } from '../../redux/api/conferencesApi';
 import { showToast } from '../../utils/toast';
 import TrackAssignmentList from './TrackAssignmentList';
-import SubmissionList from './SubmissionList';
+import TrackSubmissionsView from './TrackSubmissionsView';
 import ReviewForm from './ReviewForm';
 import RebuttalWindow from './RebuttalWindow';
 
@@ -26,10 +26,13 @@ const ReviewerDashboard = () => {
     }
   }, [activeTab, selectedSubmissionId, selectedAssignmentId]);
 
-  const { data: assignmentsData, isLoading: assignmentsLoading, error: assignmentsError } = useGetMyAssignmentsQuery();
-  const assignments = assignmentsData?.data || [];
+  const { data: trackAssignmentsData, isLoading: trackAssignmentsLoading, error: trackAssignmentsError } = useGetMyTrackAssignmentsQuery();
+  
+  const acceptedTrackAssignments = trackAssignmentsData?.data?.filter(
+    (ta) => ta.status === 'ACCEPTED' && ta.track
+  ) || [];
 
-  if (assignmentsLoading) {
+  if (trackAssignmentsLoading) {
     return (
       <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -41,7 +44,7 @@ const ReviewerDashboard = () => {
     );
   }
 
-  if (assignmentsError) {
+  if (trackAssignmentsError) {
     return (
       <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
         <div className="max-w-7xl mx-auto px-4">
@@ -134,17 +137,24 @@ const ReviewerDashboard = () => {
             <>
               <TrackAssignmentList
                 onAcceptTrack={(trackId, conferenceId) => {
-                  // Handle track acceptance - show submissions for this track
+                  // Handle track acceptance - will refresh track assignments
                 }}
               />
-              {assignments.length > 0 ? (
-                <SubmissionList
-                  assignments={assignments}
-                  onEvaluate={handleEvaluateSubmission}
-                />
-              ) : (
-                <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500 mt-6">
-                  Chưa có bài nộp nào được phân công
+              
+              {acceptedTrackAssignments.length > 0 && (
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    Các chủ đề đã chấp nhận
+                  </h2>
+                  <div className="space-y-4">
+                    {acceptedTrackAssignments.map((trackAssignment) => (
+                      <TrackSubmissionsView
+                        key={trackAssignment.id}
+                        trackAssignment={trackAssignment}
+                        onEvaluate={handleEvaluateSubmission}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </>
