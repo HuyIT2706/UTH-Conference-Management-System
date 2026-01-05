@@ -133,6 +133,62 @@ export class ReviewsController {
       data: assignments,
     };
   }
+
+  @Get('submissions/accepted-tracks')
+  @ApiOperation({
+    summary: 'Reviewer xem danh sách bài nộp trong các track đã chấp nhận',
+    description: `Reviewer xem tất cả submissions trong các track mà họ đã chấp nhận.
+    
+    **Query parameters:**
+    - \`status\`: Filter theo status (SUBMITTED, REVIEWING, etc.). Có thể truyền nhiều giá trị, ví dụ: ?status=SUBMITTED&status=REVIEWING
+    
+    **Response bao gồm:**
+    - Danh sách submissions trong các track đã chấp nhận
+    - Mặc định chỉ hiển thị submissions có status SUBMITTED hoặc REVIEWING`
+  })
+  @ApiQuery({ name: 'status', required: false, type: String, isArray: true, description: 'Filter by submission status' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách submissions thành công' })
+  @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
+  async getSubmissionsForReviewer(
+    @Req() req: Request,
+    @Query('status') status?: string | string[],
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    this.ensureIsReviewer(user);
+
+    // Extract JWT token from Authorization header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
+    if (!authToken) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+
+    // Convert status to array if it's a string
+    // Default: get SUBMITTED and REVIEWING submissions (submissions that need review)
+    const statusArray = status 
+      ? Array.isArray(status) 
+        ? status 
+        : [status]
+      : ['SUBMITTED', 'REVIEWING']; // Default: only show submissions that need review
+
+    const submissions = await this.reviewsService.getSubmissionsForReviewer(
+      user.sub,
+      authToken,
+      statusArray,
+    );
+
+    return {
+      message: 'Lấy danh sách bài nộp thành công',
+      data: submissions,
+    };
+  }
+
   @Put('assignments/:id/accept')
   @ApiOperation({
     summary: 'Reviewer chấp nhận assignment',

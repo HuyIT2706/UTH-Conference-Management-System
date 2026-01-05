@@ -229,7 +229,7 @@ export const conferencesApi = apiSlice.injectEndpoints({
     }),
     // Get my track assignments (for reviewers)
     getMyTrackAssignments: builder.query<ApiResponse<TrackMember[]>, void>({
-      query: () => '/conferences/tracks/my-assignments',
+      query: () => '/conferences/reviewer/my-track-assignments',
       providesTags: (result) =>
         result?.data && Array.isArray(result.data)
           ? [

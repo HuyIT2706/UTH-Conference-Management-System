@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionsQuery } from '../../redux/api/submissionsApi';
 import { 
   useGetMyAssignmentsQuery, 
-  useSelfAssignSubmissionMutation 
+  useSelfAssignSubmissionMutation,
+  useGetSubmissionsForReviewerQuery,
 } from '../../redux/api/reviewsApi';
 import type { TrackMember, Submission, ReviewAssignment } from '../../types/api.types';
+import { SubmissionStatus } from '../../types/api.types';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 
@@ -18,15 +19,22 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
   const [isExpanded, setIsExpanded] = useState(false);
   const track = trackAssignment.track;
   
-  // Fetch submissions - get all statuses first, then filter in frontend
-  // Reviewer needs to see submissions that are waiting for review (SUBMITTED, REVIEWING)
-  const { data: submissionsData, isLoading: submissionsLoading, error: submissionsError } = useGetSubmissionsQuery(
-    isExpanded && track ? { 
-      trackId: track.id, 
-      limit: 100,
-      // Don't filter by status here - get all and filter in frontend
-    } : undefined,
+  // Fetch submissions for this specific track from review-service
+  // This endpoint returns submissions in all accepted tracks, so we filter by trackId
+  // Request SUBMITTED and REVIEWING status
+  const { data: submissionsData, isLoading: submissionsLoading, error: submissionsError } = useGetSubmissionsForReviewerQuery(
+    isExpanded && track
+      ? {
+          status: [SubmissionStatus.SUBMITTED, SubmissionStatus.REVIEWING],
+        }
+      : undefined,
     { skip: !isExpanded || !track }
+  );
+
+  // Filter submissions by current track
+  const allSubmissions: Submission[] = submissionsData?.data || [];
+  const submissions = allSubmissions.filter(
+    (submission) => submission.trackId === track?.id
   );
 
   // Debug logging
@@ -34,13 +42,14 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
     console.log('[TrackSubmissionsView] Submissions data:', {
       trackId: track.id,
       trackName: track.name,
-      totalSubmissions: submissionsData.data?.length || 0,
-      submissions: submissionsData.data?.map(s => ({
+      totalSubmissions: allSubmissions.length,
+      filteredSubmissions: submissions.length,
+      submissions: submissions.map(s => ({
         id: s.id,
         title: s.title,
         status: s.status,
         trackId: s.trackId,
-      })) || [],
+      })),
     });
   }
 
@@ -55,16 +64,16 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
     submissionToAssignmentMap.set(submissionId, assignment);
   });
 
-  const allSubmissions: Submission[] = submissionsData?.data || [];
   
-  // Filter to only show submissions that need review (SUBMITTED or REVIEWING)
-  // Exclude ACCEPTED, REJECTED, WITHDRAWN, CAMERA_READY, DRAFT
-  const submissions = allSubmissions.filter((submission) => 
-    submission.status === 'SUBMITTED' || submission.status === 'REVIEWING'
+  // Filter: only show SUBMITTED and REVIEWING for reviewer to evaluate
+  const visibleSubmissions = submissions.filter(
+    (submission) => 
+      submission.status === SubmissionStatus.SUBMITTED || 
+      submission.status === SubmissionStatus.REVIEWING
   );
   
   // Convert submissions to assignments format
-  const submissionsWithAssignments = submissions.map((submission) => {
+  const submissionsWithAssignments = visibleSubmissions.map((submission) => {
     const existingAssignment = submissionToAssignmentMap.get(submission.id);
     if (existingAssignment) {
       return existingAssignment;
@@ -111,12 +120,12 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
             <div className="flex justify-center items-center py-8">
               <CircularProgress size={24} disableShrink />
             </div>
-          ) : submissions.length === 0 ? (
+          ) : submissionsWithAssignments.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               Chưa có bài nộp nào cần đánh giá trong chủ đề này
-              {allSubmissions.length > 0 && (
+              {submissions.length > 0 && (
                 <p className="text-xs text-gray-400 mt-2">
-                  (Có {allSubmissions.length} bài nhưng đã được quyết định hoặc chưa nộp)
+                  (Có {submissions.length} bài nhưng đã được quyết định hoặc chưa nộp)
                 </p>
               )}
             </div>
@@ -192,7 +201,7 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
                                   }
                                   
                                   const result = await selfAssignSubmission({
-                                    submissionId: parseInt(submission.id.replace(/-/g, '').substring(0, 10)) || 0,
+                                    submissionId: submission.id, // submissionId is string (UUID)
                                     conferenceId: track.conferenceId,
                                   }).unwrap();
                                   

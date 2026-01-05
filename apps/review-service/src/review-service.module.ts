@@ -12,6 +12,9 @@ import { PcDiscussion } from './reviews/entities/pc-discussion.entity';
 import { Decision } from './reviews/entities/decision.entity';
 import { Rebuttal } from './reviews/entities/rebuttal.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { HttpModule } from '@nestjs/axios';
+import { ConferenceClientService } from './integrations/conference-client.service';
+import { SubmissionClientService } from './integrations/submission-client.service';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
         '.env',
       ],
     }),
+    HttpModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -79,6 +83,11 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ]),
   ],
   controllers: [ReviewsController],
-  providers: [ReviewsService, JwtStrategy],
+  providers: [
+    ReviewsService,
+    JwtStrategy,
+    ConferenceClientService,
+    SubmissionClientService,
+  ],
 })
 export class ReviewServiceModule {}

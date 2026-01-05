@@ -2,6 +2,7 @@ import { apiSlice } from './apiSlice';
 import type {
   Review,
   ReviewAssignment,
+  Submission,
   ApiResponse,
 } from '../../types/api.types';
 
@@ -43,7 +44,7 @@ export const reviewsApi = apiSlice.injectEndpoints({
     // Self-assign submission (reviewer assigns to themselves)
     selfAssignSubmission: builder.mutation<
       ApiResponse<ReviewAssignment>,
-      { submissionId: number; conferenceId: number }
+      { submissionId: string; conferenceId: number }
     >({
       query: (body) => ({
         url: '/reviews/assignments/self',
@@ -52,6 +53,7 @@ export const reviewsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [
         { type: 'Assignment', id: 'MY_LIST' },
+        { type: 'Submission', id: 'REVIEWER_ACCEPTED_TRACKS' },
       ],
     }),
     // Create review
@@ -99,6 +101,19 @@ export const reviewsApi = apiSlice.injectEndpoints({
         { type: 'Review', id: `submission-${submissionId}` },
       ],
     }),
+    // Get submissions for reviewer in accepted tracks
+    getSubmissionsForReviewer: builder.query<
+      ApiResponse<Submission[]>,
+      { status?: string[] }
+    >({
+      query: (params = {}) => ({
+        url: '/reviews/submissions/accepted-tracks',
+        params: params.status
+          ? { status: params.status }
+          : undefined,
+      }),
+      providesTags: [{ type: 'Submission', id: 'REVIEWER_ACCEPTED_TRACKS' }],
+    }),
   }),
 });
 
@@ -111,5 +126,6 @@ export const {
   useGetReviewsForSubmissionQuery,
   useGetReviewByIdQuery,
   useGetAnonymizedReviewsForSubmissionQuery,
+  useGetSubmissionsForReviewerQuery,
 } = reviewsApi;
 

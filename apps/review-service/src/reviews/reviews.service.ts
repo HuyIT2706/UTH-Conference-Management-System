@@ -21,6 +21,8 @@ import { Rebuttal } from './entities/rebuttal.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { ConferenceClientService } from '../integrations/conference-client.service';
+import { SubmissionClientService, Submission } from '../integrations/submission-client.service';
 
 @Injectable()
 export class ReviewsService {
@@ -37,6 +39,8 @@ export class ReviewsService {
     private readonly decisionRepository: Repository<Decision>,
     @InjectRepository(Rebuttal)
     private readonly rebuttalRepository: Repository<Rebuttal>,
+    private readonly conferenceClient: ConferenceClientService,
+    private readonly submissionClient: SubmissionClientService,
   ) {}
 
   /**
@@ -650,6 +654,126 @@ export class ReviewsService {
     }
 
     return this.decisionRepository.save(decision);
+  }
+
+  /**
+   * Get submissions for reviewer in accepted tracks
+   * This endpoint aggregates data from conference-service and submission-service
+   */
+  async getSubmissionsForReviewer(
+    reviewerId: number,
+    authToken: string,
+    status?: string[],
+  ): Promise<Submission[]> {
+    console.log('[ReviewsService] getSubmissionsForReviewer called:', {
+      reviewerId,
+      status,
+      hasAuthToken: !!authToken,
+    });
+
+    // 1. Get accepted track assignments from conference-service
+    let acceptedTracks: any[] = [];
+    try {
+      console.log('[ReviewsService] Calling conferenceClient.getMyTrackAssignments...');
+      const trackAssignments = await this.conferenceClient.getMyTrackAssignments(authToken);
+      
+      console.log('[ReviewsService] Got track assignments from conference-service:', {
+        count: trackAssignments.length,
+        assignments: trackAssignments.map(a => ({
+          id: a.id,
+          trackId: a.trackId,
+          status: a.status,
+          trackName: a.track?.name,
+        })),
+      });
+      
+      // Filter only ACCEPTED tracks
+      acceptedTracks = trackAssignments.filter(
+        (assignment) => assignment.status === 'ACCEPTED',
+      );
+
+      console.log('[ReviewsService] Accepted tracks for reviewer:', {
+        reviewerId,
+        totalAssignments: trackAssignments.length,
+        acceptedTracksCount: acceptedTracks.length,
+        trackIds: acceptedTracks.map((t) => t.trackId),
+        trackNames: acceptedTracks.map((t) => t.track?.name),
+      });
+    } catch (error) {
+      console.error('[ReviewsService] Error getting track assignments:', {
+        error: error instanceof Error ? error.message : error,
+        reviewerId,
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+      // If conference-service is down or error, return empty array
+      return [];
+    }
+
+    if (acceptedTracks.length === 0) {
+      console.log('[ReviewsService] No accepted tracks for reviewer');
+      return [];
+    }
+
+    // 2. Get submissions for each accepted track
+    const allSubmissions: Submission[] = [];
+    
+    for (const trackAssignment of acceptedTracks) {
+      try {
+        // Get submissions - if status filter provided, use it; otherwise get all and filter later
+        // Note: submission-service only supports single status, so we'll get all and filter
+        const submissions = await this.submissionClient.getSubmissionsByTrack(
+          trackAssignment.trackId,
+          authToken,
+          undefined, // Don't pass status - get all submissions, filter in this service
+        );
+        
+        console.log('[ReviewsService] Got submissions for track (before filter):', {
+          trackId: trackAssignment.trackId,
+          count: submissions.length,
+          statuses: submissions.map(s => s.status),
+        });
+        
+        // Filter by status if provided, otherwise filter out DRAFT and WITHDRAWN
+        let filteredSubmissions = submissions;
+        if (status && status.length > 0) {
+          filteredSubmissions = submissions.filter((s) => status.includes(s.status));
+          console.log('[ReviewsService] After status filter:', {
+            before: submissions.length,
+            after: filteredSubmissions.length,
+            filterStatus: status,
+          });
+        } else {
+          // Default: exclude DRAFT and WITHDRAWN
+          filteredSubmissions = submissions.filter(
+            (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN'
+          );
+          console.log('[ReviewsService] After filtering out DRAFT/WITHDRAWN:', {
+            before: submissions.length,
+            after: filteredSubmissions.length,
+          });
+        }
+        
+        allSubmissions.push(...filteredSubmissions);
+      } catch (error) {
+        console.error('[ReviewsService] Error getting submissions for track:', {
+          trackId: trackAssignment.trackId,
+          error: error instanceof Error ? error.message : error,
+        });
+        // Continue with other tracks even if one fails
+      }
+    }
+
+    // Remove duplicates (in case same submission appears in multiple tracks - shouldn't happen but just in case)
+    const uniqueSubmissions = Array.from(
+      new Map(allSubmissions.map((s) => [s.id, s])).values(),
+    );
+
+    console.log('[ReviewsService] Total unique submissions for reviewer:', {
+      reviewerId,
+      total: uniqueSubmissions.length,
+    });
+
+    return uniqueSubmissions;
   }
 }
 

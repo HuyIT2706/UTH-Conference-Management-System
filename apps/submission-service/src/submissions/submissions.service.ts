@@ -387,6 +387,181 @@ export class SubmissionsService {
     submission.status = SubmissionStatus.WITHDRAWN;
     return await this.submissionRepository.save(submission);
   }
+
+  /**
+   * Admin/Chair: Cập nhật submission (không cần check author)
+   */
+  async updateByAdmin(
+    id: string,
+    updateDto: UpdateSubmissionDto,
+    file: Express.Multer.File | undefined,
+    userId: number,
+    userRoles: string[],
+  ): Promise<Submission> {
+    // Check permission
+    const isAdminOrChair = userRoles.includes('ADMIN') || userRoles.includes('CHAIR');
+    if (!isAdminOrChair) {
+      throw new ForbiddenException('Chỉ Admin hoặc Chair mới có quyền cập nhật submission này');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const submission = await queryRunner.manager.findOne(Submission, {
+        where: { id },
+      });
+
+      if (!submission) {
+        throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
+      }
+
+      // Admin/Chair không cần check deadline, có thể update bất cứ lúc nào
+      const existingVersions = await queryRunner.manager.find(
+        SubmissionVersion,
+        {
+          where: { submissionId: id },
+          select: ['versionNumber'],
+        },
+      );
+
+      const maxVersion = existingVersions.length
+        ? Math.max(...existingVersions.map((v) => v.versionNumber))
+        : 0;
+
+      const newVersionNumber = maxVersion + 1;
+      
+      // Create version snapshot before update
+      await queryRunner.manager.insert(SubmissionVersion, {
+        submissionId: submission.id,
+        versionNumber: newVersionNumber,
+        title: submission.title,
+        abstract: submission.abstract,
+        fileUrl: submission.fileUrl,
+        keywords: submission.keywords,
+      });
+
+      // Upload file mới nếu có
+      let newFileUrl = submission.fileUrl;
+      if (file) {
+        newFileUrl = await this.uploadFile(file);
+      }
+
+      // Update submission
+      if (updateDto.title !== undefined) {
+        submission.title = updateDto.title;
+      }
+      if (updateDto.abstract !== undefined) {
+        submission.abstract = updateDto.abstract;
+      }
+      if (updateDto.keywords !== undefined) {
+        submission.keywords = updateDto.keywords;
+      }
+      if (updateDto.trackId !== undefined) {
+        submission.trackId = updateDto.trackId;
+      }
+      if (updateDto.authorAffiliation !== undefined) {
+        submission.authorAffiliation = updateDto.authorAffiliation;
+      }
+      if (updateDto.coAuthors !== undefined) {
+        try {
+          submission.coAuthors = JSON.parse(updateDto.coAuthors);
+        } catch {
+          throw new BadRequestException('coAuthors phải là JSON hợp lệ');
+        }
+      }
+      if (newFileUrl) {
+        submission.fileUrl = newFileUrl;
+      }
+
+      await queryRunner.manager.save(Submission, submission);
+      await queryRunner.commitTransaction();
+
+      const result = await this.submissionRepository.findOne({
+        where: { id: submission.id },
+        relations: ['versions'],
+      });
+
+      if (!result) {
+        throw new NotFoundException(`Không tìm thấy submission sau khi cập nhật`);
+      }
+
+      return result;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /**
+   * Admin/Chair: Xóa submission (hard delete)
+   */
+  async deleteByAdmin(
+    id: string,
+    userId: number,
+    userRoles: string[],
+  ): Promise<void> {
+    // Check permission
+    const isAdminOrChair = userRoles.includes('ADMIN') || userRoles.includes('CHAIR');
+    if (!isAdminOrChair) {
+      throw new ForbiddenException('Chỉ Admin hoặc Chair mới có quyền xóa submission này');
+    }
+
+    const submission = await this.submissionRepository.findOne({
+      where: { id },
+    });
+
+    if (!submission) {
+      throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
+    }
+
+    // Delete file from Supabase if exists
+    const supabase = this.supabaseService.getClient();
+    const bucketName = 'submissions';
+    
+    if (submission.fileUrl) {
+      try {
+        // Extract file path from URL
+        const urlParts = submission.fileUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        if (fileName) {
+          const { error } = await supabase.storage
+            .from(bucketName)
+            .remove([fileName]);
+          if (error) {
+            console.warn(`Failed to delete file from Supabase: ${fileName}`, error);
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to delete file from Supabase: ${submission.fileUrl}`, error);
+      }
+    }
+
+    if (submission.cameraReadyFileUrl) {
+      try {
+        // Extract file path from URL
+        const urlParts = submission.cameraReadyFileUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        if (fileName) {
+          const { error } = await supabase.storage
+            .from(bucketName)
+            .remove([fileName]);
+          if (error) {
+            console.warn(`Failed to delete camera-ready file from Supabase: ${fileName}`, error);
+          }
+        }
+      } catch (error) {
+        console.warn(`Failed to delete camera-ready file from Supabase: ${submission.cameraReadyFileUrl}`, error);
+      }
+    }
+
+    // Delete submission (cascade will delete versions)
+    await this.submissionRepository.remove(submission);
+  }
+
 // Update status submission
   async updateStatus(
     id: string,
@@ -537,13 +712,18 @@ export class SubmissionsService {
 
     // Debug logging for reviewer queries
     if (isReviewer && queryDto.trackId) {
+      const sql = queryBuilder.getSql();
+      const params = queryBuilder.getParameters();
       console.log('[SubmissionsService] Reviewer query:', {
         userId,
         userRoles,
         trackId: queryDto.trackId,
+        status: queryDto.status,
         total,
         isReviewer,
         hasTrackId: !!queryDto.trackId,
+        sql: sql,
+        params: params,
       });
     }
 

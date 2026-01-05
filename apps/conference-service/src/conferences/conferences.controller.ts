@@ -81,6 +81,29 @@ export class ConferencesController {
     };
   }
 
+  // Alternative endpoint for reviewers to get their track assignments
+  // Using 'reviewer' prefix to avoid route conflicts
+  @Get('reviewer/my-track-assignments')
+  @ApiOperation({ summary: 'Lấy danh sách chủ đề được phân công cho reviewer hiện tại' })
+  @ApiResponse({ status: 200, description: 'Lấy danh sách phân công thành công' })
+  async getMyTrackAssignments(@CurrentUser() user: JwtPayload) {
+    console.log('[ConferencesController] getMyTrackAssignments called:', {
+      userId: user.sub,
+      roles: user.roles,
+    });
+    const assignments = await this.conferencesService.getMyTrackAssignments(user.sub);
+    console.log('[ConferencesController] getMyTrackAssignments result:', {
+      count: assignments.length,
+      assignments: assignments.map(a => ({
+        id: a.id,
+        trackId: a.trackId,
+        status: a.status,
+        trackName: a.track?.name,
+      })),
+    });
+    return { message: 'Lấy danh sách phân công thành công', data: assignments };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết hội nghị' })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
@@ -359,6 +382,21 @@ export class ConferencesController {
     return { message: 'Xóa thành viên thành công' };
   }
 
+  @Get('tracks/:trackId/reviewer/:reviewerId/check-assignment')
+  @ApiOperation({ summary: 'Kiểm tra reviewer đã chấp nhận track assignment chưa' })
+  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
+  @ApiParam({ name: 'reviewerId', description: 'ID của reviewer' })
+  @ApiResponse({ status: 200, description: 'Kiểm tra thành công' })
+  async checkReviewerTrackAssignment(
+    @Param('trackId', ParseIntPipe) trackId: number,
+    @Param('reviewerId', ParseIntPipe) reviewerId: number,
+  ) {
+    console.log('[ConferencesController] checkReviewerTrackAssignment called:', { trackId, reviewerId });
+    const result = await this.conferencesService.checkReviewerTrackAssignment(reviewerId, trackId);
+    console.log('[ConferencesController] checkReviewerTrackAssignment result:', result);
+    return { message: 'Kiểm tra thành công', data: result };
+  }
+
   @Get('tracks/:trackId/members')
   @ApiOperation({ summary: 'Lấy danh sách thành viên ban chương trình của chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -424,27 +462,6 @@ export class ConferencesController {
     return { message: 'Xóa thành viên thành công' };
   }
 
-  @Get('tracks/my-assignments')
-  @ApiOperation({ summary: 'Lấy danh sách chủ đề được phân công cho reviewer hiện tại' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách phân công thành công' })
-  async getMyTrackAssignments(@CurrentUser() user: JwtPayload) {
-    const assignments = await this.conferencesService.getMyTrackAssignments(user.sub);
-    return { message: 'Lấy danh sách phân công thành công', data: assignments };
-  }
-
-  @Get('tracks/:trackId/reviewer/:reviewerId/check-assignment')
-  @ApiOperation({ summary: 'Kiểm tra reviewer đã chấp nhận track assignment chưa' })
-  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
-  @ApiParam({ name: 'reviewerId', description: 'ID của reviewer' })
-  @ApiResponse({ status: 200, description: 'Kiểm tra thành công' })
-  async checkReviewerTrackAssignment(
-    @Param('trackId', ParseIntPipe) trackId: number,
-    @Param('reviewerId', ParseIntPipe) reviewerId: number,
-  ) {
-    const result = await this.conferencesService.checkReviewerTrackAssignment(reviewerId, trackId);
-    return { message: 'Kiểm tra thành công', data: result };
-  }
-
   @Post('tracks/:trackId/accept')
   @ApiOperation({ summary: 'Chấp nhận phân công chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -471,18 +488,5 @@ export class ConferencesController {
   ) {
     const member = await this.conferencesService.rejectTrackAssignment(trackId, user.sub);
     return { message: 'Từ chối phân công thành công', data: member };
-  }
-
-  @Get('tracks/:trackId/reviewer/:reviewerId/check-assignment')
-  @ApiOperation({ summary: 'Kiểm tra reviewer đã chấp nhận track assignment chưa' })
-  @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
-  @ApiParam({ name: 'reviewerId', description: 'ID của reviewer' })
-  @ApiResponse({ status: 200, description: 'Kiểm tra thành công' })
-  async checkReviewerTrackAssignment(
-    @Param('trackId', ParseIntPipe) trackId: number,
-    @Param('reviewerId', ParseIntPipe) reviewerId: number,
-  ) {
-    const result = await this.conferencesService.checkReviewerTrackAssignment(reviewerId, trackId);
-    return { message: 'Kiểm tra thành công', data: result };
   }
 }

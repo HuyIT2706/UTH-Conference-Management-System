@@ -62,8 +62,12 @@ services:
       - DB_USERNAME=admin
       - DB_PASSWORD=admin123
       - DB_DATABASE=db_review
+      - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
     depends_on:
       - postgres
+      - conference-service
+      - submission-service
     networks:
       - uth-net
 

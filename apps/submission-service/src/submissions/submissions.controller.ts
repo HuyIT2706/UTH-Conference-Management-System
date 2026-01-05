@@ -25,6 +25,7 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 import { QuerySubmissionsDto } from './dto/query-submissions.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { JwtPayload } from '../auth/jwt.strategy';
+import { Submission } from '../entities/submission.entity';
 
 @ApiTags('Submissions')
 @Controller('submissions')
@@ -128,7 +129,7 @@ export class SubmissionsController {
   @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
-    summary: 'Cập nhật submission',
+    summary: 'Cập nhật submission (chỉ Author)',
     description: `Cập nhật thông tin submission. Tất cả các trường đều tùy chọn. Nếu upload file mới, sẽ tự động tạo version mới.
     
     **Ví dụ request (multipart/form-data):**
@@ -137,6 +138,8 @@ export class SubmissionsController {
     - \`abstract\`: Tóm tắt mới (tùy chọn)
     - \`keywords\`: Từ khóa mới (tùy chọn)
     - \`trackId\`: ID track mới (tùy chọn)
+    - \`authorAffiliation\`: Tổ chức của tác giả (tùy chọn)
+    - \`coAuthors\`: JSON string của đồng tác giả (tùy chọn)
 
     **Lưu ý:**
     - Chỉ author của submission mới được cập nhật
@@ -158,12 +161,14 @@ export class SubmissionsController {
         abstract: { type: 'string', example: 'Updated abstract...', description: 'Tóm tắt mới (tùy chọn)' },
         keywords: { type: 'string', example: 'updated, keywords', description: 'Từ khóa mới (tùy chọn)' },
         trackId: { type: 'number', example: 2, description: 'ID track mới (tùy chọn)' },
+        authorAffiliation: { type: 'string', example: 'Đại học Công nghệ', description: 'Tổ chức của tác giả (tùy chọn)' },
+        coAuthors: { type: 'string', example: '[{"name":"Nguyễn Văn A","email":"a@example.com"}]', description: 'JSON string của đồng tác giả (tùy chọn)' },
       },
     },
   })
   @ApiResponse({ status: 200, description: 'Cập nhật submission thành công' })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ, deadline đã qua, hoặc file không đúng định dạng' })
-  @ApiResponse({ status: 403, description: 'Không có quyền cập nhật submission này' })
+  @ApiResponse({ status: 403, description: 'Chỉ author mới có quyền cập nhật submission này' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -176,6 +181,7 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Chỉ author mới được update
     const submission = await this.submissionsService.update(
       id,
       updateDto,
@@ -306,8 +312,8 @@ export class SubmissionsController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Rút submission (Withdraw)',
-    description: `Rút bài submission khỏi hội nghị. 
+    summary: 'Rút submission (Withdraw) - Chỉ Author',
+    description: `Rút bài submission khỏi hội nghị. Chỉ author của submission mới được rút.
     
     **Lưu ý:**
     - Chỉ author của submission mới được rút
@@ -318,7 +324,7 @@ export class SubmissionsController {
   @ApiParam({ name: 'id', description: 'UUID của submission cần rút' })
   @ApiResponse({ status: 200, description: 'Rút submission thành công' })
   @ApiResponse({ status: 400, description: 'Không thể rút (status không hợp lệ hoặc deadline đã qua)' })
-  @ApiResponse({ status: 403, description: 'Không có quyền rút submission này' })
+  @ApiResponse({ status: 403, description: 'Chỉ author mới có quyền rút submission này' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy submission' })
   async withdraw(
     @Param('id', ParseUUIDPipe) id: string,
@@ -329,6 +335,7 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Chỉ author mới được withdraw
     const submission = await this.submissionsService.withdraw(id, user.sub);
 
     return {
