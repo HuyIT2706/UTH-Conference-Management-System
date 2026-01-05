@@ -47,7 +47,7 @@ export class ReviewsService {
     const existingBid = await this.reviewPreferenceRepository.findOne({
       where: {
         reviewerId,
-        submissionId: dto.submissionId,
+        submissionId: String(dto.submissionId),
       },
     });
 
@@ -60,7 +60,7 @@ export class ReviewsService {
     // Create new bid
     const bid = this.reviewPreferenceRepository.create({
       reviewerId,
-      submissionId: dto.submissionId,
+      submissionId: String(dto.submissionId),
       conferenceId: dto.conferenceId,
       preference: dto.preference,
     });
@@ -74,7 +74,7 @@ export class ReviewsService {
    */
   async checkConflictOfInterest(
     reviewerId: number,
-    submissionId: number,
+    submissionId: string | number,
     conferenceId?: number,
   ): Promise<boolean> {
     const where: Record<string, any> = {
@@ -145,6 +145,60 @@ export class ReviewsService {
       assignedBy: chairId,
       status: AssignmentStatus.PENDING,
       dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+    });
+
+    return this.assignmentRepository.save(assignment);
+  }
+
+  /**
+   * Reviewer self-assigns a submission for review
+   * This is allowed when reviewer has accepted the track assignment
+   */
+  async selfAssignSubmission(
+    reviewerId: number,
+    submissionId: string, // UUID from submission-service
+    conferenceId: number,
+  ): Promise<Assignment> {
+    // Check for Conflict of Interest
+    const hasConflict = await this.checkConflictOfInterest(
+      reviewerId,
+      submissionId,
+      conferenceId,
+    );
+
+    if (hasConflict) {
+      throw new BadRequestException(
+        'Không thể tự phân công bài này vì bạn đã báo cáo xung đột lợi ích (CONFLICT)',
+      );
+    }
+
+    // Check if assignment already exists
+    const existingAssignment = await this.assignmentRepository.findOne({
+      where: {
+        reviewerId,
+        submissionId,
+        conferenceId,
+      },
+    });
+
+    if (existingAssignment) {
+      // If exists and is ACCEPTED, return it
+      if (existingAssignment.status === AssignmentStatus.ACCEPTED) {
+        return existingAssignment;
+      }
+      // If exists but not ACCEPTED, accept it
+      existingAssignment.status = AssignmentStatus.ACCEPTED;
+      return this.assignmentRepository.save(existingAssignment);
+    }
+
+    // Create assignment with ACCEPTED status (reviewer already accepted track)
+    const assignment = this.assignmentRepository.create({
+      reviewerId,
+      submissionId,
+      conferenceId,
+      assignedBy: reviewerId, // Self-assigned
+      status: AssignmentStatus.ACCEPTED, // Auto-accept since reviewer accepted track
+      dueDate: null,
     });
 
     return this.assignmentRepository.save(assignment);
@@ -261,13 +315,13 @@ export class ReviewsService {
    * Get all reviews for a submission (Chair view)
    */
   async getReviewsBySubmission(
-    submissionId: number,
+    submissionId: string | number,
     page = 1,
     limit = 10,
   ): Promise<Review[]> {
     // Find all assignments for this submission
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
     });
 
     const assignmentIds = assignments.map((a) => a.id);
@@ -291,14 +345,14 @@ export class ReviewsService {
    * Get all bids for a submission (optional helper)
    */
   async getBidsBySubmission(
-    submissionId: number,
+    submissionId: string | number,
     page = 1,
     limit = 10,
   ): Promise<ReviewPreference[]> {
     const skip = (page - 1) * limit;
 
     return this.reviewPreferenceRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
@@ -310,12 +364,12 @@ export class ReviewsService {
    */
   async createDiscussion(
     userId: number,
-    submissionId: number,
+    submissionId: string | number,
     message: string,
   ): Promise<PcDiscussion> {
     const discussion = this.pcDiscussionRepository.create({
       userId,
-      submissionId,
+      submissionId: String(submissionId),
       message,
     });
 
@@ -326,14 +380,14 @@ export class ReviewsService {
    * Get PC Discussion for a submission
    */
   async getDiscussionsBySubmission(
-    submissionId: number,
+    submissionId: string | number,
     page = 1,
     limit = 20,
   ): Promise<PcDiscussion[]> {
     const skip = (page - 1) * limit;
 
     return this.pcDiscussionRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
       order: { createdAt: 'ASC' },
       skip,
       take: limit,
@@ -345,7 +399,7 @@ export class ReviewsService {
    */
   async autoAssignSubmission(
     chairId: number,
-    submissionId: number,
+    submissionId: string | number,
     conferenceId: number,
     reviewerIds: number[],
   ): Promise<{
@@ -359,7 +413,7 @@ export class ReviewsService {
       try {
         const assignment = await this.createAssignment(chairId, {
           reviewerId,
-          submissionId,
+          submissionId: String(submissionId),
           conferenceId,
           // no dueDate in auto mode; chair can update later
         } as any);
@@ -380,12 +434,12 @@ export class ReviewsService {
    */
   async createRebuttal(
     authorId: number,
-    submissionId: number,
+    submissionId: string | number,
     conferenceId: number | null,
     message: string,
   ): Promise<Rebuttal> {
     const rebuttal = this.rebuttalRepository.create({
-      submissionId,
+      submissionId: String(submissionId),
       authorId,
       conferenceId,
       message,
@@ -394,9 +448,9 @@ export class ReviewsService {
     return this.rebuttalRepository.save(rebuttal);
   }
 
-  async getRebuttalsBySubmission(submissionId: number): Promise<Rebuttal[]> {
+  async getRebuttalsBySubmission(submissionId: string | number): Promise<Rebuttal[]> {
     return this.rebuttalRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
       order: { createdAt: 'ASC' },
     });
   }
@@ -404,7 +458,7 @@ export class ReviewsService {
   /**
    * Anonymized reviews for authors (single-blind)
    */
-  async getAnonymizedReviewsBySubmission(submissionId: number): Promise<
+  async getAnonymizedReviewsBySubmission(submissionId: string | number): Promise<
     Array<{
       score: number;
       commentForAuthor: string | null;
@@ -425,8 +479,8 @@ export class ReviewsService {
   /**
    * Basic progress tracking for a single submission
    */
-  async getSubmissionProgress(submissionId: number): Promise<{
-    submissionId: number;
+  async getSubmissionProgress(submissionId: string | number): Promise<{
+    submissionId: string | number;
     totalAssignments: number;
     completedAssignments: number;
     pendingAssignments: number;
@@ -434,7 +488,7 @@ export class ReviewsService {
     lastReviewAt: Date | null;
   }> {
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
     });
 
     const totalAssignments = assignments.length;
@@ -508,8 +562,8 @@ export class ReviewsService {
    * Aggregate reviews for a submission (average score, counts)
    * and return together with current final decision (if any)
    */
-  async getDecisionSummaryBySubmission(submissionId: number): Promise<{
-    submissionId: number;
+  async getDecisionSummaryBySubmission(submissionId: string | number): Promise<{
+    submissionId: string | number;
     stats: {
       reviewCount: number;
       averageScore: number | null;
@@ -521,7 +575,7 @@ export class ReviewsService {
   }> {
     // Get all reviews for this submission
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
     });
 
     const assignmentIds = assignments.map((a) => a.id);
@@ -553,7 +607,7 @@ export class ReviewsService {
     }
 
     const decision = await this.decisionRepository.findOne({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
     });
 
     return {
@@ -573,18 +627,18 @@ export class ReviewsService {
    * Create or update final decision for a submission (Chair/Admin)
    */
   async upsertDecisionForSubmission(
-    submissionId: number,
+    submissionId: string | number,
     decidedBy: number,
     decisionValue: FinalDecision,
     note?: string,
   ): Promise<Decision> {
     let decision = await this.decisionRepository.findOne({
-      where: { submissionId },
+      where: { submissionId: String(submissionId) },
     });
 
     if (!decision) {
       decision = this.decisionRepository.create({
-        submissionId,
+        submissionId: String(submissionId),
         decision: decisionValue,
         decidedBy,
         note: note ?? null,
@@ -598,6 +652,7 @@ export class ReviewsService {
     return this.decisionRepository.save(decision);
   }
 }
+
 
 
 

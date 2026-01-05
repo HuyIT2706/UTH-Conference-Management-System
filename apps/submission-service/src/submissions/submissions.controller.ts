@@ -213,11 +213,25 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Debug logging
+    console.log('[SubmissionsController] findAll request:', {
+      userId: user.sub,
+      roles: user.roles,
+      queryDto,
+    });
+
     const result = await this.submissionsService.findAll(
       queryDto,
       user.sub,
       user.roles || [],
     );
+
+    // Debug logging
+    console.log('[SubmissionsController] findAll result:', {
+      total: result.total,
+      dataCount: result.data.length,
+      trackId: queryDto.trackId,
+    });
 
     return {
       message: 'Lấy danh sách các bài dự thi thành công',
@@ -270,10 +284,18 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Extract JWT token from Authorization header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
     const submission = await this.submissionsService.findOne(
       id,
       user.sub,
       user.roles || [],
+      undefined, // assignmentIds - not used in controller
+      authToken,
     );
 
     return {

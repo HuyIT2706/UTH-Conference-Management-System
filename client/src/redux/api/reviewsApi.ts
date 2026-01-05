@@ -40,6 +40,20 @@ export const reviewsApi = apiSlice.injectEndpoints({
         { type: 'Assignment', id: 'MY_LIST' },
       ],
     }),
+    // Self-assign submission (reviewer assigns to themselves)
+    selfAssignSubmission: builder.mutation<
+      ApiResponse<ReviewAssignment>,
+      { submissionId: number; conferenceId: number }
+    >({
+      query: (body) => ({
+        url: '/reviews/assignments/self',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [
+        { type: 'Assignment', id: 'MY_LIST' },
+      ],
+    }),
     // Create review
     createReview: builder.mutation<
       ApiResponse<Review>,
@@ -92,6 +106,7 @@ export const {
   useGetMyAssignmentsQuery,
   useAcceptAssignmentMutation,
   useRejectAssignmentMutation,
+  useSelfAssignSubmissionMutation,
   useCreateReviewMutation,
   useGetReviewsForSubmissionQuery,
   useGetReviewByIdQuery,

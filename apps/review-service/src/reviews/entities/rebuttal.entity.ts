@@ -10,8 +10,8 @@ export class Rebuttal {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int' })
-  submissionId: number;
+  @Column({ type: 'varchar', length: 255 })
+  submissionId: string; // UUID from submission-service
 
   @Column({ type: 'int' })
   authorId: number;
@@ -25,6 +25,7 @@ export class Rebuttal {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
+
 
 
 

@@ -18,8 +18,8 @@ export class Decision {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int' })
-  submissionId: number;
+  @Column({ type: 'varchar', length: 255 })
+  submissionId: string; // UUID from submission-service
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -39,6 +39,7 @@ export class Decision {
   @CreateDateColumn({ type: 'timestamptz' })
   decidedAt: Date;
 }
+
 
 
 

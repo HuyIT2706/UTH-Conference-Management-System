@@ -433,6 +433,21 @@ export class ConferencesService {
     return this.trackMemberRepository.save(member);
   }
 
+  // Check if reviewer has accepted track assignment
+  async checkReviewerTrackAssignment(
+    reviewerId: number,
+    trackId: number,
+  ): Promise<{ hasAccepted: boolean }> {
+    const member = await this.trackMemberRepository.findOne({
+      where: {
+        userId: reviewerId,
+        trackId: trackId,
+        status: 'ACCEPTED',
+      },
+    });
+    return { hasAccepted: !!member };
+  }
+
   // Reject track assignment
   async rejectTrackAssignment(
     trackId: number,

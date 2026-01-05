@@ -498,8 +498,9 @@ export class SubmissionsService {
     // If reviewer with trackId: see all submissions in that track (no author filter)
     
     if (queryDto.trackId) {
+      // Use exact match for trackId (ensure type consistency)
       queryBuilder.andWhere('submission.trackId = :trackId', {
-        trackId: queryDto.trackId,
+        trackId: Number(queryDto.trackId),
       });
     }
 
@@ -534,6 +535,18 @@ export class SubmissionsService {
     // Get total count
     const total = await queryBuilder.getCount();
 
+    // Debug logging for reviewer queries
+    if (isReviewer && queryDto.trackId) {
+      console.log('[SubmissionsService] Reviewer query:', {
+        userId,
+        userRoles,
+        trackId: queryDto.trackId,
+        total,
+        isReviewer,
+        hasTrackId: !!queryDto.trackId,
+      });
+    }
+
     // Pagination and ordering
     const submissions = await queryBuilder
       .leftJoinAndSelect('submission.versions', 'versions')
@@ -541,6 +554,16 @@ export class SubmissionsService {
       .skip(skip)
       .take(limit)
       .getMany();
+
+    // Debug: Log actual submissions found
+    if (isReviewer && queryDto.trackId) {
+      console.log('[SubmissionsService] Found submissions:', {
+        count: submissions.length,
+        submissionIds: submissions.map(s => s.id),
+        statuses: submissions.map(s => s.status),
+        trackIds: submissions.map(s => s.trackId),
+      });
+    }
 
     return {
       data: submissions,
@@ -578,7 +601,8 @@ export class SubmissionsService {
     id: string,
     userId: number,
     userRoles: string[],
-    assignmentIds?: number[], 
+    assignmentIds?: number[],
+    authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
       where: { id },
@@ -604,11 +628,66 @@ export class SubmissionsService {
       }
       return submission;
     }
-    if (isReviewer && assignmentIds && assignmentIds.length > 0) {
-      if (submission.versions) {
-        submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
+    
+    // Reviewer: can view if:
+    // 1. Has review assignment for this submission, OR
+    // 2. Has accepted track assignment for the track of this submission
+    if (isReviewer) {
+      console.log('[SubmissionsService] Reviewer access check:', {
+        userId,
+        submissionId: id,
+        trackId: submission.trackId,
+        hasAssignmentIds: !!assignmentIds,
+        assignmentIdsCount: assignmentIds?.length || 0,
+        hasAuthToken: !!authToken,
+      });
+      
+      // Check if reviewer has review assignment
+      if (assignmentIds && assignmentIds.length > 0) {
+        console.log('[SubmissionsService] Reviewer has assignment, allowing access');
+        if (submission.versions) {
+          submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
+        }
+        return submission;
       }
-      return submission;
+      
+      // Check if reviewer has accepted track assignment for this submission's track
+      if (submission.trackId) {
+        try {
+          console.log('[SubmissionsService] Checking track assignment for reviewer:', {
+            reviewerId: userId,
+            trackId: submission.trackId,
+          });
+          
+          const trackCheck = await this.conferenceClient.checkReviewerTrackAssignment(
+            userId,
+            submission.trackId,
+            authToken,
+          );
+          
+          console.log('[SubmissionsService] Track assignment check result:', trackCheck);
+          
+          if (trackCheck.hasAccepted) {
+            console.log('[SubmissionsService] Reviewer has accepted track assignment, allowing access');
+            if (submission.versions) {
+              submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
+            }
+            return submission;
+          } else {
+            console.log('[SubmissionsService] Reviewer has NOT accepted track assignment');
+          }
+        } catch (error) {
+          // If check fails, log and continue to throw ForbiddenException
+          console.error('[SubmissionsService] Error checking track assignment:', error);
+          if (error instanceof Error) {
+            console.error('[SubmissionsService] Error details:', error.message, error.stack);
+          }
+        }
+      } else {
+        console.log('[SubmissionsService] Submission has no trackId');
+      }
+      
+      console.log('[SubmissionsService] Reviewer does not have access to this submission');
     }
 
     throw new ForbiddenException('Bạn không có quyền xem submission này');

@@ -194,4 +194,59 @@ export class ConferenceClientService {
       return null;
     }
   }
+
+  /**
+   * Check if reviewer has accepted track assignment for a specific track
+   */
+  async checkReviewerTrackAssignment(
+    reviewerId: number,
+    trackId: number,
+    authToken?: string,
+  ): Promise<{ hasAccepted: boolean }> {
+    try {
+      // Call conference-service to check if reviewer has accepted this track
+      const headers: Record<string, string> = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+        console.log('[ConferenceClient] Calling check-assignment with auth token');
+      } else {
+        console.warn('[ConferenceClient] No auth token provided for check-assignment');
+      }
+      
+      const url = `/conferences/tracks/${trackId}/reviewer/${reviewerId}/check-assignment`;
+      console.log('[ConferenceClient] Calling:', url, { reviewerId, trackId });
+      
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers,
+        }),
+      );
+      
+      console.log('[ConferenceClient] Response:', {
+        status: response.status,
+        data: response.data,
+      });
+      
+      const result = response.data;
+      const hasAccepted = result?.data?.hasAccepted || result?.hasAccepted || false;
+      
+      console.log('[ConferenceClient] Track assignment check result:', hasAccepted);
+      
+      return { hasAccepted };
+    } catch (error: any) {
+      // If endpoint doesn't exist or error, return false (conservative approach)
+      console.error(
+        '[ConferenceClient] Error checking reviewer track assignment:',
+        {
+          message: error.message || error,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          reviewerId,
+          trackId,
+        },
+      );
+      return { hasAccepted: false };
+    }
+  }
 }

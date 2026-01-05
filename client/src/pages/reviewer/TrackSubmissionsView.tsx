@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionsQuery } from '../../redux/api/submissionsApi';
-import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
+import { 
+  useGetMyAssignmentsQuery, 
+  useSelfAssignSubmissionMutation 
+} from '../../redux/api/reviewsApi';
 import type { TrackMember, Submission, ReviewAssignment } from '../../types/api.types';
 import { showToast } from '../../utils/toast';
+import { formatApiError } from '../../utils/api-helpers';
 
 interface TrackSubmissionsViewProps {
   trackAssignment: TrackMember;
@@ -14,18 +18,34 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
   const [isExpanded, setIsExpanded] = useState(false);
   const track = trackAssignment.track;
   
-  // Fetch submissions with status SUBMITTED or REVIEWING (not ACCEPTED/REJECTED)
-  // Reviewer needs to see submissions that are waiting for review, not already decided by Chair
-  const { data: submissionsData, isLoading: submissionsLoading } = useGetSubmissionsQuery(
+  // Fetch submissions - get all statuses first, then filter in frontend
+  // Reviewer needs to see submissions that are waiting for review (SUBMITTED, REVIEWING)
+  const { data: submissionsData, isLoading: submissionsLoading, error: submissionsError } = useGetSubmissionsQuery(
     isExpanded && track ? { 
       trackId: track.id, 
       limit: 100,
-      // Note: API might not support multiple status filter, so we'll filter in frontend
+      // Don't filter by status here - get all and filter in frontend
     } : undefined,
     { skip: !isExpanded || !track }
   );
 
-  const { data: assignmentsData } = useGetMyAssignmentsQuery();
+  // Debug logging
+  if (isExpanded && track && submissionsData) {
+    console.log('[TrackSubmissionsView] Submissions data:', {
+      trackId: track.id,
+      trackName: track.name,
+      totalSubmissions: submissionsData.data?.length || 0,
+      submissions: submissionsData.data?.map(s => ({
+        id: s.id,
+        title: s.title,
+        status: s.status,
+        trackId: s.trackId,
+      })) || [],
+    });
+  }
+
+  const { data: assignmentsData, refetch: refetchAssignments } = useGetMyAssignmentsQuery();
+  const [selfAssignSubmission] = useSelfAssignSubmissionMutation();
   const assignments: ReviewAssignment[] = assignmentsData?.data || [];
 
   // Create mapping of submissionId to assignment
@@ -154,26 +174,50 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
                         )}
                       </div>
                       <div className="flex gap-2 ml-4">
-                        {assignment.status === 'ACCEPTED' || assignment.status === 'PENDING' ? (
+                        {assignment.status === 'COMPLETED' ? (
+                          <span className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg">
+                            Đã hoàn thành
+                          </span>
+                        ) : (
                           <button
-                            onClick={() => {
-                              // If assignment has a valid ID (from review-service), use it
-                              // Otherwise, we need to create assignment first
-                              if (assignment.id && assignment.id > 0 && assignment.status === 'ACCEPTED') {
-                                onEvaluate(submission.id, assignment.id);
-                              } else {
-                                showToast.info('Vui lòng chờ Chair phân công bài này để đánh giá');
+                            onClick={async () => {
+                              try {
+                                let assignmentId = assignment.id;
+                                
+                                // If no assignment or invalid assignment, self-assign first
+                                if (!assignmentId || assignmentId === 0) {
+                                  if (!track || !track.conferenceId) {
+                                    showToast.error('Không thể xác định conference');
+                                    return;
+                                  }
+                                  
+                                  const result = await selfAssignSubmission({
+                                    submissionId: parseInt(submission.id.replace(/-/g, '').substring(0, 10)) || 0,
+                                    conferenceId: track.conferenceId,
+                                  }).unwrap();
+                                  
+                                  assignmentId = result.data.id;
+                                  refetchAssignments();
+                                  showToast.success('Đã tự phân công bài này');
+                                } else if (assignment.status === 'PENDING') {
+                                  // If assignment exists but is PENDING, accept it first
+                                  // This will be handled by the review form or we can accept here
+                                  showToast.info('Vui lòng chấp nhận phân công trước');
+                                  return;
+                                }
+                                
+                                // Now proceed to evaluate
+                                if (assignmentId && assignmentId > 0) {
+                                  onEvaluate(submission.id, assignmentId);
+                                }
+                              } catch (error) {
+                                showToast.error(formatApiError(error));
                               }
                             }}
-                            disabled={assignment.status !== 'ACCEPTED' || !assignment.id || assignment.id === 0}
-                            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
                           >
-                            {assignment.status === 'ACCEPTED' ? 'Đánh giá' : 'Chờ phân công'}
+                            Đánh giá
                           </button>
-                        ) : (
-                          <span className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg">
-                            {assignment.status === 'COMPLETED' ? 'Đã hoàn thành' : 'Chưa phân công'}
-                          </span>
                         )}
                       </div>
                     </div>

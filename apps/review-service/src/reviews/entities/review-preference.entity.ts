@@ -23,8 +23,8 @@ export class ReviewPreference {
   @Column({ type: 'int' })
   reviewerId: number;
 
-  @Column({ type: 'int' })
-  submissionId: number;
+  @Column({ type: 'varchar', length: 255 })
+  submissionId: string; // UUID from submission-service
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -42,6 +42,7 @@ export class ReviewPreference {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
+
 
 
 

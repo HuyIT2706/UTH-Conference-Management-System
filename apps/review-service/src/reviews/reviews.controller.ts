@@ -330,6 +330,53 @@ export class ReviewsController {
     };
   }
 
+  @Post('assignments/self')
+  @ApiOperation({
+    summary: 'Reviewer tự phân công bài báo cho chính mình (Self Assignment)',
+    description: `Reviewer tự phân công một bài báo cho chính mình để review. Chỉ áp dụng khi reviewer đã chấp nhận track assignment.
+    
+    **Ví dụ request body:**
+    \`\`\`json
+    {
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
+      "conferenceId": 1
+    }
+    \`\`\`
+
+    **Lưu ý:**
+    - Reviewer phải đã chấp nhận track assignment trước
+    - Assignment sẽ được tạo với status ACCEPTED (tự động chấp nhận)
+    - Nếu đã có assignment, sẽ tự động accept nếu đang PENDING`
+  })
+  @ApiResponse({ status: 201, description: 'Tự phân công thành công' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc có CONFLICT' })
+  async selfAssign(
+    @Req() req: Request,
+    @Body() dto: { submissionId: string; conferenceId: number },
+  ) {
+    const user = req.user as JwtPayload | undefined;
+    if (!user?.sub) {
+      throw new UnauthorizedException('Token không hợp lệ');
+    }
+    
+    // Check if user is reviewer
+    const isReviewer = user.roles?.includes('REVIEWER') || user.roles?.includes('PC_MEMBER');
+    if (!isReviewer) {
+      throw new ForbiddenException('Chỉ Reviewer mới có thể tự phân công');
+    }
+
+    const assignment = await this.reviewsService.selfAssignSubmission(
+      user.sub,
+      dto.submissionId,
+      dto.conferenceId,
+    );
+
+    return {
+      message: 'Tự phân công bài báo thành công',
+      data: assignment,
+    };
+  }
+
   @Get('submission/:id')
   @ApiOperation({
     summary: 'Chair xem tất cả reviews của một submission',
