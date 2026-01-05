@@ -104,14 +104,20 @@ export const reviewsApi = apiSlice.injectEndpoints({
     // Get submissions for reviewer in accepted tracks
     getSubmissionsForReviewer: builder.query<
       ApiResponse<Submission[]>,
-      { status?: string[] }
+      { status?: string[] } | void
     >({
-      query: (params = {}) => ({
-        url: '/reviews/submissions/accepted-tracks',
-        params: params.status
-          ? { status: params.status }
-          : undefined,
-      }),
+      query: (params) => {
+        // Convert status array to query string format: status=SUBMITTED&status=REVIEWING
+        const queryParams: Record<string, string | string[]> = {};
+        if (params?.status && Array.isArray(params.status) && params.status.length > 0) {
+          queryParams.status = params.status;
+        }
+        
+        return {
+          url: '/reviews/submissions/accepted-tracks',
+          params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+        };
+      },
       providesTags: [{ type: 'Submission', id: 'REVIEWER_ACCEPTED_TRACKS' }],
     }),
   }),

@@ -50,26 +50,36 @@ export class ConferenceClientService {
     authToken: string,
   ): Promise<TrackMember[]> {
     try {
-      console.log('[ConferenceClient] Getting track assignments, URL:', this.conferenceServiceUrl);
+      console.log('[ConferenceClient] Getting track assignments, baseURL:', this.conferenceServiceUrl);
       
       // Use alternative endpoint to avoid route conflicts
       // Note: baseURL already includes /api, so we just need /conferences/...
       const url = '/conferences/reviewer/my-track-assignments';
-      console.log('[ConferenceClient] Full URL will be:', `${this.conferenceServiceUrl}${url}`);
+      const fullUrl = `${this.conferenceServiceUrl}${url}`;
+      console.log('[ConferenceClient] Full URL will be:', fullUrl);
       
-      const response = await firstValueFrom(
-        this.httpService.get(url, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        }),
-      );
+      // Use axios directly with full URL to avoid baseURL issues
+      const axios = require('axios');
+      const response = await axios.get(fullUrl, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        timeout: 10000,
+      });
 
       console.log('[ConferenceClient] Response status:', response.status);
       const result = response.data;
       const assignments = result?.data || [];
       
-      console.log('[ConferenceClient] Got track assignments:', assignments.length);
+      console.log('[ConferenceClient] Got track assignments:', {
+        count: assignments.length,
+        assignments: assignments.map(a => ({
+          id: a.id,
+          trackId: a.trackId,
+          status: a.status,
+          trackName: a.track?.name,
+        })),
+      });
       
       return assignments;
     } catch (error: any) {

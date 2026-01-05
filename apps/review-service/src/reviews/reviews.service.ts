@@ -717,8 +717,18 @@ export class ReviewsService {
     // 2. Get submissions for each accepted track
     const allSubmissions: Submission[] = [];
     
+    console.log('[ReviewsService] Starting to fetch submissions for accepted tracks:', {
+      acceptedTracksCount: acceptedTracks.length,
+      trackIds: acceptedTracks.map(t => t.trackId),
+    });
+    
     for (const trackAssignment of acceptedTracks) {
       try {
+        console.log('[ReviewsService] Fetching submissions for track:', {
+          trackId: trackAssignment.trackId,
+          trackName: trackAssignment.track?.name,
+        });
+        
         // Get submissions - if status filter provided, use it; otherwise get all and filter later
         // Note: submission-service only supports single status, so we'll get all and filter
         const submissions = await this.submissionClient.getSubmissionsByTrack(
@@ -729,18 +739,23 @@ export class ReviewsService {
         
         console.log('[ReviewsService] Got submissions for track (before filter):', {
           trackId: trackAssignment.trackId,
+          trackName: trackAssignment.track?.name,
           count: submissions.length,
           statuses: submissions.map(s => s.status),
+          submissionIds: submissions.map(s => s.id),
         });
         
         // Filter by status if provided, otherwise filter out DRAFT and WITHDRAWN
         let filteredSubmissions = submissions;
         if (status && status.length > 0) {
-          filteredSubmissions = submissions.filter((s) => status.includes(s.status));
+          // Ensure status is an array (handle case where it might be a string)
+          const statusArray = Array.isArray(status) ? status : [status];
+          filteredSubmissions = submissions.filter((s) => statusArray.includes(s.status));
           console.log('[ReviewsService] After status filter:', {
             before: submissions.length,
             after: filteredSubmissions.length,
-            filterStatus: status,
+            filterStatus: statusArray,
+            submissionStatuses: submissions.map(s => s.status),
           });
         } else {
           // Default: exclude DRAFT and WITHDRAWN

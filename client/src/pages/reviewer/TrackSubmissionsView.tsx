@@ -38,10 +38,14 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
   );
 
   // Debug logging
-  if (isExpanded && track && submissionsData) {
+  if (isExpanded && track) {
     console.log('[TrackSubmissionsView] Submissions data:', {
       trackId: track.id,
       trackName: track.name,
+      isLoading: submissionsLoading,
+      hasError: !!submissionsError,
+      error: submissionsError,
+      rawData: submissionsData,
       totalSubmissions: allSubmissions.length,
       filteredSubmissions: submissions.length,
       submissions: submissions.map(s => ({
