@@ -261,6 +261,7 @@ export class ReviewsService {
 
   /**
    * Review Logic: Submit review for an assignment
+   * Supports both creating new review and updating existing review if deadline not passed
    */
   async submitReview(reviewerId: number, dto: CreateReviewDto): Promise<Review> {
     // Find assignment
@@ -279,23 +280,42 @@ export class ReviewsService {
       );
     }
 
-    // Only ACCEPTED assignments can submit review
+    // Check if review already exists
+    const existingReview = await this.reviewRepository.findOne({
+      where: { assignmentId: dto.assignmentId },
+    });
+
+    // If review exists and assignment is COMPLETED, check if we can update
+    if (existingReview && assignment.status === AssignmentStatus.COMPLETED) {
+      // Check assignment dueDate to see if deadline has passed
+      if (assignment.dueDate && new Date() > new Date(assignment.dueDate)) {
+        throw new BadRequestException(
+          'Đã hết hạn phản biện, không thể cập nhật đánh giá',
+        );
+      }
+      
+      // Deadline not passed or no dueDate, allow update
+      existingReview.score = dto.score;
+      existingReview.confidence = dto.confidence;
+      existingReview.commentForAuthor = dto.commentForAuthor || null;
+      existingReview.commentForPC = dto.commentForPC || null;
+      existingReview.recommendation = dto.recommendation;
+      
+      return await this.reviewRepository.save(existingReview);
+    }
+
+    // Only ACCEPTED assignments can submit new review
     if (assignment.status !== AssignmentStatus.ACCEPTED) {
       throw new BadRequestException(
         `Chỉ có thể nộp review khi assignment ở trạng thái ACCEPTED. Hiện tại: ${assignment.status}`,
       );
     }
 
-    // Check if review already exists (more reliable check)
-    const existingReview = await this.reviewRepository.findOne({
-      where: { assignmentId: dto.assignmentId },
-    });
-
     if (existingReview) {
       throw new BadRequestException('Review cho assignment này đã được nộp rồi');
     }
 
-    // Create review
+    // Create new review
     const review = this.reviewRepository.create({
       assignmentId: dto.assignmentId,
       conferenceId: assignment.conferenceId ?? null,

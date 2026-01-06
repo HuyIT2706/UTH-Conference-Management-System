@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
-import { useCreateReviewMutation } from '../../redux/api/reviewsApi';
+import { useCreateReviewMutation, useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
+import type { Review } from '../../types/api.types';
 
 interface ReviewFormProps {
   submissionId: string;
@@ -14,12 +15,26 @@ interface ReviewFormProps {
 
 const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFormProps) => {
   const { data: submissionData } = useGetSubmissionByIdQuery(submissionId);
+  const { data: assignmentsData } = useGetMyAssignmentsQuery();
   const [createReview, { isLoading }] = useCreateReviewMutation();
   
   const submission = submissionData?.data;
+  const assignments = assignmentsData?.data || [];
+  const currentAssignment = assignments.find(a => a.id === assignmentId);
+  const isCompleted = currentAssignment?.status === 'COMPLETED';
+  // Get review from assignment (may need to cast type)
+  const existingReview = (currentAssignment as any)?.review as Review | undefined;
   
-  const [score, setScore] = useState<number>(5);
-  const [comment, setComment] = useState('');
+  // Check assignment dueDate to determine if can edit
+  const dueDate = currentAssignment?.dueDate ? new Date(currentAssignment.dueDate) : null;
+  const isDeadlinePassed = dueDate ? new Date() > dueDate : false;
+  
+  // Can edit if not completed, or completed but deadline not passed
+  const canEdit = !isCompleted || (isCompleted && !isDeadlinePassed);
+  
+  const [score, setScore] = useState<number>(existingReview?.score || 5);
+  const [comment, setComment] = useState(existingReview?.commentForAuthor || '');
+  const [showReview, setShowReview] = useState(false);
 
   const handleSubmit = async () => {
     if (!comment.trim()) {
@@ -58,9 +73,15 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
           <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
             {submission.id}
           </span>
-          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">
-            Đang đánh giá
-          </span>
+          {isCompleted ? (
+            <span className="px-2 py-1 text-xs bg-green-100 text-green-600 rounded">
+              Đã hoàn thành
+            </span>
+          ) : (
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">
+              Đang đánh giá
+            </span>
+          )}
         </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">{submission.title}</h2>
         
@@ -131,6 +152,37 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
       {/* Evaluation Section */}
       <div className="bg-white rounded-lg shadow p-6 border-2 border-blue-200">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Đánh giá</h3>
+        {isCompleted && (
+          <div className={`mb-4 p-3 rounded-lg ${
+            canEdit 
+              ? 'bg-yellow-50 border border-yellow-200' 
+              : 'bg-green-50 border border-green-200'
+          }`}>
+            <p className={`text-sm ${
+              canEdit ? 'text-yellow-700' : 'text-green-700'
+            }`}>
+              {canEdit 
+                ? '✓ Bạn đã nộp đánh giá. Bạn có thể chỉnh sửa trước khi hết hạn phản biện.'
+                : isDeadlinePassed
+                ? '✓ Bạn đã nộp đánh giá. Đã hết hạn phản biện, không thể chỉnh sửa.'
+                : '✓ Bạn đã nộp đánh giá cho bài viết này.'
+              }
+            </p>
+            {dueDate && (
+              <p className={`text-xs mt-1 ${
+                canEdit ? 'text-yellow-600' : 'text-green-600'
+              }`}>
+                Hạn nộp: {dueDate.toLocaleString('vi-VN', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+            )}
+          </div>
+        )}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600">1 - Kém</span>
@@ -140,12 +192,13 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
               <button
                 key={num}
-                onClick={() => setScore(num)}
+                onClick={() => (!isCompleted || canEdit) && setScore(num)}
+                disabled={isCompleted && !canEdit}
                 className={`w-10 h-10 rounded-lg border-2 transition-colors ${
                   score === num
                     ? 'bg-teal-600 border-teal-600 text-white'
                     : 'border-gray-300 text-gray-700 hover:border-teal-400'
-                }`}
+                } ${(isCompleted && !canEdit) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 {num}
               </button>
@@ -163,13 +216,63 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
           </label>
           <textarea
             value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            onChange={(e) => (!isCompleted || canEdit) && setComment(e.target.value)}
+            disabled={isCompleted && !canEdit}
             placeholder="Nhập điểm mạnh, điểm yếu và đề xuất cải thiện..."
             rows={8}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 ${
+              (isCompleted && !canEdit) ? 'bg-gray-50 cursor-not-allowed' : ''
+            }`}
           />
         </div>
       </div>
+
+      {/* Review Details Section (when completed) */}
+      {isCompleted && showReview && existingReview && (
+        <div className="bg-white rounded-lg shadow p-6 border-2 border-green-200">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Đánh giá đã nộp</h3>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Điểm số:</p>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-teal-600">{existingReview.score}</span>
+                <span className="text-sm text-gray-500">/ 10</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Nhận xét:</p>
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-700 whitespace-pre-wrap">{existingReview.commentForAuthor}</p>
+              </div>
+            </div>
+            {existingReview.recommendation && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Đề xuất:</p>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm">
+                  {existingReview.recommendation === 'ACCEPT' && 'Chấp nhận'}
+                  {existingReview.recommendation === 'WEAK_ACCEPT' && 'Chấp nhận yếu'}
+                  {existingReview.recommendation === 'WEAK_REJECT' && 'Từ chối yếu'}
+                  {existingReview.recommendation === 'REJECT' && 'Từ chối'}
+                </span>
+              </div>
+            )}
+            {existingReview.createdAt && (
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1">Ngày nộp:</p>
+                <p className="text-sm text-gray-600">
+                  {new Date(existingReview.createdAt).toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex justify-between">
@@ -179,20 +282,32 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
         >
           Quay lại
         </button>
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading}
-          className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-        >
-          {isLoading ? (
-            <span className="flex items-center gap-2">
-              <CircularProgress size={16} disableShrink />
-              Đang xử lý...
-            </span>
-          ) : (
-            'Nộp đánh giá'
+        <div className="flex gap-2">
+          {isCompleted && !canEdit && (
+            <button
+              onClick={() => setShowReview(!showReview)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {showReview ? 'Ẩn đánh giá' : 'Xem đánh giá'}
+            </button>
           )}
-        </button>
+          {(canEdit || !isCompleted) && (
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <CircularProgress size={16} disableShrink />
+                  Đang xử lý...
+                </span>
+              ) : (
+                canEdit ? 'Cập nhật đánh giá' : 'Nộp đánh giá'
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

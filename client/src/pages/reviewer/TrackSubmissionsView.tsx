@@ -188,9 +188,16 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
                       </div>
                       <div className="flex gap-2 ml-4">
                         {assignment.status === 'COMPLETED' ? (
-                          <span className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg">
-                            Đã hoàn thành
-                          </span>
+                          <button
+                            onClick={() => {
+                              if (assignment.id && assignment.id > 0) {
+                                onEvaluate(submission.id, assignment.id);
+                              }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            Xem đánh giá
+                          </button>
                         ) : (
                           <button
                             onClick={async () => {
