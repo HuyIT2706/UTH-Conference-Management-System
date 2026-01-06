@@ -45,7 +45,7 @@ const StudentSubmissionLanding = () => {
           Chọn cuộc thi và chủ đề để nộp bài.
         </p>
 
-        <div className="space-y-4">
+        <div className="border-2 border-solid border-teal-200 rounded-lg p-5 space-y-5 ">
           {conferences.map((c) => (
             <ConferenceCard
               key={c.id}
@@ -102,7 +102,7 @@ const ConferenceCard = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onToggle}
-            className="px-4 py-2 text-teal-600 border border-teal-600 rounded-md hover:bg-teal-50 transition-colors"
+            className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
           >
             {isExpanded ? 'Ẩn chủ đề' : 'Xem chủ đề'}
           </button>

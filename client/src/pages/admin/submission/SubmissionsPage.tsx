@@ -1,24 +1,16 @@
 import { useState, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionsQuery } from '../../redux/api/submissionsApi';
-import { useGetConferencesQuery, useGetTracksQuery } from '../../redux/api/conferencesApi';
-import type { Submission, Conference, SubmissionStatus } from '../../types/api.types';
-import { formatApiError } from '../../utils/api-helpers';
-import { showToast } from '../../utils/toast';
-
-const removeVietnameseTones = (str: string): string => {
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase();
-};
+import { useGetSubmissionsQuery } from '../../../redux/api/submissionsApi';
+import {
+  useGetConferencesQuery,
+  useGetTracksQuery,
+} from '../../../redux/api/conferencesApi';
+import type { SubmissionStatus } from '../../../types/api.types';
+import { formatApiError } from '../../../utils/api-helpers';
+import { showToast } from '../../../utils/toast';
 
 const getStatusColor = (status: SubmissionStatus): string => {
   switch (status) {
-    case 'DRAFT':
-      return 'bg-gray-100 text-gray-800';
     case 'SUBMITTED':
       return 'bg-blue-100 text-blue-800';
     case 'REVIEWING':
@@ -38,44 +30,43 @@ const getStatusColor = (status: SubmissionStatus): string => {
 
 const getStatusLabel = (status: SubmissionStatus): string => {
   switch (status) {
-    case 'DRAFT':
-      return 'Bản nháp';
     case 'SUBMITTED':
       return 'Đã nộp';
-    case 'REVIEWING':
-      return 'Đang đánh giá';
-    case 'ACCEPTED':
-      return 'Đã chấp nhận';
-    case 'REJECTED':
-      return 'Đã từ chối';
     case 'WITHDRAWN':
       return 'Đã rút';
-    case 'CAMERA_READY':
-      return 'Camera-ready';
     default:
       return status;
   }
 };
 
 const SubmissionsPage = () => {
-  const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
+  const [selectedConferenceId, setSelectedConferenceId] = useState<
+    number | null
+  >(null);
   const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<SubmissionStatus | ''>('');
+  const [selectedStatus, setSelectedStatus] = useState<SubmissionStatus | ''>(
+    '',
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const limit = 10;
 
   // Fetch conferences
-  const { data: conferencesData, isLoading: conferencesLoading } = useGetConferencesQuery();
+  const { data: conferencesData, isLoading: conferencesLoading } =
+    useGetConferencesQuery();
 
   // Fetch tracks for selected conference
   const { data: tracksData, isLoading: tracksLoading } = useGetTracksQuery(
     selectedConferenceId!,
-    { skip: !selectedConferenceId }
+    { skip: !selectedConferenceId },
   );
 
   // Fetch submissions with filters
-  const { data: submissionsData, isLoading: submissionsLoading, error: submissionsError } = useGetSubmissionsQuery({
+  const {
+    data: submissionsData,
+    isLoading: submissionsLoading,
+    error: submissionsError,
+  } = useGetSubmissionsQuery({
     conferenceId: selectedConferenceId || undefined,
     trackId: selectedTrackId || undefined,
     status: selectedStatus || undefined,
@@ -85,16 +76,46 @@ const SubmissionsPage = () => {
   });
 
   const conferences = useMemo(() => {
-    return (conferencesData?.data && Array.isArray(conferencesData.data)) ? conferencesData.data : [];
+    return conferencesData?.data && Array.isArray(conferencesData.data)
+      ? conferencesData.data
+      : [];
   }, [conferencesData]);
 
   const tracks = useMemo(() => {
-    return (tracksData?.data && Array.isArray(tracksData.data)) ? tracksData.data : [];
+    return tracksData?.data && Array.isArray(tracksData.data)
+      ? tracksData.data
+      : [];
   }, [tracksData]);
 
   const submissions = useMemo(() => {
-    return (submissionsData?.data && Array.isArray(submissionsData.data)) ? submissionsData.data : [];
+    return submissionsData?.data && Array.isArray(submissionsData.data)
+      ? submissionsData.data
+      : [];
   }, [submissionsData]);
+
+  // Filter submissions to only show SUBMITTED and WITHDRAWN
+  const filteredSubmissions = useMemo(() => {
+    if (!selectedStatus) {
+      // Nếu không chọn status, chỉ hiển thị SUBMITTED và WITHDRAWN
+      return submissions.filter(
+        (s) => s.status === 'SUBMITTED' || s.status === 'WITHDRAWN',
+      );
+    }
+    // Nếu đã chọn status, chỉ hiển thị nếu là SUBMITTED hoặc WITHDRAWN
+    if (selectedStatus === 'SUBMITTED' || selectedStatus === 'WITHDRAWN') {
+      return submissions.filter((s) => s.status === selectedStatus);
+    }
+    return [];
+  }, [submissions, selectedStatus]);
+
+  // Helper function to get track name
+  const getTrackName = (trackId: number): string => {
+    // First try to find in current tracks (from selected conference)
+    const track = tracks.find((t) => t.id === trackId);
+    if (track) return track.name;
+    // If not found, return Track #id (will be improved later with better track fetching)
+    return `Track #${trackId}`;
+  };
 
   const pagination = submissionsData?.pagination;
 
@@ -103,7 +124,7 @@ const SubmissionsPage = () => {
     window.open(`/submissions/${submissionId}`, '_blank');
   };
 
-  const handleDownloadFile = (fileUrl: string, title: string) => {
+  const handleDownloadFile = (fileUrl: string) => {
     if (fileUrl) {
       window.open(fileUrl, '_blank');
     } else {
@@ -114,8 +135,12 @@ const SubmissionsPage = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Quản lý Bài nộp</h1>
-        <p className="text-gray-600">Xem danh sách bài nộp của thí sinh theo hội nghị và chủ đề</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          Quản lý Bài nộp
+        </h1>
+        <p className="text-gray-600">
+          Xem danh sách bài nộp của thí sinh theo hội nghị và chủ đề
+        </p>
       </div>
 
       {/* Filters */}
@@ -124,13 +149,15 @@ const SubmissionsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Conference Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
               Hội nghị
             </label>
             <select
               value={selectedConferenceId || ''}
               onChange={(e) => {
-                setSelectedConferenceId(e.target.value ? Number(e.target.value) : null);
+                setSelectedConferenceId(
+                  e.target.value ? Number(e.target.value) : null,
+                );
                 setSelectedTrackId(null); // Reset track when conference changes
                 setPage(1);
               }}
@@ -147,13 +174,15 @@ const SubmissionsPage = () => {
 
           {/* Track Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
               Chủ đề
             </label>
             <select
               value={selectedTrackId || ''}
               onChange={(e) => {
-                setSelectedTrackId(e.target.value ? Number(e.target.value) : null);
+                setSelectedTrackId(
+                  e.target.value ? Number(e.target.value) : null,
+                );
                 setPage(1);
               }}
               disabled={!selectedConferenceId}
@@ -170,7 +199,7 @@ const SubmissionsPage = () => {
 
           {/* Status Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
               Trạng thái
             </label>
             <select
@@ -182,19 +211,14 @@ const SubmissionsPage = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="DRAFT">Bản nháp</option>
               <option value="SUBMITTED">Đã nộp</option>
-              <option value="REVIEWING">Đang đánh giá</option>
-              <option value="ACCEPTED">Đã chấp nhận</option>
-              <option value="REJECTED">Đã từ chối</option>
               <option value="WITHDRAWN">Đã rút</option>
-              <option value="CAMERA_READY">Camera-ready</option>
             </select>
           </div>
 
           {/* Search */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
               Tìm kiếm
             </label>
             <input
@@ -223,9 +247,7 @@ const SubmissionsPage = () => {
       {/* Error */}
       {submissionsError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <p className="text-red-600">
-            {formatApiError(submissionsError)}
-          </p>
+          <p className="text-red-600">{formatApiError(submissionsError)}</p>
         </div>
       )}
 
@@ -245,12 +267,17 @@ const SubmissionsPage = () => {
             </div>
           </div>
 
-          {submissions.length === 0 ? (
+          {filteredSubmissions.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <p>Không có bài nộp nào được tìm thấy.</p>
-              {(!selectedConferenceId && !selectedTrackId && !selectedStatus && !searchQuery) && (
-                <p className="mt-2 text-sm">Vui lòng chọn hội nghị hoặc chủ đề để xem bài nộp.</p>
-              )}
+              {!selectedConferenceId &&
+                !selectedTrackId &&
+                !selectedStatus &&
+                !searchQuery && (
+                  <p className="mt-2 text-sm">
+                    Vui lòng chọn hội nghị hoặc chủ đề để xem bài nộp.
+                  </p>
+                )}
             </div>
           ) : (
             <>
@@ -258,70 +285,97 @@ const SubmissionsPage = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
                         Tiêu đề
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
                         Tác giả
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
                         Chủ đề
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
                         Trạng thái
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
                         Ngày nộp
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Thao tác
+                      <th className="p-3 text-left text-sm font-medium text-black uppercase tracking-wider">
+                        File nộp
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {submissions.map((submission) => (
+                    {filteredSubmissions.map((submission) => (
                       <tr key={submission.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 max-w-xs truncate" title={submission.title}>
+                        <td className="p-3 whitespace-nowrap">
+                          <div
+                            className="text-sm font-medium text-gray-900 max-w-xs truncate"
+                            title={submission.title}
+                          >
                             {submission.title}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="p-3">
                           <div className="text-sm text-gray-900">
-                            {submission.authorName || `ID: ${submission.authorId}`}
+                            <div className="font-medium">
+                              {submission.authorName ||
+                                `ID: ${submission.authorId}`}
+                            </div>
+                            {submission.coAuthors &&
+                              submission.coAuthors.length > 0 && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  <span className="font-medium">
+                                    Đồng tác giả:
+                                  </span>{' '}
+                                  {submission.coAuthors.map((ca, idx) => (
+                                    <span key={idx}>
+                                      {ca.name}
+                                      {idx < submission.coAuthors!.length - 1 &&
+                                        ', '}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="p-3 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {tracks.find(t => t.id === submission.trackId)?.name || `Track #${submission.trackId}`}
+                            {getTrackName(submission.trackId)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="p-3 whitespace-nowrap">
                           <span
                             className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                              submission.status as SubmissionStatus
+                              submission.status as SubmissionStatus,
                             )}`}
                           >
-                            {getStatusLabel(submission.status as SubmissionStatus)}
+                            {getStatusLabel(
+                              submission.status as SubmissionStatus,
+                            )}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="p-3 whitespace-nowrap text-sm text-gray-500">
                           {submission.submittedAt || submission.createdAt
-                            ? new Date(submission.submittedAt || submission.createdAt).toLocaleDateString('vi-VN')
+                            ? new Date(
+                                submission.submittedAt || submission.createdAt,
+                              ).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
                             : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td className="p-3 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleViewDetail(submission.id)}
-                              className="text-teal-600 hover:text-teal-900"
-                            >
-                              Xem chi tiết
-                            </button>
                             {submission.fileUrl && (
                               <button
-                                onClick={() => handleDownloadFile(submission.fileUrl!, submission.title)}
-                                className="text-blue-600 hover:text-blue-900"
+                                onClick={() =>
+                                  handleDownloadFile(submission.fileUrl!)
+                                }
+                                className="p-3 border border-solid border-primary rounded-[10px] text-white bg-teal-600 hover:cursor-pointer hover:bg-teal-700 transition-colors text-xs"
                               >
                                 Tải file
                               </button>
@@ -338,11 +392,13 @@ const SubmissionsPage = () => {
               {pagination && pagination.totalPages > 1 && (
                 <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
                   <div className="text-sm text-gray-700">
-                    Hiển thị {((page - 1) * limit) + 1} - {Math.min(page * limit, pagination.total)} của {pagination.total} bài
+                    Hiển thị {(page - 1) * limit + 1} -{' '}
+                    {Math.min(page * limit, pagination.total)} của{' '}
+                    {pagination.total} bài
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -352,7 +408,9 @@ const SubmissionsPage = () => {
                       Trang {page} / {pagination.totalPages}
                     </span>
                     <button
-                      onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                      onClick={() =>
+                        setPage((p) => Math.min(pagination.totalPages, p + 1))
+                      }
                       disabled={page === pagination.totalPages}
                       className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >

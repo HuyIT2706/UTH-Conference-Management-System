@@ -9,7 +9,7 @@ import DashboardPage from '../pages/admin/DashboardPage';
 import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
 import TrackManagementPage from '../pages/admin/tracks/TrackManagementPage';
-import SubmissionsPage from '../pages/admin/SubmissionsPage';
+import SubmissionsPage from '../pages/admin/submission/SubmissionsPage';
 import PCManagementPage from '../pages/admin/pc-management/PCManagementPage';
 import AssignmentsPage from '../pages/admin/AssignmentsPage';
 import DecisionsPage from '../pages/admin/DecisionsPage';
