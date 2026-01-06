@@ -301,9 +301,11 @@ export class ConferencesService {
     user: { id: number; roles: string[] },
   ) {
     const roles = user?.roles || [];
-    if (roles.includes('ADMIN')) {
+    // ADMIN và CHAIR có quyền quản lý tất cả conferences
+    if (roles.includes('ADMIN') || roles.includes('CHAIR')) {
       return;
     }
+    // Nếu không phải ADMIN/CHAIR, phải là member của conference với role CHAIR
     const membership = await this.conferenceMemberRepository.findOne({
       where: { conferenceId, userId: user.id },
     });
