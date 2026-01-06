@@ -15,6 +15,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { ConferenceClientService } from './integrations/conference-client.service';
 import { SubmissionClientService } from './integrations/submission-client.service';
+import { IdentityClientService } from './integrations/identity-client.service';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { SubmissionClientService } from './integrations/submission-client.servic
     JwtStrategy,
     ConferenceClientService,
     SubmissionClientService,
+    IdentityClientService,
   ],
 })
 export class ReviewServiceModule {}

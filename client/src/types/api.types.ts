@@ -214,6 +214,7 @@ export interface Review {
   assignmentId: number;
   submissionId: string;
   reviewerId: number;
+  reviewerName?: string; // Enriched by backend from identity service
   score: number;
   confidence?: 'LOW' | 'MEDIUM' | 'HIGH';
   commentForAuthor: string;

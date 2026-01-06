@@ -34,7 +34,7 @@ export class Review {
   conferenceId: number | null;
 
   @Column({ type: 'int' })
-  score: number; // 0-100
+  score: number; // 0-10
 
   @Column({
     type: 'enum',
@@ -65,6 +65,7 @@ export class Review {
   @JoinColumn({ name: 'assignmentId' })
   assignment: Assignment;
 }
+
 
 
 

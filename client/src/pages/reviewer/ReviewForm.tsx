@@ -32,7 +32,13 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   // Can edit if not completed, or completed but deadline not passed
   const canEdit = !isCompleted || (isCompleted && !isDeadlinePassed);
   
-  const [score, setScore] = useState<number>(existingReview?.score || 5);
+  // Normalize existing review score from 0-100 to 0-10 if needed (for backward compatibility)
+  const normalizeExistingScore = (score?: number): number => {
+    if (!score) return 5;
+    // If score >= 10, assume it's old 0-100 scale, convert to 0-10
+    return score >= 10 ? Math.round(score / 10) : score;
+  };
+  const [score, setScore] = useState<number>(normalizeExistingScore(existingReview?.score));
   const [comment, setComment] = useState(existingReview?.commentForAuthor || '');
   const [showReview, setShowReview] = useState(false);
 
@@ -235,7 +241,9 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
             <div>
               <p className="text-sm font-medium text-gray-700 mb-2">Điểm số:</p>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-teal-600">{existingReview.score}</span>
+                <span className="text-2xl font-bold text-teal-600">
+                  {normalizeExistingScore(existingReview.score)}
+                </span>
                 <span className="text-sm text-gray-500">/ 10</span>
               </div>
             </div>

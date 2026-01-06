@@ -41,6 +41,11 @@ export class ReviewsController {
     }
   }
 
+  private canManageConference(user?: JwtPayload): boolean {
+    const roles = user?.roles || [];
+    return roles.includes('ADMIN') || roles.includes('CHAIR');
+  }
+
   private ensureIsReviewer(user?: JwtPayload) {
     const roles = user?.roles || [];
     if (
@@ -275,7 +280,7 @@ export class ReviewsController {
     \`\`\`
 
     **Các trường:**
-    - \`score\`: Điểm số từ 0-100
+    - \`score\`: Điểm số từ 0-10
     - \`confidence\`: Mức độ tự tin (HIGH, MEDIUM, LOW)
     - \`commentForAuthor\`: Nhận xét cho tác giả (sẽ được hiển thị sau khi có decision)
     - \`commentForPC\`: Nhận xét nội bộ cho PC (confidential)
@@ -445,8 +450,12 @@ export class ReviewsController {
 
   @Get('submission/:id')
   @ApiOperation({
-    summary: 'Chair xem tất cả reviews của một submission',
-    description: `Chair xem danh sách tất cả reviews đã được nộp cho một submission (bao gồm cả thông tin reviewer).
+    summary: 'Xem tất cả reviews của một submission',
+    description: `Chair/Admin/Reviewer xem danh sách tất cả reviews đã được nộp cho một submission.
+    
+    **Quyền truy cập:**
+    - Chair/Admin: Xem tất cả reviews
+    - Reviewer: Chỉ xem được nếu có assignment cho submission này
     
     **Query parameters:**
     - \`page\`: Số trang (mặc định: 1)
@@ -454,28 +463,51 @@ export class ReviewsController {
 
     **Response bao gồm:**
     - Danh sách reviews với đầy đủ thông tin (score, comments, recommendation)
-    - Thông tin reviewer (cho Chair)
+    - Thông tin reviewer (cho Chair/Admin)
     - Assignment details`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'Lấy danh sách reviews thành công' })
-  @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
+  @ApiResponse({ status: 403, description: 'Không có quyền xem' })
   async getReviewsBySubmission(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
       throw new UnauthorizedException('Token không hợp lệ');
     }
-    this.ensureCanManageConference(user);
+    
+    // Check if user is Chair/Admin
+    const isChairOrAdmin = this.canManageConference(user);
+    
+    // If not Chair/Admin, check if reviewer has assignment for this submission
+    if (!isChairOrAdmin) {
+      const hasAssignment = await this.reviewsService.checkReviewerAssignment(
+        user.sub,
+        submissionId,
+      );
+      if (!hasAssignment) {
+        throw new ForbiddenException(
+          'Bạn không có quyền xem reviews của submission này. Chỉ reviewer được gán bài mới có thể xem.',
+        );
+      }
+    }
+    
+    // Extract JWT token from Authorization header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
     const reviews = await this.reviewsService.getReviewsBySubmission(
       submissionId,
       query.page,
       query.limit,
+      authToken,
     );
 
     return {
@@ -496,10 +528,10 @@ export class ReviewsController {
 
     **Không bao gồm:** Thông tin reviewer (đã ẩn danh)`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách reviews ẩn danh thành công' })
   async getAnonymizedReviews(
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
   ) {
     const reviews =
       await this.reviewsService.getAnonymizedReviewsBySubmission(submissionId);
@@ -524,14 +556,14 @@ export class ReviewsController {
     - Thông tin reviewer
     - Timestamp`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'Lấy danh sách bids thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getBidsBySubmission(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
@@ -659,12 +691,12 @@ export class ReviewsController {
     summary: 'Chair xem tất cả rebuttals của một submission',
     description: `Chair/Admin xem danh sách tất cả rebuttals mà tác giả đã gửi cho một submission.`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách rebuttal thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getRebuttalsBySubmission(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -694,14 +726,14 @@ export class ReviewsController {
     - \`page\`: Số trang (mặc định: 1)
     - \`limit\`: Số lượng mỗi trang (mặc định: 10, tối đa: 100)`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thảo luận thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDiscussionsBySubmission(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
@@ -732,12 +764,12 @@ export class ReviewsController {
     - Quyết định cuối cùng (nếu đã set)
     - Note về quyết định (nếu có)`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiResponse({ status: 200, description: 'Lấy tổng hợp review và quyết định thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDecisionSummary(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -832,12 +864,12 @@ export class ReviewsController {
     - Tỷ lệ hoàn thành
     - Thông tin về due dates`
   })
-  @ApiParam({ name: 'id', description: 'ID của submission' })
+  @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiResponse({ status: 200, description: 'Lấy tiến độ review của bài báo thành công' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getSubmissionProgress(
     @Req() req: Request,
-    @Param('id', ParseIntPipe) submissionId: number,
+    @Param('id') submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {

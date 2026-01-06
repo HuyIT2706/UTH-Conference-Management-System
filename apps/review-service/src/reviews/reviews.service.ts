@@ -23,6 +23,7 @@ import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ConferenceClientService } from '../integrations/conference-client.service';
 import { SubmissionClientService, Submission } from '../integrations/submission-client.service';
+import { IdentityClientService } from '../integrations/identity-client.service';
 
 @Injectable()
 export class ReviewsService {
@@ -41,6 +42,7 @@ export class ReviewsService {
     private readonly rebuttalRepository: Repository<Rebuttal>,
     private readonly conferenceClient: ConferenceClientService,
     private readonly submissionClient: SubmissionClientService,
+    private readonly identityClient: IdentityClientService,
   ) {}
 
   /**
@@ -285,8 +287,15 @@ export class ReviewsService {
       where: { assignmentId: dto.assignmentId },
     });
 
-    // If review exists and assignment is COMPLETED, check if we can update
-    if (existingReview && assignment.status === AssignmentStatus.COMPLETED) {
+    // If assignment is COMPLETED, check if we can update existing review
+    if (assignment.status === AssignmentStatus.COMPLETED) {
+      if (!existingReview) {
+        // This shouldn't happen, but handle gracefully
+        throw new BadRequestException(
+          'Assignment đã hoàn thành nhưng không tìm thấy review. Vui lòng liên hệ admin.',
+        );
+      }
+      
       // Check assignment dueDate to see if deadline has passed
       if (assignment.dueDate && new Date() > new Date(assignment.dueDate)) {
         throw new BadRequestException(
@@ -336,13 +345,30 @@ export class ReviewsService {
   }
 
   /**
-   * Get all reviews for a submission (Chair view)
+   * Check if reviewer has assignment for a submission
+   */
+  async checkReviewerAssignment(
+    reviewerId: number,
+    submissionId: string | number,
+  ): Promise<boolean> {
+    const assignment = await this.assignmentRepository.findOne({
+      where: {
+        reviewerId,
+        submissionId: String(submissionId),
+      },
+    });
+    return !!assignment;
+  }
+
+  /**
+   * Get all reviews for a submission (Chair/Reviewer view)
    */
   async getReviewsBySubmission(
     submissionId: string | number,
     page = 1,
     limit = 10,
-  ): Promise<Review[]> {
+    authToken?: string,
+  ): Promise<any[]> {
     // Find all assignments for this submission
     const assignments = await this.assignmentRepository.find({
       where: { submissionId: String(submissionId) },
@@ -356,13 +382,51 @@ export class ReviewsService {
     // Get all reviews for these assignments
     const skip = (page - 1) * limit;
 
-    return this.reviewRepository.find({
+    const reviews = await this.reviewRepository.find({
       where: { assignmentId: In(assignmentIds) },
       relations: ['assignment'],
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
     });
+
+    // Enrich reviews with reviewer names from identity service
+    const reviewerIds = reviews
+      .map((r) => r.assignment?.reviewerId)
+      .filter((id): id is number => id !== undefined && id !== null);
+
+    if (reviewerIds.length > 0 && authToken) {
+      try {
+        const userMap = await this.identityClient.getUsersByIds(reviewerIds, authToken);
+        
+        // Map reviews with reviewer names
+        return reviews.map((review) => {
+          const reviewerId = review.assignment?.reviewerId;
+          const reviewer = reviewerId ? userMap.get(reviewerId) : null;
+          
+          return {
+            ...review,
+            reviewerId: reviewerId || review.assignment?.reviewerId,
+            reviewerName: reviewer?.fullName || reviewer?.email || `Reviewer #${reviewerId}`,
+          };
+        });
+      } catch (error) {
+        console.error('[ReviewsService] Error enriching reviews with reviewer names:', error);
+        // Return reviews without names if identity service fails
+        return reviews.map((review) => ({
+          ...review,
+          reviewerId: review.assignment?.reviewerId,
+          reviewerName: `Reviewer #${review.assignment?.reviewerId}`,
+        }));
+      }
+    }
+
+    // Return reviews without names if no auth token
+    return reviews.map((review) => ({
+      ...review,
+      reviewerId: review.assignment?.reviewerId,
+      reviewerName: `Reviewer #${review.assignment?.reviewerId}`,
+    }));
   }
 
   /**

@@ -23,15 +23,15 @@ export class CreateReviewDto {
   assignmentId: number;
 
   @ApiProperty({
-    description: 'Điểm số (0-100)',
-    example: 85,
+    description: 'Điểm số (0-10)',
+    example: 8,
     minimum: 0,
-    maximum: 100,
+    maximum: 10,
   })
   @IsInt()
   @IsNotEmpty()
   @Min(0)
-  @Max(100)
+  @Max(10)
   score: number;
 
   @ApiProperty({
