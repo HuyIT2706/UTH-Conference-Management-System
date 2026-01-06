@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import { useCreateReviewMutation } from '../../redux/api/reviewsApi';
@@ -20,16 +20,11 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   
   const [score, setScore] = useState<number>(5);
   const [comment, setComment] = useState('');
-  const [recommendation, setRecommendation] = useState<string>('');
 
   const handleSubmit = async (saveAsDraft: boolean = false) => {
     if (!saveAsDraft) {
       if (!comment.trim()) {
         showToast.error('Vui lòng nhập nhận xét chi tiết');
-        return;
-      }
-      if (!recommendation) {
-        showToast.error('Vui lòng chọn đề xuất');
         return;
       }
     }
@@ -41,7 +36,7 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
           score,
           confidence: 'MEDIUM',
           commentForAuthor: comment,
-          recommendation: recommendation as 'ACCEPT' | 'WEAK_ACCEPT' | 'REJECT' | 'WEAK_REJECT',
+          recommendation: 'ACCEPT', // Default recommendation, can be changed later by chair
         }).unwrap();
         showToast.success('Đánh giá bài viết thành công');
         onComplete();
@@ -73,8 +68,70 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
             Đang đánh giá
           </span>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">{submission.title}</h2>
-        <p className="text-gray-600">Tác giả: {submission.authorName || 'N/A'}</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">{submission.title}</h2>
+        
+        <div className="space-y-3 mb-4">
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1">Tác giả:</p>
+            <p className="text-gray-600">{submission.authorName || `ID: ${submission.authorId}`}</p>
+            {submission.authorAffiliation && (
+              <p className="text-sm text-gray-500 mt-1">{submission.authorAffiliation}</p>
+            )}
+          </div>
+
+          {submission.coAuthors && submission.coAuthors.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-1">Đồng tác giả:</p>
+              <div className="space-y-1">
+                {submission.coAuthors.map((coAuthor, idx) => (
+                  <div key={idx} className="text-sm text-gray-600">
+                    <span className="font-medium">{coAuthor.name}</span>
+                    {coAuthor.email && <span className="text-gray-500"> ({coAuthor.email})</span>}
+                    {coAuthor.affiliation && <span className="text-gray-500"> - {coAuthor.affiliation}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {submission.abstract && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-1">Tóm tắt:</p>
+              <p className="text-gray-600 whitespace-pre-wrap">{submission.abstract}</p>
+            </div>
+          )}
+
+          {submission.keywords && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-1">Từ khóa:</p>
+              <div className="flex flex-wrap gap-2">
+                {submission.keywords.split(',').map((keyword, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-xs bg-teal-100 text-teal-700 rounded"
+                  >
+                    {keyword.trim()}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {submission.fileUrl && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">File bài nộp:</p>
+              <button
+                onClick={() => window.open(submission.fileUrl, '_blank')}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Tải xuống file PDF
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Evaluation Section */}
@@ -117,27 +174,6 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
             rows={8}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           />
-        </div>
-      </div>
-
-      {/* Decision Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">Quyết định</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Đề xuất <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={recommendation}
-            onChange={(e) => setRecommendation(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-          >
-            <option value="">Chọn đề xuất</option>
-            <option value="ACCEPT">Chấp nhận</option>
-            <option value="WEAK_ACCEPT">Chấp nhận yếu</option>
-            <option value="WEAK_REJECT">Từ chối yếu</option>
-            <option value="REJECT">Từ chối</option>
-          </select>
         </div>
       </div>
 

@@ -817,9 +817,31 @@ export class SubmissionsService {
         hasAuthToken: !!authToken,
       });
       
-      // Check if reviewer has review assignment
-      if (assignmentIds && assignmentIds.length > 0) {
-        console.log('[SubmissionsService] Reviewer has assignment, allowing access');
+      // If assignmentIds not provided, try to get from review-service
+      let reviewerSubmissionIds: string[] = [];
+      let reviewerAssignmentIds: number[] = [];
+      
+      if (!assignmentIds || assignmentIds.length === 0) {
+        try {
+          console.log('[SubmissionsService] Fetching assignments from review-service...');
+          const assignments = await this.reviewClient.getReviewerAssignments(authToken);
+          reviewerSubmissionIds = assignments.map((a) => a.submissionId);
+          reviewerAssignmentIds = assignments.map((a) => a.id);
+          console.log('[SubmissionsService] Got assignments from review-service:', {
+            count: assignments.length,
+            submissionIds: reviewerSubmissionIds,
+            assignmentIds: reviewerAssignmentIds,
+          });
+        } catch (error) {
+          console.error('[SubmissionsService] Error fetching assignments from review-service:', error);
+        }
+      } else {
+        reviewerAssignmentIds = assignmentIds;
+      }
+      
+      // Check if reviewer has review assignment for this submission
+      if (reviewerSubmissionIds.includes(id)) {
+        console.log('[SubmissionsService] Reviewer has assignment for this submission, allowing access');
         if (submission.versions) {
           submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
         }

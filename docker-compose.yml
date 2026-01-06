@@ -87,6 +87,7 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_KEY=${SUPABASE_KEY}
       - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
+      - REVIEW_SERVICE_URL=http://review-service:3004/api
     depends_on:
       - postgres
       - conference-service

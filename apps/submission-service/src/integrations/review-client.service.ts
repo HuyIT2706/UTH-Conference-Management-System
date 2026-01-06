@@ -13,7 +13,7 @@ export class ReviewClientService {
   ) {
     this.reviewServiceUrl =
       this.configService.get<string>('REVIEW_SERVICE_URL') ||
-      'http://localhost:3003/api';
+      'http://localhost:3004/api';
 
     this.httpService.axiosRef.defaults.baseURL = this.reviewServiceUrl;
     this.httpService.axiosRef.defaults.timeout = 10000;
@@ -38,13 +38,22 @@ export class ReviewClientService {
       return [];
     }
   }
-  async getReviewerAssignments(reviewerId: number): Promise<number[]> {
+  async getReviewerAssignments(
+    authToken?: string,
+  ): Promise<Array<{ submissionId: string; id: number }>> {
     try {
+      const headers: Record<string, string> = {};
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
       const response = await firstValueFrom(
-        this.httpService.get(`/reviews/assignments/me`),
+        this.httpService.get(`/reviews/assignments/me`, { headers }),
       );
       const assignments = response.data.data || [];
-      return assignments.map((a: any) => a.submissionId);
+      return assignments.map((a: any) => ({
+        submissionId: a.submissionId,
+        id: a.id,
+      }));
     } catch (error: any) {
       console.warn(
         '[ReviewClientService] Lỗi khi lấy assignments cho reviewer:',

@@ -13,16 +13,8 @@ const getStatusColor = (status: SubmissionStatus): string => {
   switch (status) {
     case 'SUBMITTED':
       return 'bg-blue-100 text-blue-800';
-    case 'REVIEWING':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'ACCEPTED':
-      return 'bg-green-100 text-green-800';
-    case 'REJECTED':
-      return 'bg-red-100 text-red-800';
     case 'WITHDRAWN':
       return 'bg-gray-100 text-gray-600';
-    case 'CAMERA_READY':
-      return 'bg-purple-100 text-purple-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -110,19 +102,12 @@ const SubmissionsPage = () => {
 
   // Helper function to get track name
   const getTrackName = (trackId: number): string => {
-    // First try to find in current tracks (from selected conference)
     const track = tracks.find((t) => t.id === trackId);
     if (track) return track.name;
-    // If not found, return Track #id (will be improved later with better track fetching)
-    return `Track #${trackId}`;
+    return `Track: ${trackId}`;
   };
 
   const pagination = submissionsData?.pagination;
-
-  const handleViewDetail = (submissionId: string) => {
-    // Open submission detail in new tab
-    window.open(`/submissions/${submissionId}`, '_blank');
-  };
 
   const handleDownloadFile = (fileUrl: string) => {
     if (fileUrl) {
@@ -136,11 +121,8 @@ const SubmissionsPage = () => {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Quản lý Bài nộp
+          Bài nộp thí sinh
         </h1>
-        <p className="text-gray-600">
-          Xem danh sách bài nộp của thí sinh theo hội nghị và chủ đề
-        </p>
       </div>
 
       {/* Filters */}
@@ -307,7 +289,7 @@ const SubmissionsPage = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredSubmissions.map((submission) => (
-                      <tr key={submission.id} className="hover:bg-gray-50">
+                      <tr key={submission.id} className="hover:bg-gray-100">
                         <td className="p-3 whitespace-nowrap">
                           <div
                             className="text-sm font-medium text-gray-900 max-w-xs truncate"
@@ -375,7 +357,7 @@ const SubmissionsPage = () => {
                                 onClick={() =>
                                   handleDownloadFile(submission.fileUrl!)
                                 }
-                                className="p-3 border border-solid border-primary rounded-[10px] text-white bg-teal-600 hover:cursor-pointer hover:bg-teal-700 transition-colors text-xs"
+                                className="px-3 py-2 border border-solid border-primary rounded-[10px] text-white bg-teal-600 hover:cursor-pointer hover:bg-teal-700 transition-colors text-xs"
                               >
                                 Tải file
                               </button>

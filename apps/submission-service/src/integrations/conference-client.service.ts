@@ -197,7 +197,7 @@ export class ConferenceClientService {
 
   /**
    * Check if reviewer has accepted track assignment for a specific track
-   * Alternative: Get all track assignments and check locally
+   * Get all track assignments and check locally
    */
   async checkReviewerTrackAssignment(
     reviewerId: number,
@@ -205,14 +205,14 @@ export class ConferenceClientService {
     authToken?: string,
   ): Promise<{ hasAccepted: boolean }> {
     try {
-      // Try the new endpoint first
       const headers: Record<string, string> = {};
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const url = `/conferences/tracks/${trackId}/reviewer/${reviewerId}/check-assignment`;
-      console.log('[ConferenceClient] Calling:', url, { reviewerId, trackId });
+      // Use the correct endpoint: /conferences/reviewer/my-track-assignments
+      const url = '/conferences/reviewer/my-track-assignments';
+      console.log('[ConferenceClient] Getting track assignments:', url, { reviewerId, trackId });
       
       const response = await firstValueFrom(
         this.httpService.get(url, {
@@ -220,49 +220,30 @@ export class ConferenceClientService {
         }),
       );
       
-      const result = response.data;
-      const hasAccepted = result?.data?.hasAccepted || result?.hasAccepted || false;
+      const assignments = response.data?.data || [];
+      console.log('[ConferenceClient] Got track assignments:', {
+        count: assignments.length,
+        assignments: assignments.map((a: any) => ({
+          id: a.id,
+          trackId: a.trackId,
+          status: a.status,
+        })),
+      });
       
-      console.log('[ConferenceClient] Track assignment check result:', hasAccepted);
+      // Check if any assignment matches trackId and has status ACCEPTED
+      const hasAccepted = assignments.some(
+        (assignment: any) => 
+          assignment.trackId === trackId && 
+          assignment.status === 'ACCEPTED'
+      );
+      
+      console.log('[ConferenceClient] Track assignment check result:', {
+        trackId,
+        hasAccepted,
+      });
       
       return { hasAccepted };
     } catch (error: any) {
-      // If endpoint returns 404, try alternative: get all track assignments
-      if (error.response?.status === 404) {
-        console.log('[ConferenceClient] check-assignment endpoint not found, trying alternative method');
-        try {
-          const headers: Record<string, string> = {};
-          if (authToken) {
-            headers['Authorization'] = `Bearer ${authToken}`;
-          }
-          
-          // Get all track assignments for this reviewer
-          const response = await firstValueFrom(
-            this.httpService.get('/conferences/tracks/my-assignments', {
-              headers,
-            }),
-          );
-          
-          const assignments = response.data?.data || [];
-          console.log('[ConferenceClient] Got track assignments:', assignments.length);
-          
-          // Check if any assignment matches trackId and has status ACCEPTED
-          const hasAccepted = assignments.some(
-            (assignment: any) => 
-              assignment.trackId === trackId && 
-              assignment.status === 'ACCEPTED'
-          );
-          
-          console.log('[ConferenceClient] Track assignment check result (alternative):', hasAccepted);
-          
-          return { hasAccepted };
-        } catch (altError: any) {
-          console.error('[ConferenceClient] Alternative method also failed:', altError.message);
-          return { hasAccepted: false };
-        }
-      }
-      
-      // For other errors, return false
       console.error(
         '[ConferenceClient] Error checking reviewer track assignment:',
         {
