@@ -21,28 +21,22 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   const [score, setScore] = useState<number>(5);
   const [comment, setComment] = useState('');
 
-  const handleSubmit = async (saveAsDraft: boolean = false) => {
-    if (!saveAsDraft) {
-      if (!comment.trim()) {
-        showToast.error('Vui lòng nhập nhận xét chi tiết');
-        return;
-      }
+  const handleSubmit = async () => {
+    if (!comment.trim()) {
+      showToast.error('Vui lòng nhập nhận xét chi tiết');
+      return;
     }
 
     try {
-      if (!saveAsDraft) {
-        await createReview({
-          assignmentId,
-          score,
-          confidence: 'MEDIUM',
-          commentForAuthor: comment,
-          recommendation: 'ACCEPT', // Default recommendation, can be changed later by chair
-        }).unwrap();
-        showToast.success('Đánh giá bài viết thành công');
-        onComplete();
-      } else {
-        showToast.success('Đã lưu bản nháp');
-      }
+      await createReview({
+        assignmentId,
+        score,
+        confidence: 'MEDIUM',
+        commentForAuthor: comment,
+        recommendation: 'ACCEPT', // Default recommendation, can be changed later by chair
+      }).unwrap();
+      showToast.success('Đánh giá bài viết thành công');
+      onComplete();
     } catch (error) {
       showToast.error(formatApiError(error));
     }
@@ -185,32 +179,20 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
         >
           Quay lại
         </button>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleSubmit(true)}
-            disabled={isLoading}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-            </svg>
-            Lưu bản nháp
-          </button>
-          <button
-            onClick={() => handleSubmit(false)}
-            disabled={isLoading}
-            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <CircularProgress size={16} disableShrink />
-                Đang xử lý...
-              </span>
-            ) : (
-              'Nộp đánh giá'
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+        >
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <CircularProgress size={16} disableShrink />
+              Đang xử lý...
+            </span>
+          ) : (
+            'Nộp đánh giá'
+          )}
+        </button>
       </div>
     </div>
   );
