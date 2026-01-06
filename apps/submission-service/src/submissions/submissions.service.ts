@@ -94,7 +94,6 @@ export class SubmissionsService {
     newStatus: SubmissionStatus,
   ): boolean {
     const allowedTransitions: Record<SubmissionStatus, SubmissionStatus[]> = {
-      [SubmissionStatus.DRAFT]: [SubmissionStatus.SUBMITTED],
       [SubmissionStatus.SUBMITTED]: [
         SubmissionStatus.REVIEWING,
         SubmissionStatus.WITHDRAWN,
@@ -127,30 +126,24 @@ export class SubmissionsService {
     authorId: number,
     authorName?: string,
   ): Promise<Submission> {
-    const isDraft = createDto.isDraft ?? false;
-
-    // Nếu là draft, file có thể optional hoặc vẫn cần file
-    // Nhưng để đơn giản, vẫn yêu cầu file ngay cả khi draft
     if (!file) {
       throw new BadRequestException('File là bắt buộc (PDF, DOCX hoặc ZIP)');
     }
 
-    // Chỉ check deadline khi nộp bài (không phải draft)
-    if (!isDraft) {
-      try {
-        const deadlineCheck = await this.conferenceClient.checkDeadline(
-          createDto.conferenceId,
-          'submission',
+    // Check deadline trước khi nộp bài
+    try {
+      const deadlineCheck = await this.conferenceClient.checkDeadline(
+        createDto.conferenceId,
+        'submission',
+      );
+      if (!deadlineCheck.valid) {
+        throw new BadRequestException(
+          `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
         );
-        if (!deadlineCheck.valid) {
-          throw new BadRequestException(
-            `Hạn nộp bài đã qua: ${deadlineCheck.message}`,
-          );
-        }
-      } catch (e) {
-        if (e instanceof BadRequestException) {
-          throw e;
-        }
+      }
+    } catch (e) {
+      if (e instanceof BadRequestException) {
+        throw e;
       }
     }
 
@@ -172,19 +165,20 @@ export class SubmissionsService {
         }
       }
 
-      // 2. Tạo submission mới với status = DRAFT hoặc SUBMITTED
+      // 2. Tạo submission mới với status = SUBMITTED
       const submission = this.submissionRepository.create({
         title: createDto.title,
         abstract: createDto.abstract,
         keywords: createDto.keywords || null,
         fileUrl,
-        status: isDraft ? SubmissionStatus.DRAFT : SubmissionStatus.SUBMITTED,
+        status: SubmissionStatus.SUBMITTED,
         authorId,
         authorName: authorName || null, // Lưu tên từ JWT token
         authorAffiliation: createDto.authorAffiliation || null,
         trackId: createDto.trackId,
         conferenceId: createDto.conferenceId,
         coAuthors: parsedCoAuthors,
+        submittedAt: new Date(), // Lưu thời gian nộp bài
       });
 
       const savedSubmission = await queryRunner.manager.save(submission);
@@ -322,6 +316,7 @@ export class SubmissionsService {
         fileUrl: newFileUrl,
         authorAffiliation: updateDto.authorAffiliation !== undefined ? updateDto.authorAffiliation : submission.authorAffiliation,
         coAuthors: parsedCoAuthors,
+        submittedAt: new Date(), // Cập nhật thời gian nộp bài thành thời gian hiện tại
       });
 
       const updatedSubmission = await queryRunner.manager.save(submission);

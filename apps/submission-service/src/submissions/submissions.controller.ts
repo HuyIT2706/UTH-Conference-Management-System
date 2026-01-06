@@ -90,11 +90,6 @@ export class SubmissionsController {
           example: 1,
           description: 'ID của conference',
         },
-        isDraft: {
-          type: 'boolean',
-          example: false,
-          description: 'Lưu bản nháp (true) hay nộp bài (false)',
-        },
       },
       required: ['file', 'title', 'abstract', 'trackId', 'conferenceId'],
     },
@@ -119,10 +114,8 @@ export class SubmissionsController {
       user.fullName, 
     );
 
-    const isDraft = createDto.isDraft ?? false;
-
     return {
-      message: isDraft ? 'Lưu bản nháp thành công' : 'Nộp bài dự thi thành công',
+      message: 'Nộp bài dự thi thành công',
       data: submission,
     };
   }

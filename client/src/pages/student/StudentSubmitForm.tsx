@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../../hooks/useAuth';
 import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
-import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation } from '../../redux/api/submissionsApi';
+import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation, useGetMySubmissionsQuery } from '../../redux/api/submissionsApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
 import StudentSubmissionsList from '../../components/StudentSubmissionsList';
@@ -42,6 +42,7 @@ const StudentSubmitForm = () => {
 
   const [createSubmission, { isLoading: isSubmitting }] = useCreateSubmissionMutation();
   const [updateSubmission, { isLoading: isUpdating }] = useUpdateSubmissionMutation();
+  const { refetch: refetchMySubmissions } = useGetMySubmissionsQuery();
 
   // Form state
   const [title, setTitle] = useState('');
@@ -154,7 +155,7 @@ const StudentSubmitForm = () => {
     setCoAuthors(updated);
   };
 
-  const handleSubmit = async (saveAsDraft: boolean = false) => {
+  const handleSubmit = async () => {
     if (!conferenceId) {
       showToast.error('Vui lòng chọn hội nghị');
       return;
@@ -166,57 +167,33 @@ const StudentSubmitForm = () => {
     }
 
     // Check deadline trước khi submit
-    if (!saveAsDraft && isDeadlinePassed) {
+    if (isDeadlinePassed) {
       showToast.error('Hạn nộp bài đã qua. Vui lòng liên hệ ban tổ chức nếu cần hỗ trợ.');
       return;
     }
 
-    if (!saveAsDraft) {
-      if (!title.trim()) {
-        showToast.error('Vui lòng nhập tiêu đề bài viết');
-        return;
-      }
-      if (!abstract.trim()) {
-        showToast.error('Vui lòng nhập tóm tắt');
-        return;
-      }
-      if (!file) {
-        showToast.error('Vui lòng tải lên file (PDF, DOCX, DOC hoặc ZIP)');
-        return;
-      }
+    if (!title.trim()) {
+      showToast.error('Vui lòng nhập tiêu đề bài viết');
+      return;
+    }
+    if (!abstract.trim()) {
+      showToast.error('Vui lòng nhập tóm tắt');
+      return;
+    }
+    if (!file) {
+      showToast.error('Vui lòng tải lên file (PDF, DOCX, DOC hoặc ZIP)');
+      return;
     }
 
     try {
-      const formData = new FormData();
-      if (file) {
-        formData.append('file', file);
-      }
-      formData.append('title', title || 'Draft');
-      formData.append('abstract', abstract || '');
-      if (keywords) {
-        formData.append('keywords', keywords);
-      }
-      formData.append('trackId', selectedTrackId.toString());
-      formData.append('conferenceId', conferenceId.toString());
-      formData.append('isDraft', saveAsDraft.toString());
-      if (authorAffiliation) {
-        formData.append('authorAffiliation', authorAffiliation);
-      }
-      if (coAuthors.length > 0) {
-        const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
-        if (validCoAuthors.length > 0) {
-          formData.append('coAuthors', JSON.stringify(validCoAuthors));
-        }
-      }
-
       if (isEditMode && submissionId) {
         // Update existing submission
         const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
         await updateSubmission({
           id: submissionId,
           data: {
-            title: title || 'Draft',
-            abstract: abstract || '',
+            title: title,
+            abstract: abstract,
             keywords: keywords || undefined,
             trackId: selectedTrackId!,
             authorAffiliation: authorAffiliation || undefined,
@@ -224,13 +201,33 @@ const StudentSubmitForm = () => {
           },
           file: file || undefined,
         }).unwrap();
-        showToast.success(saveAsDraft ? 'Đã cập nhật bản nháp thành công' : 'Đã cập nhật bài nộp thành công');
+        showToast.success('Đã cập nhật bài nộp thành công');
         // Refresh danh sách và chuyển về trang nộp bài
+        await refetchMySubmissions();
         navigate('/student');
       } else {
         // Create new submission
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title);
+        formData.append('abstract', abstract);
+        if (keywords) {
+          formData.append('keywords', keywords);
+        }
+        formData.append('trackId', selectedTrackId.toString());
+        formData.append('conferenceId', conferenceId.toString());
+        if (authorAffiliation) {
+          formData.append('authorAffiliation', authorAffiliation);
+        }
+        if (coAuthors.length > 0) {
+          const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
+          if (validCoAuthors.length > 0) {
+            formData.append('coAuthors', JSON.stringify(validCoAuthors));
+          }
+        }
+
         await createSubmission(formData).unwrap();
-        showToast.success(saveAsDraft ? 'Đã lưu bản nháp thành công' : 'Nộp bài thành công');
+        showToast.success('Nộp bài thành công');
         // Refresh danh sách và chuyển về trang nộp bài
         navigate('/student');
       }
@@ -545,16 +542,9 @@ const StudentSubmitForm = () => {
           </div>
 
           {/* Footer Buttons */}
-          <div className="flex justify-between pt-6 border-t border-gray-200">
+          <div className="flex justify-end pt-6 border-t border-gray-200">
             <button
-              onClick={() => handleSubmit(true)}
-              disabled={isLoading}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
-              {isEditMode ? 'Cập nhật bản nháp' : 'Lưu bản nháp'}
-            </button>
-            <button
-              onClick={() => handleSubmit(false)}
+              onClick={handleSubmit}
               disabled={isLoading || isDeadlinePassed}
               className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >

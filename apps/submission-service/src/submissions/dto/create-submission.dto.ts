@@ -4,9 +4,8 @@ import {
   IsInt,
   IsOptional,
   MaxLength,
-  IsBoolean,
 } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSubmissionDto {
@@ -56,21 +55,6 @@ export class CreateSubmissionDto {
   @IsInt()
   @IsNotEmpty()
   conferenceId: number;
-
-  @ApiProperty({
-    description: 'Lưu bản nháp (true) hay nộp bài (false)',
-    example: false,
-    required: false,
-    default: false,
-  })
-  @IsOptional()
-  @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
-    return false;
-  })
-  @IsBoolean()
-  isDraft?: boolean;
 
   @ApiProperty({
     description: 'Tổ chức/Trường đại học của tác giả chính',

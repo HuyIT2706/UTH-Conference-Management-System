@@ -9,7 +9,6 @@ import {
 import { SubmissionVersion } from './submission-version.entity';
 
 export enum SubmissionStatus {
-  DRAFT = 'DRAFT',
   SUBMITTED = 'SUBMITTED',
   REVIEWING = 'REVIEWING',
   ACCEPTED = 'ACCEPTED',
@@ -38,7 +37,7 @@ export class Submission {
   @Column({
     type: 'enum',
     enum: SubmissionStatus,
-    default: SubmissionStatus.DRAFT,
+    default: SubmissionStatus.SUBMITTED,
   })
   status: SubmissionStatus;
 
@@ -68,6 +67,9 @@ export class Submission {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true, name: 'submitted_at' })
+  submittedAt: Date | null;
 
   @OneToMany(() => SubmissionVersion, (version) => version.submission, {
     cascade: true,

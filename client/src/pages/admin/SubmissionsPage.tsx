@@ -306,8 +306,8 @@ const SubmissionsPage = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {submission.createdAt
-                            ? new Date(submission.createdAt).toLocaleDateString('vi-VN')
+                          {submission.submittedAt || submission.createdAt
+                            ? new Date(submission.submittedAt || submission.createdAt).toLocaleDateString('vi-VN')
                             : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

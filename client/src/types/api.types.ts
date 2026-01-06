@@ -137,7 +137,6 @@ export interface TrackMember {
 
 // Submission Types
 export const SubmissionStatus = {
-  DRAFT: 'DRAFT',
   SUBMITTED: 'SUBMITTED',
   REVIEWING: 'REVIEWING',
   ACCEPTED: 'ACCEPTED',
@@ -164,6 +163,7 @@ export interface Submission {
   coAuthors?: Array<{ name: string; email: string; affiliation?: string }>;
   createdAt: string;
   updatedAt: string;
+  submittedAt?: string;
   versions?: SubmissionVersion[];
 }
 

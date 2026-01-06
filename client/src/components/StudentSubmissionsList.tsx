@@ -214,7 +214,7 @@ const SubmissionCard = ({
             </div>
             <div>
               <span className="font-medium">Ngày nộp:</span>{' '}
-              {new Date(submission.createdAt).toLocaleDateString('vi-VN', {
+              {new Date(submission.submittedAt || submission.createdAt).toLocaleDateString('vi-VN', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
