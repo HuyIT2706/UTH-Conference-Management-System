@@ -180,7 +180,14 @@ const StudentSubmitForm = () => {
       showToast.error('Vui lòng nhập tóm tắt');
       return;
     }
-    if (!file) {
+    // Khi edit mode, nếu đã có file cũ thì không bắt buộc file mới
+    // Khi create mode, bắt buộc phải có file
+    if (!isEditMode && !file) {
+      showToast.error('Vui lòng tải lên file (PDF, DOCX, DOC hoặc ZIP)');
+      return;
+    }
+    // Khi edit mode, nếu không có file mới và cũng không có file cũ thì báo lỗi
+    if (isEditMode && !file && !submission?.fileUrl) {
       showToast.error('Vui lòng tải lên file (PDF, DOCX, DOC hoặc ZIP)');
       return;
     }
@@ -535,7 +542,22 @@ const StudentSubmitForm = () => {
                   <p className="text-gray-600 mb-2">
                     {filePreview || 'hoặc kéo thả file vào đây'}
                   </p>
-                  <p className="text-sm text-gray-500">Chỉ chấp nhận file PDF, DOCX, DOC hoặc ZIP, tối đa 20MB</p>
+                  {isEditMode && submission?.fileUrl && !file && (
+                    <div className="mt-2">
+                      <a
+                        href={submission.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-600 hover:text-teal-700 underline text-sm"
+                      >
+                        Xem file hiện tại
+                      </a>
+                      <p className="text-xs text-gray-500 mt-1">
+                        (Nếu không chọn file mới, file hiện tại sẽ được giữ nguyên)
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-500 mt-2">Chỉ chấp nhận file PDF, DOCX, DOC hoặc ZIP, tối đa 20MB</p>
                 </div>
               </label>
             </div>
