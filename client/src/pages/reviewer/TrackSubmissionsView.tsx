@@ -4,6 +4,7 @@ import {
   useGetMyAssignmentsQuery, 
   useSelfAssignSubmissionMutation,
   useGetSubmissionsForReviewerQuery,
+  useAcceptAssignmentMutation,
 } from '../../redux/api/reviewsApi';
 import type { TrackMember, Submission, ReviewAssignment } from '../../types/api.types';
 import { SubmissionStatus } from '../../types/api.types';
@@ -72,6 +73,7 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
 
   const { data: assignmentsData, refetch: refetchAssignments } = useGetMyAssignmentsQuery();
   const [selfAssignSubmission] = useSelfAssignSubmissionMutation();
+  const [acceptAssignment] = useAcceptAssignmentMutation();
   const assignments: ReviewAssignment[] = assignmentsData?.data || [];
 
   // Create mapping of submissionId to assignment
@@ -217,8 +219,11 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
                               try {
                                 let assignmentId = assignment.id;
                                 
-                                // If no assignment or invalid assignment, self-assign first
-                                if (!assignmentId || assignmentId === 0) {
+                                // Check if this is a real assignment (exists in database) or mock assignment
+                                const isRealAssignment = submissionToAssignmentMap.has(submission.id);
+                                
+                                // If no assignment, invalid assignment, or mock assignment, self-assign first
+                                if (!assignmentId || assignmentId === 0 || !isRealAssignment) {
                                   if (!track || !track.conferenceId) {
                                     showToast.error('Không thể xác định conference');
                                     return;
@@ -232,14 +237,26 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
                                   assignmentId = result.data.id;
                                   refetchAssignments();
                                   showToast.success('Đã tự phân công bài này');
-                                } else if (assignment.status === 'PENDING') {
-                                  // If assignment exists but is PENDING, accept it first
-                                  // This will be handled by the review form or we can accept here
-                                  showToast.info('Vui lòng chấp nhận phân công trước');
+                                  // selfAssignSubmission already returns ACCEPTED status, so proceed to evaluate
+                                  onEvaluate(submission.id, assignmentId);
                                   return;
                                 }
                                 
-                                // Now proceed to evaluate
+                                // If assignment exists but is PENDING, auto-accept it
+                                // Reviewer đã chấp nhận track rồi nên có thể tự động accept assignment
+                                if (assignment.status === 'PENDING') {
+                                  try {
+                                    await acceptAssignment(assignmentId).unwrap();
+                                    refetchAssignments();
+                                    showToast.success('Đã chấp nhận phân công');
+                                    // Assignment đã được accept, tiếp tục với assignmentId hiện tại
+                                  } catch (error) {
+                                    showToast.error(formatApiError(error));
+                                    return;
+                                  }
+                                }
+                                
+                                // Now proceed to evaluate (assignment should be ACCEPTED now)
                                 if (assignmentId && assignmentId > 0) {
                                   onEvaluate(submission.id, assignmentId);
                                 }

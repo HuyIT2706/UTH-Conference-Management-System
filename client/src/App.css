@@ -6,6 +6,19 @@
     --color-hover: #ff6f61;
     --max-width-custom: calc(100% - 48px);
 }
+.btn-primary{
+  max-width: 120px;
+  text-align: center;
+  background-color: var(--color-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 40px;
+  transition: background-color 0.3s;
+
+  &:hover{
+    background-color: var(--color-hover);
+  }
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 

@@ -6,7 +6,7 @@ import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/
 import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation, useGetMySubmissionsQuery } from '../../redux/api/submissionsApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
-import StudentSubmissionsList from '../../components/StudentSubmissionsList';
+import StudentSubmissionsList from '../../components/student/StudentSubmissionsList';
 import type { Track } from '../../types/api.types';
 
 interface CoAuthor {
@@ -31,13 +31,12 @@ const StudentSubmitForm = () => {
   const { data: tracksData } = useGetPublicTracksQuery(conferenceId, {
     skip: !conferenceId,
   });
-  const { data: submissionData, isLoading: submissionLoading } = useGetSubmissionByIdQuery(submissionId!, {
+  const { data: submissionData} = useGetSubmissionByIdQuery(submissionId!, {
     skip: !submissionId,
   });
 
   const conference = conferenceData?.data;
   const tracks: Track[] = tracksData?.data || [];
-  const selectedTrack = trackId ? tracks.find((t) => t.id === trackId) : undefined;
   const submission = submissionData?.data;
 
   const [createSubmission, { isLoading: isSubmitting }] = useCreateSubmissionMutation();
@@ -194,7 +193,6 @@ const StudentSubmitForm = () => {
 
     try {
       if (isEditMode && submissionId) {
-        // Update existing submission
         const validCoAuthors = coAuthors.filter((ca) => ca.name && ca.email);
         await updateSubmission({
           id: submissionId,
@@ -209,13 +207,13 @@ const StudentSubmitForm = () => {
           file: file || undefined,
         }).unwrap();
         showToast.success('Đã cập nhật bài nộp thành công');
-        // Refresh danh sách và chuyển về trang nộp bài
         await refetchMySubmissions();
         navigate('/student');
       } else {
-        // Create new submission
         const formData = new FormData();
-        formData.append('file', file);
+        if (file) {
+            formData.append('file', file)
+        }
         formData.append('title', title);
         formData.append('abstract', abstract);
         if (keywords) {
