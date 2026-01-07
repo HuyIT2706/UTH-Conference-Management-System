@@ -738,8 +738,16 @@ export class SubmissionsService {
     
     if (queryDto.trackId) {
       // Use exact match for trackId (ensure type consistency)
+      const trackIdNumber = Number(queryDto.trackId);
+      console.log('[SubmissionsService] Adding trackId filter:', {
+        originalTrackId: queryDto.trackId,
+        originalType: typeof queryDto.trackId,
+        convertedTrackId: trackIdNumber,
+        convertedType: typeof trackIdNumber,
+      });
+      
       queryBuilder.andWhere('submission.trackId = :trackId', {
-        trackId: Number(queryDto.trackId),
+        trackId: trackIdNumber,
       });
     }
 
@@ -808,28 +816,43 @@ export class SubmissionsService {
         });
         
         // Also check raw count without any filters to see if submissions exist in track
-        const rawCountQuery = this.submissionRepository.createQueryBuilder('submission')
-          .where('submission.trackId = :trackId', { trackId: Number(queryDto.trackId) });
-        const rawCount = await rawCountQuery.getCount();
-        
-        // Get sample submissions to see what's in the track
-        const sampleSubmissions = await rawCountQuery
-          .select(['submission.id', 'submission.title', 'submission.status', 'submission.trackId'])
-          .limit(5)
-          .getMany();
-        
-        console.log('[SubmissionsService] Raw submissions count in track (no filters):', {
-          trackId: queryDto.trackId,
-          trackIdType: typeof queryDto.trackId,
-          rawCount,
-          sampleSubmissions: sampleSubmissions.map(s => ({
-            id: s.id,
-            title: s.title?.substring(0, 50),
-            status: s.status,
-            trackId: s.trackId,
-            trackIdType: typeof s.trackId,
-          })),
-        });
+        try {
+          const rawCountQuery = this.submissionRepository.createQueryBuilder('submission')
+            .where('submission.trackId = :trackId', { trackId: Number(queryDto.trackId) });
+          const rawCount = await rawCountQuery.getCount();
+          
+          // Get sample submissions to see what's in the track
+          const sampleSubmissions = await rawCountQuery
+            .select(['submission.id', 'submission.title', 'submission.status', 'submission.trackId'])
+            .limit(5)
+            .getMany();
+          
+          console.log('[SubmissionsService] Raw submissions count in track (no filters):', {
+            trackId: queryDto.trackId,
+            trackIdType: typeof queryDto.trackId,
+            rawCount,
+            sampleSubmissions: sampleSubmissions.map(s => ({
+              id: s.id,
+              title: s.title?.substring(0, 50),
+              status: s.status,
+              trackId: s.trackId,
+              trackIdType: typeof s.trackId,
+            })),
+          });
+          
+          // Also check with string trackId to see if there's a type mismatch
+          const rawCountQueryString = this.submissionRepository.createQueryBuilder('submission')
+            .where('submission.trackId = :trackId', { trackId: String(queryDto.trackId) });
+          const rawCountString = await rawCountQueryString.getCount();
+          console.log('[SubmissionsService] Raw count with string trackId:', {
+            trackId: String(queryDto.trackId),
+            rawCount: rawCountString,
+          });
+        } catch (error) {
+          console.error('[SubmissionsService] Error checking raw count:', {
+            error: error instanceof Error ? error.message : error,
+          });
+        }
       } catch (error) {
         console.error('[SubmissionsService] Error in debug logging:', {
           error: error instanceof Error ? error.message : error,
@@ -841,12 +864,32 @@ export class SubmissionsService {
     // Pagination and ordering
     let submissions: Submission[] = [];
     try {
+      // Log final query before execution
+      if (isReviewer && queryDto.trackId) {
+        const finalSql = queryBuilder.getSql();
+        const finalParams = queryBuilder.getParameters();
+        console.log('[SubmissionsService] Final query before execution:', {
+          sql: finalSql,
+          params: finalParams,
+          skip,
+          limit,
+        });
+      }
+      
       submissions = await queryBuilder
         .leftJoinAndSelect('submission.versions', 'versions')
         .orderBy('submission.createdAt', 'DESC')
         .skip(skip)
         .take(limit)
         .getMany();
+        
+      console.log('[SubmissionsService] Query executed successfully:', {
+        foundCount: submissions.length,
+        total,
+        trackId: queryDto.trackId,
+        isReviewer,
+        hasTrackId: !!queryDto.trackId,
+      });
     } catch (error) {
       console.error('[SubmissionsService] Error executing query:', {
         error: error instanceof Error ? error.message : error,
@@ -862,11 +905,29 @@ export class SubmissionsService {
       if (isReviewer && queryDto.trackId) {
         console.log('[SubmissionsService] Found submissions:', {
           count: submissions.length,
+          total,
           submissionIds: submissions.map(s => s.id),
           statuses: submissions.map(s => s.status),
           trackIds: submissions.map(s => s.trackId),
+          submissions: submissions.map(s => ({
+            id: s.id,
+            title: s.title?.substring(0, 50),
+            status: s.status,
+            trackId: s.trackId,
+            authorId: s.authorId,
+          })),
         });
       }
+
+      console.log('[SubmissionsService] findAll returning:', {
+        dataCount: submissions.length,
+        total,
+        page,
+        limit,
+        hasTrackId: !!queryDto.trackId,
+        trackId: queryDto.trackId,
+        status: queryDto.status,
+      });
 
       return {
         data: submissions,

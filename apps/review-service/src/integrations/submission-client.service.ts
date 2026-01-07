@@ -36,9 +36,9 @@ export class SubmissionClientService {
         : 'http://localhost:3003/api');
 
     console.log('[SubmissionClient] Initialized with URL:', this.submissionServiceUrl);
-
-    this.httpService.axiosRef.defaults.baseURL = this.submissionServiceUrl;
-    this.httpService.axiosRef.defaults.timeout = 10000;
+    
+    // Don't set baseURL on shared axios instance - use full URL in requests instead
+    // This prevents conflicts with other client services that share the same HttpService
   }
 
   /**
@@ -67,12 +67,15 @@ export class SubmissionClientService {
         fullUrl: `${this.submissionServiceUrl}/submissions?trackId=${trackId}&limit=100&page=1`,
       });
 
+      // Use full URL instead of baseURL to avoid conflicts with other client services
+      const fullUrl = `${this.submissionServiceUrl}/submissions`;
       const response = await firstValueFrom(
-        this.httpService.get('/submissions', {
+        this.httpService.get(fullUrl, {
           params,
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
+          timeout: 10000,
         }),
       );
 
@@ -208,11 +211,14 @@ export class SubmissionClientService {
     authToken: string,
   ): Promise<Submission | null> {
     try {
+      // Use full URL instead of baseURL to avoid conflicts with other client services
+      const fullUrl = `${this.submissionServiceUrl}/submissions/${submissionId}`;
       const response = await firstValueFrom(
-        this.httpService.get(`/submissions/${submissionId}`, {
+        this.httpService.get(fullUrl, {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
+          timeout: 10000,
         }),
       );
 

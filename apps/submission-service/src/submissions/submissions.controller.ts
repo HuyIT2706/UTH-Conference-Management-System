@@ -12,6 +12,7 @@ import {
   UploadedFile,
   ParseUUIDPipe,
   UnauthorizedException,
+  HttpException,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -207,8 +208,17 @@ export class SubmissionsController {
     @Query() queryDto: QuerySubmissionsDto,
     @Req() req: Request,
   ) {
+    console.log('[SubmissionsController] ====== FINDALL REQUEST RECEIVED ======');
+    console.log('[SubmissionsController] Request URL:', req.url);
+    console.log('[SubmissionsController] Request method:', req.method);
+    console.log('[SubmissionsController] Request headers:', {
+      authorization: req.headers.authorization ? 'present' : 'missing',
+      'content-type': req.headers['content-type'],
+    });
+    
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
+      console.error('[SubmissionsController] No user in request!');
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
@@ -224,6 +234,10 @@ export class SubmissionsController {
       roles: user.roles,
       queryDto,
       hasAuthToken: !!authToken,
+      trackId: queryDto.trackId,
+      trackIdType: typeof queryDto.trackId,
+      status: queryDto.status,
+      conferenceId: queryDto.conferenceId,
     });
 
     try {
@@ -252,16 +266,44 @@ export class SubmissionsController {
         },
       };
     } catch (error) {
-      console.error('[SubmissionsController] Error in findAll:', {
+      console.error('[SubmissionsController] Error in findAll - DETAILED:', {
         error: error instanceof Error ? error.message : error,
         errorStack: error instanceof Error ? error.stack : undefined,
         errorName: error instanceof Error ? error.name : typeof error,
+        errorType: typeof error,
         userId: user.sub,
         queryDto,
+        isHttpException: error instanceof HttpException,
+        httpStatus: error instanceof HttpException ? error.getStatus() : undefined,
+        httpResponse: error instanceof HttpException ? error.getResponse() : undefined,
       });
       
-      // Re-throw to let NestJS handle it properly
-      throw error;
+      // If it's already an HttpException, re-throw as is
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      // If it's a regular Error, convert to HttpException with proper status
+      if (error instanceof Error) {
+        throw new HttpException(
+          {
+            message: error.message || 'Lỗi khi lấy danh sách submissions',
+            error: 'Internal Server Error',
+            statusCode: 500,
+          },
+          500,
+        );
+      }
+      
+      // For unknown error types, wrap in HttpException
+      throw new HttpException(
+        {
+          message: 'Lỗi không xác định khi lấy danh sách submissions',
+          error: 'Internal Server Error',
+          statusCode: 500,
+        },
+        500,
+      );
     }
   }
 
