@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetMyTrackAssignmentsQuery } from '../../redux/api/conferencesApi';
 import { showToast } from '../../utils/toast';
+import { tokenUtils } from '../../utils/token';
+import ReviewerTabs from '../../components/reviewer/ReviewerTabs';
 import TrackAssignmentList from './TrackAssignmentList';
 import TrackSubmissionsView from './TrackSubmissionsView';
-import ReviewForm from './ReviewForm';
-import RebuttalWindow from './RebuttalWindow';
+
+// Lazy load heavy components
+const ReviewForm = lazy(() => import('./ReviewForm'));
+const RebuttalWindow = lazy(() => import('./RebuttalWindow'));
 
 type TabType = 'assignment' | 'evaluate' | 'rebuttal';
 
@@ -26,11 +30,17 @@ const ReviewerDashboard = () => {
     }
   }, [activeTab, selectedSubmissionId, selectedAssignmentId]);
 
-  const { data: trackAssignmentsData, isLoading: trackAssignmentsLoading, error: trackAssignmentsError } = useGetMyTrackAssignmentsQuery();
+  const hasToken = tokenUtils.hasToken();
+  const { data: trackAssignmentsData, isLoading: trackAssignmentsLoading, error: trackAssignmentsError } = useGetMyTrackAssignmentsQuery(undefined, {
+    skip: !hasToken,
+  });
   
-  const acceptedTrackAssignments = trackAssignmentsData?.data?.filter(
-    (ta) => ta.status === 'ACCEPTED' && ta.track
-  ) || [];
+  const acceptedTrackAssignments = useMemo(
+    () => trackAssignmentsData?.data?.filter(
+      (ta) => ta.status === 'ACCEPTED' && ta.track
+    ) || [],
+    [trackAssignmentsData?.data]
+  );
 
   if (trackAssignmentsLoading) {
     return (
@@ -82,54 +92,30 @@ const ReviewerDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
-          <button
-            onClick={() => {
-              setActiveTab('assignment');
+        <ReviewerTabs
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab === 'assignment') {
               setSelectedSubmissionId(null);
               setSelectedAssignmentId(null);
-            }}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'assignment'
-                ? 'border-b-2 border-teal-600 text-teal-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Phân công phản biện
-          </button>
-          <button
-            onClick={() => {
+              setActiveTab(tab);
+            } else if (tab === 'evaluate') {
               if (selectedSubmissionId && selectedAssignmentId) {
-                setActiveTab('evaluate');
+                setActiveTab(tab);
               } else {
                 showToast.error('Vui lòng chọn bài viết để đánh giá');
               }
-            }}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'evaluate'
-                ? 'border-b-2 border-teal-600 text-teal-600'
-                : 'text-gray-600 hover:text-gray-800'
-            } ${!selectedSubmissionId || !selectedAssignmentId ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            Đánh giá bài viết
-          </button>
-          <button
-            onClick={() => {
+            } else if (tab === 'rebuttal') {
               if (selectedSubmissionId) {
-                setActiveTab('rebuttal');
+                setActiveTab(tab);
               } else {
                 showToast.error('Vui lòng chọn bài viết để xem phúc đáp');
               }
-            }}
-            className={`px-6 py-3 font-medium transition-colors ${
-              activeTab === 'rebuttal'
-                ? 'border-b-2 border-teal-600 text-teal-600'
-                : 'text-gray-600 hover:text-gray-800'
-            } ${!selectedSubmissionId ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            Cửa sổ phúc đáp
-          </button>
-        </div>
+            }
+          }}
+          canAccessEvaluate={!!(selectedSubmissionId && selectedAssignmentId)}
+          canAccessRebuttal={!!selectedSubmissionId}
+        />
 
         {/* Content */}
         <div>
@@ -161,12 +147,18 @@ const ReviewerDashboard = () => {
           )}
 
           {activeTab === 'evaluate' && selectedSubmissionId && selectedAssignmentId && (
-            <ReviewForm
-              submissionId={selectedSubmissionId}
-              assignmentId={selectedAssignmentId}
-              onComplete={handleReviewComplete}
-              onBack={handleBackToSubmissions}
-            />
+            <Suspense fallback={
+              <div className="flex justify-center items-center py-8">
+                <CircularProgress disableShrink />
+              </div>
+            }>
+              <ReviewForm
+                submissionId={selectedSubmissionId}
+                assignmentId={selectedAssignmentId}
+                onComplete={handleReviewComplete}
+                onBack={handleBackToSubmissions}
+              />
+            </Suspense>
           )}
 
           {activeTab === 'evaluate' && (!selectedSubmissionId || !selectedAssignmentId) && (
@@ -176,7 +168,13 @@ const ReviewerDashboard = () => {
           )}
 
           {activeTab === 'rebuttal' && selectedSubmissionId && (
-            <RebuttalWindow submissionId={selectedSubmissionId} />
+            <Suspense fallback={
+              <div className="flex justify-center items-center py-8">
+                <CircularProgress disableShrink />
+              </div>
+            }>
+              <RebuttalWindow submissionId={selectedSubmissionId} />
+            </Suspense>
           )}
 
           {activeTab === 'rebuttal' && !selectedSubmissionId && (

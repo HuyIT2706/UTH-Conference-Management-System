@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import type { ReviewAssignment, Submission } from '../../types/api.types';
 
@@ -11,24 +10,16 @@ interface SubmissionListProps {
 
 const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Show all assignments (including PENDING ones for submissions without review assignment yet)
-  // Filter out only REJECTED assignments
   const visibleAssignments = assignments.filter((a) => a.status !== 'REJECTED');
-  
-  // Get submissions from assignments (either from assignment.submission or fetch by ID)
   const submissionsWithAssignments = useMemo(() => {
     return visibleAssignments.map((assignment) => {
-      // If assignment has submission object, use it
       if (assignment.submission) {
         return { submission: assignment.submission, assignment };
       }
-      // Otherwise, we'll need to fetch it (handled by SubmissionItem component)
       return { submission: null, assignment };
     });
   }, [visibleAssignments]);
 
-  // Apply search filter
   const searchedItems = submissionsWithAssignments.filter((item) => {
     if (!item.submission) return true; // Include items that are still loading
     return (
@@ -56,7 +47,7 @@ const SubmissionList = ({ assignments, onEvaluate }: SubmissionListProps) => {
             placeholder="Tìm kiếm bài viết..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
           />
           <svg
             className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"

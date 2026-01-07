@@ -44,23 +44,24 @@ export const useAuth = () => {
       // Update state để skip query ngay lập tức
       setHasToken(false);
       
-      // Invalidate tất cả cache để tránh refetch
+      // Unsubscribe tất cả queries để tránh gọi API sau khi logout
       dispatch(apiSlice.util.resetApiState());
       
-      // Gọi logout API nếu có refreshToken
+      // Navigate ngay lập tức để unmount components và tránh gọi API
+      navigate('/login', { replace: true });
+      
+      // Gọi logout API nếu có refreshToken (sau khi navigate để không block UI)
       if (refreshToken) {
         try {
           await logoutMutation({ refreshToken }).unwrap();
         } catch (error) {
           // Ignore logout API error, vì đã clear tokens rồi
-          console.error('Logout API error:', error);
+          // Không log error để tránh noise
         }
       }
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Đảm bảo navigate sau khi clear
-      navigate('/login');
+      // Ignore errors, đảm bảo navigate luôn xảy ra
+      navigate('/login', { replace: true });
     }
   };
 

@@ -7,6 +7,7 @@ import {
 } from '../../redux/api/conferencesApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
+import { tokenUtils } from '../../utils/token';
 import type { TrackMember } from '../../types/api.types';
 
 interface TrackAssignmentListProps {
@@ -14,7 +15,10 @@ interface TrackAssignmentListProps {
 }
 
 const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
-  const { data: assignmentsData, isLoading, refetch } = useGetMyTrackAssignmentsQuery();
+  const hasToken = tokenUtils.hasToken();
+  const { data: assignmentsData, isLoading, refetch } = useGetMyTrackAssignmentsQuery(undefined, {
+    skip: !hasToken,
+  });
   const [acceptTrackAssignment] = useAcceptTrackAssignmentMutation();
   const [rejectTrackAssignment] = useRejectTrackAssignmentMutation();
 

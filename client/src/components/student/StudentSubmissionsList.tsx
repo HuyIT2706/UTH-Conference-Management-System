@@ -8,14 +8,20 @@ import {
 import { useGetConferencesQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
+import { tokenUtils } from '../../utils/token';
 import SubmissionCard from './SubmissionCard';
 import { getStatusLabel, getStatusColor } from '../../utils/submissionListUtils';
 import type { Submission, Track } from '../../types/api.types';
 
 const StudentSubmissionsList = () => {
   const navigate = useNavigate();
-  const { data: submissionsData, isLoading } = useGetMySubmissionsQuery();
-  const { data: conferencesData } = useGetConferencesQuery();
+  const hasToken = tokenUtils.hasToken();
+  const { data: submissionsData, isLoading } = useGetMySubmissionsQuery(undefined, {
+    skip: !hasToken,
+  });
+  const { data: conferencesData } = useGetConferencesQuery(undefined, {
+    skip: !hasToken,
+  });
   const [withdrawSubmission, { isLoading: isWithdrawing }] = useWithdrawSubmissionMutation();
 
   const submissions: Submission[] = submissionsData?.data || [];
