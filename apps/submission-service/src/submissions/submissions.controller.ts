@@ -212,36 +212,57 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Extract JWT token from Authorization header for service-to-service calls
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
     // Debug logging
     console.log('[SubmissionsController] findAll request:', {
       userId: user.sub,
       roles: user.roles,
       queryDto,
+      hasAuthToken: !!authToken,
     });
 
-    const result = await this.submissionsService.findAll(
-      queryDto,
-      user.sub,
-      user.roles || [],
-    );
+    try {
+      const result = await this.submissionsService.findAll(
+        queryDto,
+        user.sub,
+        user.roles || [],
+        authToken,
+      );
 
-    // Debug logging
-    console.log('[SubmissionsController] findAll result:', {
-      total: result.total,
-      dataCount: result.data.length,
-      trackId: queryDto.trackId,
-    });
-
-    return {
-      message: 'Lấy danh sách các bài dự thi thành công',
-      data: result.data,
-      pagination: {
+      // Debug logging
+      console.log('[SubmissionsController] findAll result:', {
         total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: Math.ceil(result.total / result.limit),
-      },
-    };
+        dataCount: result.data.length,
+        trackId: queryDto.trackId,
+      });
+
+      return {
+        message: 'Lấy danh sách các bài dự thi thành công',
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: Math.ceil(result.total / result.limit),
+        },
+      };
+    } catch (error) {
+      console.error('[SubmissionsController] Error in findAll:', {
+        error: error instanceof Error ? error.message : error,
+        errorStack: error instanceof Error ? error.stack : undefined,
+        errorName: error instanceof Error ? error.name : typeof error,
+        userId: user.sub,
+        queryDto,
+      });
+      
+      // Re-throw to let NestJS handle it properly
+      throw error;
+    }
   }
 
   @Get('me')

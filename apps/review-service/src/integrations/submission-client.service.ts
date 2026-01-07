@@ -64,6 +64,7 @@ export class SubmissionClientService {
         url: `${this.submissionServiceUrl}/submissions`,
         params,
         hasAuthToken: !!authToken,
+        fullUrl: `${this.submissionServiceUrl}/submissions?trackId=${trackId}&limit=100&page=1`,
       });
 
       const response = await firstValueFrom(
@@ -83,6 +84,8 @@ export class SubmissionClientService {
         message: response.data?.message,
         pagination: response.data?.pagination,
         dataCount: response.data?.data?.length || 0,
+        totalInPagination: response.data?.pagination?.total || 0,
+        trackId,
       });
 
       const result = response.data;
@@ -118,28 +121,81 @@ export class SubmissionClientService {
 
       return submissions;
     } catch (error: any) {
-      const status = error.response?.status;
-      const message =
-        error.response?.data?.message ||
-        error.message ||
+      // Type-safe extraction of error properties
+      const hasResponse = error?.response !== undefined && error?.response !== null;
+      const status: number | undefined = hasResponse ? (error.response.status as number | undefined) : undefined;
+      const statusText: string | undefined = hasResponse ? (error.response.statusText as string | undefined) : undefined;
+      const responseData: any = hasResponse ? error.response.data : undefined;
+      const errorMessage: string = error?.message || 'Unknown error';
+      const errorName: string = error?.name || 'Error';
+      const errorCode: string | undefined = error?.code;
+      
+      // Extract message from various possible locations
+      const message: string =
+        (responseData?.message as string) ||
+        (responseData?.error as string) ||
+        errorMessage ||
         'Lỗi khi lấy submissions';
 
-      console.error('[SubmissionClient] Error getting submissions:', {
-        status,
+      console.error('[SubmissionClient] Error getting submissions - DETAILED:', {
+        status: status !== undefined ? status : 'undefined',
+        statusText: statusText || 'undefined',
+        errorName: errorName || 'undefined',
+        errorCode: errorCode || 'undefined',
         message,
-        error: error.response?.data || error.message,
+        errorMessage,
+        responseData,
+        errorStack: error?.stack,
         trackId,
+        url: `${this.submissionServiceUrl}/submissions`,
+        params: { trackId, limit: 100, page: 1 },
+        hasResponse,
+        responseStatus: status,
+        responseHeaders: hasResponse ? error.response.headers : undefined,
+        errorType: typeof error,
+        isAxiosError: error?.isAxiosError || false,
       });
 
-      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
-        throw new HttpException(message, status);
+      // If it's an HTTP error with status code (status is a number)
+      if (typeof status === 'number' && status > 0) {
+        if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+          throw new HttpException(message, status);
+        }
+        throw new HttpException(
+          `Submission-service error: ${message}`,
+          status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY,
+        );
       }
 
+      // If no status (network error, timeout, etc.)
+      // Check if it's a connection/timeout error
+      if (errorCode === 'ECONNREFUSED' || errorCode === 'ETIMEDOUT' || errorName === 'TimeoutError' || errorCode === 'ENOTFOUND') {
+        const connectionErrorMsg = errorCode === 'ECONNREFUSED' 
+          ? `Submission-service không chạy hoặc không thể kết nối. URL: ${this.submissionServiceUrl}`
+          : errorCode === 'ETIMEDOUT'
+          ? `Kết nối đến submission-service quá thời gian. URL: ${this.submissionServiceUrl}`
+          : errorCode === 'ENOTFOUND'
+          ? `Không tìm thấy submission-service. URL: ${this.submissionServiceUrl}`
+          : `Không thể kết nối đến submission-service. URL: ${this.submissionServiceUrl}`;
+        
+        console.error('[SubmissionClient] Connection error details:', {
+          errorCode,
+          errorName,
+          targetUrl: this.submissionServiceUrl,
+          dockerEnv: process.env.DOCKER_ENV,
+          submissionServiceUrl: process.env.SUBMISSION_SERVICE_URL,
+        });
+        
+        throw new HttpException(
+          `${connectionErrorMsg}. Vui lòng kiểm tra submission-service có đang chạy không.`,
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
+
+      // Generic error
       throw new HttpException(
-        `Submission-service error: ${message}`,
-        status && status >= 400 && status < 600
-          ? status
-          : HttpStatus.BAD_GATEWAY,
+        `Submission-service error: ${message || 'Unknown error'}`,
+        HttpStatus.BAD_GATEWAY,
       );
     }
   }

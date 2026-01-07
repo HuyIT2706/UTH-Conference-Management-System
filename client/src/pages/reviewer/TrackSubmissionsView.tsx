@@ -22,6 +22,7 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
   // Fetch submissions for this specific track from review-service
   // This endpoint returns submissions in all accepted tracks, so we filter by trackId
   // Request SUBMITTED and REVIEWING status
+  // Note: If no submissions found, try without status filter to see all submissions in track
   const { data: submissionsData, isLoading: submissionsLoading, error: submissionsError } = useGetSubmissionsForReviewerQuery(
     isExpanded && track
       ? {
@@ -33,8 +34,17 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
 
   // Filter submissions by current track
   const allSubmissions: Submission[] = submissionsData?.data || [];
+  // Ensure trackId comparison works (handle both number and string types)
   const submissions = allSubmissions.filter(
-    (submission) => submission.trackId === track?.id
+    (submission) => {
+      const submissionTrackId = typeof submission.trackId === 'string' 
+        ? parseInt(submission.trackId, 10) 
+        : submission.trackId;
+      const currentTrackId = typeof track?.id === 'string' 
+        ? parseInt(track.id, 10) 
+        : track?.id;
+      return submissionTrackId === currentTrackId;
+    }
   );
 
   // Debug logging
@@ -42,6 +52,7 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
     console.log('[TrackSubmissionsView] Submissions data:', {
       trackId: track.id,
       trackName: track.name,
+      conferenceId: track.conferenceId,
       isLoading: submissionsLoading,
       hasError: !!submissionsError,
       error: submissionsError,
@@ -54,6 +65,8 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
         status: s.status,
         trackId: s.trackId,
       })),
+      allSubmissionsStatuses: allSubmissions.map(s => s.status),
+      trackIdMatch: allSubmissions.filter(s => s.trackId === track.id).length,
     });
   }
 

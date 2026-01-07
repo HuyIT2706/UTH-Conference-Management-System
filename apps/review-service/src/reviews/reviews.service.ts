@@ -829,17 +829,24 @@ export class ReviewsService {
           submissionIds: submissions.map(s => s.id),
         });
         
-        // Filter by status if provided, otherwise filter out DRAFT and WITHDRAWN
+        // Filter by status if provided
         let filteredSubmissions = submissions;
         if (status && status.length > 0) {
           // Ensure status is an array (handle case where it might be a string)
           const statusArray = Array.isArray(status) ? status : [status];
           filteredSubmissions = submissions.filter((s) => statusArray.includes(s.status));
           console.log('[ReviewsService] After status filter:', {
+            trackId: trackAssignment.trackId,
+            trackName: trackAssignment.track?.name,
             before: submissions.length,
             after: filteredSubmissions.length,
             filterStatus: statusArray,
             submissionStatuses: submissions.map(s => s.status),
+            filteredSubmissions: filteredSubmissions.map(s => ({
+              id: s.id,
+              title: s.title?.substring(0, 50),
+              status: s.status,
+            })),
           });
         } else {
           // Default: exclude DRAFT and WITHDRAWN
@@ -847,8 +854,14 @@ export class ReviewsService {
             (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN'
           );
           console.log('[ReviewsService] After filtering out DRAFT/WITHDRAWN:', {
+            trackId: trackAssignment.trackId,
+            trackName: trackAssignment.track?.name,
             before: submissions.length,
             after: filteredSubmissions.length,
+            excludedStatuses: submissions.filter(s => s.status === 'DRAFT' || s.status === 'WITHDRAWN').map(s => ({
+              id: s.id,
+              status: s.status,
+            })),
           });
         }
         

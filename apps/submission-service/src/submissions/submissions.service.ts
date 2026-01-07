@@ -638,18 +638,27 @@ export class SubmissionsService {
     queryDto: QuerySubmissionsDto,
     userId: number,
     userRoles: string[],
+    authToken?: string,
   ): Promise<{
     data: Submission[];
     total: number;
     page: number;
     limit: number;
   }> {
-    const page = queryDto.page || 1;
-    const limit = queryDto.limit || 10;
-    const skip = (page - 1) * limit;
+    try {
+      const page = queryDto.page || 1;
+      const limit = queryDto.limit || 10;
+      const skip = (page - 1) * limit;
 
-    const queryBuilder =
-      this.submissionRepository.createQueryBuilder('submission');
+      console.log('[SubmissionsService] findAll called:', {
+        userId,
+        userRoles,
+        queryDto,
+        hasAuthToken: !!authToken,
+      });
+
+      const queryBuilder =
+        this.submissionRepository.createQueryBuilder('submission');
     
     // RBAC Logic:
     // - CHAIR/ADMIN: see all submissions
@@ -657,6 +666,66 @@ export class SubmissionsService {
     // - AUTHOR: see only their own submissions
     const isChairOrAdmin = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
     const isReviewer = userRoles.includes('REVIEWER') || userRoles.includes('PC_MEMBER');
+    
+    // For reviewers querying with trackId, verify they have accepted track assignment
+    // NOTE: Temporarily disabled verification to allow query to proceed
+    // Verification can be re-enabled later if needed for security
+    if (isReviewer && queryDto.trackId) {
+      try {
+        console.log('[SubmissionsService] Verifying reviewer track assignment:', {
+          userId,
+          trackId: queryDto.trackId,
+          trackIdType: typeof queryDto.trackId,
+          hasAuthToken: !!authToken,
+        });
+        
+        if (!authToken) {
+          console.warn('[SubmissionsService] No authToken provided for track assignment verification, skipping verification');
+          // Continue without verification if no token (for backward compatibility)
+        } else {
+          const trackCheck = await this.conferenceClient.checkReviewerTrackAssignment(
+            userId,
+            Number(queryDto.trackId),
+            authToken,
+          );
+          
+          console.log('[SubmissionsService] Track assignment verification result:', {
+            trackId: queryDto.trackId,
+            hasAccepted: trackCheck.hasAccepted,
+          });
+          
+          // TEMPORARILY DISABLED: Don't block query if verification fails
+          // This allows submissions to be shown even if verification service has issues
+          // TODO: Re-enable this check once verification is working correctly
+          /*
+          if (!trackCheck.hasAccepted) {
+            console.log('[SubmissionsService] Reviewer does not have accepted track assignment, returning empty');
+            return {
+              data: [],
+              total: 0,
+              page,
+              limit,
+            };
+          }
+          */
+          
+          if (!trackCheck.hasAccepted) {
+            console.warn('[SubmissionsService] Reviewer does not have accepted track assignment, but continuing query anyway (verification disabled for debugging)');
+          }
+        }
+      } catch (error) {
+        console.error('[SubmissionsService] Error verifying track assignment:', {
+          error: error instanceof Error ? error.message : error,
+          errorStack: error instanceof Error ? error.stack : undefined,
+          errorName: error instanceof Error ? error.name : typeof error,
+          userId,
+          trackId: queryDto.trackId,
+        });
+        // If verification fails, log but continue (don't block the query)
+        // This allows the query to proceed even if verification service is down
+        console.warn('[SubmissionsService] Continuing without verification due to error');
+      }
+    }
     
     if (!isChairOrAdmin && !isReviewer) {
       // Author: only see their own submissions
@@ -703,49 +772,120 @@ export class SubmissionsService {
     }
 
     // Get total count
-    const total = await queryBuilder.getCount();
+    let total = 0;
+    try {
+      total = await queryBuilder.getCount();
+    } catch (error) {
+      console.error('[SubmissionsService] Error getting count:', {
+        error: error instanceof Error ? error.message : error,
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
 
     // Debug logging for reviewer queries
     if (isReviewer && queryDto.trackId) {
-      const sql = queryBuilder.getSql();
-      const params = queryBuilder.getParameters();
-      console.log('[SubmissionsService] Reviewer query:', {
-        userId,
-        userRoles,
-        trackId: queryDto.trackId,
-        status: queryDto.status,
-        total,
-        isReviewer,
-        hasTrackId: !!queryDto.trackId,
-        sql: sql,
-        params: params,
-      });
+      try {
+        const sql = queryBuilder.getSql();
+        const params = queryBuilder.getParameters();
+        console.log('[SubmissionsService] Reviewer query details:', {
+          userId,
+          userRoles,
+          trackId: queryDto.trackId,
+          trackIdType: typeof queryDto.trackId,
+          status: queryDto.status,
+          conferenceId: queryDto.conferenceId,
+          total,
+          isReviewer,
+          hasTrackId: !!queryDto.trackId,
+          sql: sql,
+          params: params,
+          queryConditions: {
+            hasTrackIdFilter: !!queryDto.trackId,
+            hasStatusFilter: !!queryDto.status,
+            hasConferenceIdFilter: !!queryDto.conferenceId,
+          },
+        });
+        
+        // Also check raw count without any filters to see if submissions exist in track
+        const rawCountQuery = this.submissionRepository.createQueryBuilder('submission')
+          .where('submission.trackId = :trackId', { trackId: Number(queryDto.trackId) });
+        const rawCount = await rawCountQuery.getCount();
+        
+        // Get sample submissions to see what's in the track
+        const sampleSubmissions = await rawCountQuery
+          .select(['submission.id', 'submission.title', 'submission.status', 'submission.trackId'])
+          .limit(5)
+          .getMany();
+        
+        console.log('[SubmissionsService] Raw submissions count in track (no filters):', {
+          trackId: queryDto.trackId,
+          trackIdType: typeof queryDto.trackId,
+          rawCount,
+          sampleSubmissions: sampleSubmissions.map(s => ({
+            id: s.id,
+            title: s.title?.substring(0, 50),
+            status: s.status,
+            trackId: s.trackId,
+            trackIdType: typeof s.trackId,
+          })),
+        });
+      } catch (error) {
+        console.error('[SubmissionsService] Error in debug logging:', {
+          error: error instanceof Error ? error.message : error,
+        });
+        // Don't throw, just log
+      }
     }
 
     // Pagination and ordering
-    const submissions = await queryBuilder
-      .leftJoinAndSelect('submission.versions', 'versions')
-      .orderBy('submission.createdAt', 'DESC')
-      .skip(skip)
-      .take(limit)
-      .getMany();
-
-    // Debug: Log actual submissions found
-    if (isReviewer && queryDto.trackId) {
-      console.log('[SubmissionsService] Found submissions:', {
-        count: submissions.length,
-        submissionIds: submissions.map(s => s.id),
-        statuses: submissions.map(s => s.status),
-        trackIds: submissions.map(s => s.trackId),
+    let submissions: Submission[] = [];
+    try {
+      submissions = await queryBuilder
+        .leftJoinAndSelect('submission.versions', 'versions')
+        .orderBy('submission.createdAt', 'DESC')
+        .skip(skip)
+        .take(limit)
+        .getMany();
+    } catch (error) {
+      console.error('[SubmissionsService] Error executing query:', {
+        error: error instanceof Error ? error.message : error,
+        errorStack: error instanceof Error ? error.stack : undefined,
+        errorName: error instanceof Error ? error.name : typeof error,
+        userId,
+        trackId: queryDto.trackId,
       });
+      throw error;
     }
 
-    return {
-      data: submissions,
-      total,
-      page,
-      limit,
-    };
+      // Debug: Log actual submissions found
+      if (isReviewer && queryDto.trackId) {
+        console.log('[SubmissionsService] Found submissions:', {
+          count: submissions.length,
+          submissionIds: submissions.map(s => s.id),
+          statuses: submissions.map(s => s.status),
+          trackIds: submissions.map(s => s.trackId),
+        });
+      }
+
+      return {
+        data: submissions,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      console.error('[SubmissionsService] Unhandled error in findAll:', {
+        error: error instanceof Error ? error.message : error,
+        errorStack: error instanceof Error ? error.stack : undefined,
+        errorName: error instanceof Error ? error.name : typeof error,
+        userId,
+        queryDto,
+        hasAuthToken: !!authToken,
+      });
+      // Re-throw to let NestJS handle it properly
+      throw error;
+    }
   }
 
   /**

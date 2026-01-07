@@ -43,21 +43,21 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   const [showReview, setShowReview] = useState(false);
 
   const handleSubmit = async () => {
-    if (!comment.trim()) {
-      showToast.error('Vui lòng nhập nhận xét chi tiết');
-      return;
+      if (!comment.trim()) {
+        showToast.error('Vui lòng nhập nhận xét chi tiết');
+        return;
     }
 
     try {
-      await createReview({
-        assignmentId,
-        score,
-        confidence: 'MEDIUM',
-        commentForAuthor: comment,
+        await createReview({
+          assignmentId,
+          score,
+          confidence: 'MEDIUM',
+          commentForAuthor: comment,
         recommendation: 'ACCEPT', // Default recommendation, can be changed later by chair
-      }).unwrap();
-      showToast.success('Đánh giá bài viết thành công');
-      onComplete();
+        }).unwrap();
+        showToast.success('Đánh giá bài viết thành công');
+        onComplete();
     } catch (error) {
       showToast.error(formatApiError(error));
     }
@@ -84,9 +84,9 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
               Đã hoàn thành
             </span>
           ) : (
-            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">
-              Đang đánh giá
-            </span>
+          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">
+            Đang đánh giá
+          </span>
           )}
         </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">{submission.title}</h2>
@@ -265,7 +265,7 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
               </div>
             )}
             {existingReview.createdAt && (
-              <div>
+        <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">Ngày nộp:</p>
                 <p className="text-sm text-gray-600">
                   {new Date(existingReview.createdAt).toLocaleString('vi-VN', {
@@ -292,28 +292,28 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
         </button>
         <div className="flex gap-2">
           {isCompleted && !canEdit && (
-            <button
+          <button
               onClick={() => setShowReview(!showReview)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
+          >
               {showReview ? 'Ẩn đánh giá' : 'Xem đánh giá'}
-            </button>
+          </button>
           )}
           {(canEdit || !isCompleted) && (
-            <button
+          <button
               onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <CircularProgress size={16} disableShrink />
-                  Đang xử lý...
-                </span>
-              ) : (
+            disabled={isLoading}
+            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <CircularProgress size={16} disableShrink />
+                Đang xử lý...
+              </span>
+            ) : (
                 canEdit ? 'Cập nhật đánh giá' : 'Nộp đánh giá'
-              )}
-            </button>
+            )}
+          </button>
           )}
         </div>
       </div>

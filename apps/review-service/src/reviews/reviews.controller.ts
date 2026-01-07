@@ -176,20 +176,29 @@ export class ReviewsController {
 
     // Convert status to array if it's a string
     // Default: get SUBMITTED and REVIEWING submissions (submissions that need review)
-    let statusArray: string[] = ['SUBMITTED', 'REVIEWING']; // Default
+    // But if status is explicitly provided (even if empty array), use it
+    let statusArray: string[] | undefined = undefined;
     
-    if (status) {
+    if (status !== undefined) {
       if (Array.isArray(status)) {
-        statusArray = status;
+        // If array is provided (even if empty), use it
+        statusArray = status.length > 0 ? status : undefined;
       } else if (typeof status === 'string') {
         // Handle comma-separated string: "SUBMITTED,REVIEWING" -> ["SUBMITTED", "REVIEWING"]
-        statusArray = status.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        const parsed = status.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        statusArray = parsed.length > 0 ? parsed : undefined;
       }
+    }
+    
+    // If no status filter provided, default to SUBMITTED and REVIEWING
+    if (!statusArray || statusArray.length === 0) {
+      statusArray = ['SUBMITTED', 'REVIEWING'];
     }
 
     console.log('[ReviewsController] Status filter:', {
       rawStatus: status,
       statusArray,
+      hasStatusParam: status !== undefined,
     });
 
     const submissions = await this.reviewsService.getSubmissionsForReviewer(
