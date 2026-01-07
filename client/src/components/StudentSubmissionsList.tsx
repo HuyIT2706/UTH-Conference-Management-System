@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
@@ -6,6 +6,7 @@ import {
   useWithdrawSubmissionMutation,
 } from '../redux/api/submissionsApi';
 import { useGetConferencesQuery, useGetPublicTracksQuery } from '../redux/api/conferencesApi';
+import { useGetAnonymizedReviewsForSubmissionQuery } from '../redux/api/reviewsApi';
 import { formatApiError } from '../utils/api-helpers';
 import { showToast } from '../utils/toast';
 import type { Submission, SubmissionStatus, Track } from '../types/api.types';
@@ -191,8 +192,43 @@ const SubmissionCard = ({
   onDelete,
   isWithdrawing,
 }: SubmissionCardProps) => {
-  const canEdit = submission.status === 'DRAFT' || submission.status === 'SUBMITTED';
-  const canDelete = submission.status === 'DRAFT' || submission.status === 'SUBMITTED' || submission.status === 'REVIEWING';
+  const [showReviews, setShowReviews] = useState(false);
+  
+  // Check if submission has reviews (only query for non-draft submissions)
+  // Prefetch reviews to check if they exist (for disabling edit/delete)
+  const shouldCheckReviews = submission.status !== 'DRAFT' && 
+                              (submission.status === 'SUBMITTED' || 
+                               submission.status === 'REVIEWING' || 
+                               submission.status === 'ACCEPTED' || 
+                               submission.status === 'REJECTED' || 
+                               submission.status === 'CAMERA_READY');
+  
+  // Prefetch reviews to check if they exist (always fetch if shouldCheckReviews, not just when expanded)
+  const { data: reviewsData, isLoading: isLoadingReviews } = useGetAnonymizedReviewsForSubmissionQuery(submission.id, {
+    skip: !shouldCheckReviews,
+  });
+  const hasReviews = (reviewsData?.data?.length || 0) > 0;
+  
+  // Cannot edit/delete if submission has reviews
+  // Also cannot edit/delete if status is ACCEPTED, REJECTED, or CAMERA_READY (final states)
+  const canEdit = !hasReviews && 
+                  submission.status !== 'ACCEPTED' && 
+                  submission.status !== 'REJECTED' && 
+                  submission.status !== 'CAMERA_READY' &&
+                  (submission.status === 'DRAFT' || submission.status === 'SUBMITTED');
+  
+  const canDelete = !hasReviews && 
+                    submission.status !== 'ACCEPTED' && 
+                    submission.status !== 'REJECTED' && 
+                    submission.status !== 'CAMERA_READY' &&
+                    (submission.status === 'DRAFT' || submission.status === 'SUBMITTED' || submission.status === 'REVIEWING');
+  
+  // Show reviews button if submission has reviews or is in review states
+  const canViewReviews = hasReviews || 
+                         submission.status === 'REVIEWING' || 
+                         submission.status === 'ACCEPTED' || 
+                         submission.status === 'REJECTED' || 
+                         submission.status === 'CAMERA_READY';
 
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -240,8 +276,16 @@ const SubmissionCard = ({
           )}
         </div>
       </div>
-      {(canEdit || canDelete) && (
+      {(canEdit || canDelete || canViewReviews) && (
         <div className="flex gap-2 pt-3 border-t border-gray-200">
+          {canViewReviews && (
+            <button
+              onClick={() => setShowReviews(!showReviews)}
+              className="px-4 py-2 text-sm text-teal-600 border border-teal-300 rounded-lg hover:bg-teal-50 transition-colors"
+            >
+              {showReviews ? 'Ẩn phản biện' : 'Xem phản biện'}
+            </button>
+          )}
           {canEdit && (
             <button
               onClick={() => onEdit(submission)}
@@ -260,6 +304,126 @@ const SubmissionCard = ({
             </button>
           )}
         </div>
+      )}
+      
+      {/* Reviews Table - Expandable */}
+      {showReviews && canViewReviews && (
+        <ReviewsTable
+          submissionId={submission.id}
+          isLoading={isLoadingReviews}
+        />
+      )}
+    </div>
+  );
+};
+
+// Table component to display anonymized reviews inline
+interface ReviewsTableProps {
+  submissionId: string;
+  isLoading: boolean;
+}
+
+const ReviewsTable = ({ submissionId, isLoading }: ReviewsTableProps) => {
+  const { data: reviewsData, error } = useGetAnonymizedReviewsForSubmissionQuery(submissionId);
+  const reviews = reviewsData?.data || [];
+
+  const getRecommendationLabel = (recommendation: string): string => {
+    const map: Record<string, string> = {
+      ACCEPT: 'Chấp nhận',
+      WEAK_ACCEPT: 'Chấp nhận với sửa nhỏ',
+      WEAK_REJECT: 'Từ chối yếu',
+      REJECT: 'Từ chối',
+    };
+    return map[recommendation] || recommendation;
+  };
+
+  const getRecommendationColor = (recommendation: string): string => {
+    const map: Record<string, string> = {
+      ACCEPT: 'bg-green-100 text-green-700',
+      WEAK_ACCEPT: 'bg-teal-100 text-teal-700',
+      WEAK_REJECT: 'bg-yellow-100 text-yellow-700',
+      REJECT: 'bg-red-100 text-red-700',
+    };
+    return map[recommendation] || 'bg-gray-100 text-gray-700';
+  };
+
+  // Calculate average score
+  const averageScore = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.score, 0) / reviews.length).toFixed(1)
+    : '0.0';
+
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-200">
+      {isLoading ? (
+        <div className="flex justify-center items-center py-8">
+          <CircularProgress disableShrink />
+        </div>
+      ) : error ? (
+        <div className="text-center py-8 text-red-600">
+          Không thể tải phản biện. Vui lòng thử lại sau.
+        </div>
+      ) : reviews.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          Chưa có phản biện nào cho bài nộp này.
+        </div>
+      ) : (
+        <>
+          {/* Summary */}
+          <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
+            <div className="flex gap-6">
+              <div>
+                <p className="text-sm text-gray-600">Số phản biện</p>
+                <p className="text-2xl font-bold text-gray-800">{reviews.length}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Điểm trung bình</p>
+                <p className="text-2xl font-bold text-teal-600">{averageScore}/10</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Reviews Table */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                    Reviewer
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                    Điểm số
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                    Đề xuất
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                    Nhận xét
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {reviews.map((review, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-gray-900">Reviewer #{index + 1}</span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className="text-sm font-semibold text-teal-600">{review.score.toFixed(1)}/10</span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getRecommendationColor(review.recommendation)}`}>
+                        {getRecommendationLabel(review.recommendation)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{review.commentForAuthor || '-'}</p>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
