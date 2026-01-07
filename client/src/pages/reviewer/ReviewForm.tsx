@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
 import { useCreateReviewMutation, useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
@@ -32,15 +32,27 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   // Can edit if not completed, or completed but deadline not passed
   const canEdit = !isCompleted || (isCompleted && !isDeadlinePassed);
   
-  // Normalize existing review score from 0-100 to 0-10 if needed (for backward compatibility)
+  // Backend uses 0-10 scale, so no normalization needed
+  // Only normalize if score is > 10 (legacy 0-100 scale data)
   const normalizeExistingScore = (score?: number): number => {
     if (!score) return 5;
-    // If score >= 10, assume it's old 0-100 scale, convert to 0-10
-    return score >= 10 ? Math.round(score / 10) : score;
+    // Only convert if score is clearly from 0-100 scale (> 10 to avoid converting valid 10)
+    // If score is 10 or less, it's already on 0-10 scale
+    return score > 10 ? Math.round(score / 10) : score;
   };
+  
   const [score, setScore] = useState<number>(normalizeExistingScore(existingReview?.score));
   const [comment, setComment] = useState(existingReview?.commentForAuthor || '');
   const [showReview, setShowReview] = useState(false);
+
+  // Update score and comment when existingReview is loaded
+  useEffect(() => {
+    if (existingReview) {
+      const normalizedScore = normalizeExistingScore(existingReview.score);
+      setScore(normalizedScore);
+      setComment(existingReview.commentForAuthor || '');
+    }
+  }, [existingReview]);
 
   const handleSubmit = async () => {
       if (!comment.trim()) {
