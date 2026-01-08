@@ -1,4 +1,4 @@
-import { createBrowserRouter, createRoutesFromChildren, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LayoutApp from '../layouts/LayoutApp';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
@@ -81,10 +81,6 @@ const appRouter = createBrowserRouter([
       {
         path: 'assignments',
         element: <AssignmentsPage />,
-      },
-      {
-        path: 'decisions',
-        element: <DecisionsPage />,
       },
       {
         path: 'camera-ready',

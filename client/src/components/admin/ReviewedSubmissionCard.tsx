@@ -24,6 +24,8 @@ const ReviewedSubmissionCard = memo(({
         return 'bg-green-100 text-green-800';
       case 'REJECTED':
         return 'bg-red-100 text-red-800';
+      case 'CAMERA_READY':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -37,6 +39,8 @@ const ReviewedSubmissionCard = memo(({
         return 'Đã chấp nhận';
       case 'REJECTED':
         return 'Đã từ chối';
+      case 'CAMERA_READY':
+        return 'Bản hoàn thiện';
       default:
         return status;
     }

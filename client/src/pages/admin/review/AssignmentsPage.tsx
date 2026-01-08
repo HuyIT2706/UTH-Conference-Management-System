@@ -20,13 +20,14 @@ const AssignmentsPage = () => {
     { skip: !selectedConferenceId },
   );
 
-  // Fetch submissions - only get REVIEWING, ACCEPTED, REJECTED (submissions that have been reviewed)
+  // Fetch submissions - only get REVIEWING status (submissions currently being reviewed)
   const {
     data: submissionsData,
     isLoading: submissionsLoading,
   } = useGetSubmissionsQuery({
     conferenceId: selectedConferenceId || undefined,
     trackId: selectedTrackId || undefined,
+    status: 'REVIEWING',
     search: searchQuery || undefined,
   });
 
@@ -48,13 +49,19 @@ const AssignmentsPage = () => {
       : [];
   }, [submissionsData]);
 
-  // Filter by search query first
+  // Filter by status (only REVIEWING) and search query
   const searchFilteredSubmissions = useMemo(() => {
+    // First filter by status - only show REVIEWING
+    const reviewingSubmissions = allSubmissions.filter(
+      (s) => s.status === 'REVIEWING',
+    );
+    
+    // Then filter by search query if provided
     if (!searchQuery.trim()) {
-      return allSubmissions;
+      return reviewingSubmissions;
     }
     const query = searchQuery.toLowerCase();
-    return allSubmissions.filter(
+    return reviewingSubmissions.filter(
       (s) =>
         s.title.toLowerCase().includes(query) ||
         s.authorName?.toLowerCase().includes(query) ||

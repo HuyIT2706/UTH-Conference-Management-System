@@ -19,11 +19,11 @@ const Sidebar = () => {
       to: '/conference-setup',
     },
     {
-      name: 'Nộp bài / Tóm tắt',
+      name: 'Bài nộp Thí sinh',
       to: '/submissions',
     },
     {
-      name: 'Quản lý Ban Chương trình (PC)',
+      name: 'Giao việc Phản biện',
       to: '/pc-management',
     },
     {
@@ -31,11 +31,7 @@ const Sidebar = () => {
       to: '/assignments',
     },
     {
-      name: 'Ra Quyết định & Thông báo',
-      to: '/decisions',
-    },
-    {
-      name: 'Bài hoàn thiện (Camera-ready)',
+      name: 'Bài hoàn thiện Thí sinh',
       to: '/camera-ready',
     },
     {
