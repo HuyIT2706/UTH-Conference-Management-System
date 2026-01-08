@@ -311,7 +311,14 @@ export class ReviewsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
     this.ensureIsReviewer(user);
-    const review = await this.reviewsService.submitReview(user.sub, dto);
+    
+    // Extract JWT token from Authorization header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
+    const review = await this.reviewsService.submitReview(user.sub, dto, authToken);
 
     return {
       message: 'Nộp bài chấm thành công',

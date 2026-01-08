@@ -36,3 +36,4 @@ export const validateFile = (file: File): boolean => {
   return true;
 };
 
+

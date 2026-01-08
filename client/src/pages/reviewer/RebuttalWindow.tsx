@@ -31,6 +31,15 @@ const RebuttalWindow = ({ submissionId }: RebuttalWindowProps) => {
     return diffDays > 0 ? diffDays : 0;
   };
 
+  // Calculate statistics (memoized) - MUST be called before early return
+  const { totalReviews, averageScore } = useMemo(() => {
+    const total = reviews.length;
+    const avg = total > 0
+      ? (reviews.reduce((sum, r) => sum + r.score, 0) / total).toFixed(1)
+      : '0.0';
+    return { totalReviews: total, averageScore: avg };
+  }, [reviews]);
+
   if (!submission) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -42,15 +51,6 @@ const RebuttalWindow = ({ submissionId }: RebuttalWindowProps) => {
   // Get deadline from conference (same pattern as other components)
   const submissionDeadline = conference?.cfpSetting?.submissionDeadline || conference?.submissionDeadline;
   const daysLeft = submissionDeadline ? calculateDaysLeft(submissionDeadline) : 0;
-
-  // Calculate statistics (memoized)
-  const { totalReviews, averageScore } = useMemo(() => {
-    const total = reviews.length;
-    const avg = total > 0
-      ? (reviews.reduce((sum, r) => sum + r.score, 0) / total).toFixed(1)
-      : '0.0';
-    return { totalReviews: total, averageScore: avg };
-  }, [reviews]);
 
   return (
     <div className="space-y-6">

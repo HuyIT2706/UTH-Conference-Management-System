@@ -265,7 +265,7 @@ export class ReviewsService {
    * Review Logic: Submit review for an assignment
    * Supports both creating new review and updating existing review if deadline not passed
    */
-  async submitReview(reviewerId: number, dto: CreateReviewDto): Promise<Review> {
+  async submitReview(reviewerId: number, dto: CreateReviewDto, authToken?: string): Promise<Review> {
     // Find assignment
     const assignment = await this.assignmentRepository.findOne({
       where: { id: dto.assignmentId },
@@ -274,6 +274,16 @@ export class ReviewsService {
     if (!assignment) {
       throw new NotFoundException('Assignment không tồn tại');
     }
+
+    // Log assignment details immediately to debug
+    console.log('[ReviewsService] submitReview - Assignment found:', {
+      assignmentId: assignment.id,
+      submissionId: assignment.submissionId,
+      hasSubmissionId: !!assignment.submissionId,
+      submissionIdType: typeof assignment.submissionId,
+      reviewerId: assignment.reviewerId,
+      status: assignment.status,
+    });
 
     // Verify reviewer owns this assignment
     if (assignment.reviewerId !== reviewerId) {
@@ -310,7 +320,12 @@ export class ReviewsService {
       existingReview.commentForPC = dto.commentForPC || null;
       existingReview.recommendation = dto.recommendation;
       
-      return await this.reviewRepository.save(existingReview);
+      const savedReview = await this.reviewRepository.save(existingReview);
+      
+      // Also update submission status if needed (same logic as new review)
+      await this.updateSubmissionStatusIfNeeded(assignment, authToken);
+      
+      return savedReview;
     }
 
     // Only ACCEPTED assignments can submit new review
@@ -341,7 +356,91 @@ export class ReviewsService {
     assignment.status = AssignmentStatus.COMPLETED;
     await this.assignmentRepository.save(assignment);
 
+    // Update submission status if needed
+    await this.updateSubmissionStatusIfNeeded(assignment, authToken);
+
     return savedReview;
+  }
+
+  /**
+   * Helper method to update submission status to REVIEWING if needed
+   */
+  private async updateSubmissionStatusIfNeeded(
+    assignment: Assignment,
+    authToken?: string,
+  ): Promise<void> {
+    // Log assignment info for debugging
+    console.log('[ReviewsService] updateSubmissionStatusIfNeeded - Assignment info:', {
+      assignmentId: assignment.id,
+      submissionId: assignment.submissionId,
+      hasSubmissionId: !!assignment.submissionId,
+      submissionIdType: typeof assignment.submissionId,
+      hasAuthToken: !!authToken,
+      authTokenLength: authToken?.length || 0,
+    });
+
+    // Update submission status to REVIEWING if it's still SUBMITTED
+    // Only update if we have authToken and submissionId
+    if (!authToken || !assignment.submissionId) {
+      console.warn('[ReviewsService] Cannot update submission status - missing authToken or submissionId:', {
+        hasAuthToken: !!authToken,
+        hasSubmissionId: !!assignment.submissionId,
+        submissionId: assignment.submissionId,
+      });
+      return;
+    }
+
+    try {
+      console.log('[ReviewsService] Attempting to update submission status:', {
+        submissionId: assignment.submissionId,
+        hasAuthToken: !!authToken,
+        authTokenLength: authToken.length,
+      });
+
+      // Get current submission to check status
+      const submission = await this.submissionClient.getSubmissionById(
+        assignment.submissionId,
+        authToken,
+      );
+      
+      console.log('[ReviewsService] Current submission status:', {
+        submissionId: assignment.submissionId,
+        currentStatus: submission?.status,
+        submissionExists: !!submission,
+      });
+      
+      // Only update to REVIEWING if current status is SUBMITTED
+      if (submission && submission.status === 'SUBMITTED') {
+        console.log('[ReviewsService] Updating submission status from SUBMITTED to REVIEWING');
+        const updatedSubmission = await this.submissionClient.updateSubmissionStatus(
+          assignment.submissionId,
+          'REVIEWING',
+          authToken,
+        );
+        console.log('[ReviewsService] Successfully updated submission status to REVIEWING:', {
+          submissionId: assignment.submissionId,
+          newStatus: updatedSubmission?.status,
+        });
+      } else if (submission) {
+        console.log('[ReviewsService] Submission status is not SUBMITTED, skipping update:', {
+          submissionId: assignment.submissionId,
+          currentStatus: submission.status,
+        });
+      } else {
+        console.warn('[ReviewsService] Submission not found:', {
+          submissionId: assignment.submissionId,
+        });
+      }
+    } catch (error) {
+      // Log detailed error but don't fail the review submission
+      console.error('[ReviewsService] Error updating submission status - DETAILED:', {
+        submissionId: assignment.submissionId,
+        error: error instanceof Error ? error.message : String(error),
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        errorStack: error instanceof Error ? error.stack : undefined,
+        hasAuthToken: !!authToken,
+      });
+    }
   }
 
   /**

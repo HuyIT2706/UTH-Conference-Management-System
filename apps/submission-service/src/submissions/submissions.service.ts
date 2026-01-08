@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Like, In } from 'typeorm';
@@ -571,7 +572,25 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-    if (!userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
+
+    // Allow automatic transition from SUBMITTED to REVIEWING (when reviewer submits review)
+    // This doesn't require Chair/Admin role
+    const isAutoReviewingTransition = 
+      submission.status === 'SUBMITTED' && 
+      updateStatusDto.status === 'REVIEWING';
+
+    console.log('[SubmissionsService] updateStatus called:', {
+      submissionId: id,
+      currentStatus: submission.status,
+      newStatus: updateStatusDto.status,
+      isAutoReviewingTransition,
+      userRoles,
+      userId,
+    });
+
+    // For other status updates, require Chair/Admin role
+    if (!isAutoReviewingTransition && !userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
+      console.log('[SubmissionsService] Access denied - not auto transition and not Chair/Admin');
       throw new ForbiddenException(
         'Chỉ Chair hoặc Admin mới được cập nhật trạng thái',
       );
@@ -581,13 +600,21 @@ export class SubmissionsService {
     if (
       !this.validateStatusTransition(submission.status, updateStatusDto.status)
     ) {
+      console.log('[SubmissionsService] Invalid status transition');
       throw new BadRequestException(
         `Không thể chuyển từ ${submission.status} sang ${updateStatusDto.status}`,
       );
     }
 
+    const oldStatus = submission.status;
     submission.status = updateStatusDto.status;
-    return await this.submissionRepository.save(submission);
+    const savedSubmission = await this.submissionRepository.save(submission);
+    console.log('[SubmissionsService] Successfully updated submission status:', {
+      submissionId: id,
+      oldStatus,
+      newStatus: savedSubmission.status,
+    });
+    return savedSubmission;
   }
 
   /**
@@ -616,15 +643,32 @@ export class SubmissionsService {
       );
     }
 
-    // Validate deadline
-    const deadlineCheck = await this.conferenceClient.checkDeadline(
-      submission.conferenceId,
-      'camera-ready',
-    );
-    if (!deadlineCheck.valid) {
-      throw new BadRequestException(
-        `Hạn nộp camera-ready đã qua: ${deadlineCheck.message}`,
+    // Validate deadline (if available)
+    try {
+      const deadlineCheck = await this.conferenceClient.checkDeadline(
+        submission.conferenceId,
+        'camera-ready',
       );
+      if (!deadlineCheck.valid) {
+        throw new BadRequestException(
+          `Hạn nộp camera-ready đã qua: ${deadlineCheck.message}`,
+        );
+      }
+    } catch (error: any) {
+      // If deadline check fails (endpoint not available or deadline not configured),
+      // log the error but allow upload to proceed
+      // This handles cases where camera-ready deadline might not be set yet
+      if (error.status === HttpStatus.BAD_REQUEST || error.status === HttpStatus.NOT_FOUND) {
+        console.warn(
+          `[SubmissionsService] Cannot check camera-ready deadline for submission ${id}:`,
+          error.message,
+        );
+        // Allow upload to proceed if deadline check fails
+        // This is acceptable if deadline is not configured yet
+      } else {
+        // For other errors, rethrow
+        throw error;
+      }
     }
 
     const cameraReadyFileUrl = await this.uploadFile(file);

@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useGetAnonymizedReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
+import { useUploadCameraReadyMutation } from '../../redux/api/submissionsApi';
+import { showToast } from '../../utils/toast';
+import { formatApiError } from '../../utils/api-helpers';
 import type { Submission} from '../../types/api.types';
 import ReviewsTable from './ReviewsTable';
 
@@ -25,6 +29,8 @@ const SubmissionCard = ({
   isWithdrawing,
 }: SubmissionCardProps) => {
   const [showReviews, setShowReviews] = useState(false);
+  const [uploadCameraReady, { isLoading: isUploading }] = useUploadCameraReadyMutation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if submission has reviews (only query for non-draft submissions)
   // Prefetch reviews to check if they exist (for disabling edit/delete)
@@ -68,6 +74,41 @@ const SubmissionCard = ({
     submission.status === 'ACCEPTED' ||
     submission.status === 'REJECTED' ||
     submission.status === 'CAMERA_READY';
+
+  // Show camera-ready upload button only if status is ACCEPTED
+  const canUploadCameraReady = submission.status === 'ACCEPTED';
+
+  const handleCameraReadyClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type (PDF only)
+    if (file.type !== 'application/pdf') {
+      showToast.error('Chỉ chấp nhận file PDF');
+      return;
+    }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      showToast.error('File không được vượt quá 20MB');
+      return;
+    }
+
+    try {
+      await uploadCameraReady({ id: submission.id, file }).unwrap();
+      showToast.success('Nộp bản cuối cùng thành công');
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      showToast.error(formatApiError(error));
+    }
+  };
 
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -115,6 +156,31 @@ const SubmissionCard = ({
             >
               Xem file
             </a>
+          )}
+          {canUploadCameraReady && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={handleCameraReadyClick}
+                disabled={isUploading}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <CircularProgress size={16} disableShrink className="text-white" />
+                    Đang tải...
+                  </>
+                ) : (
+                  'Nộp bản cuối cùng'
+                )}
+              </button>
+            </>
           )}
         </div>
       </div>

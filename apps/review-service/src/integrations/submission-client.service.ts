@@ -36,7 +36,7 @@ export class SubmissionClientService {
         : 'http://localhost:3003/api');
 
     console.log('[SubmissionClient] Initialized with URL:', this.submissionServiceUrl);
-    
+
     // Don't set baseURL on shared axios instance - use full URL in requests instead
     // This prevents conflicts with other client services that share the same HttpService
   }
@@ -161,9 +161,9 @@ export class SubmissionClientService {
 
       // If it's an HTTP error with status code (status is a number)
       if (typeof status === 'number' && status > 0) {
-        if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
-          throw new HttpException(message, status);
-        }
+      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+        throw new HttpException(message, status);
+      }
         throw new HttpException(
           `Submission-service error: ${message}`,
           status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY,
@@ -242,6 +242,71 @@ export class SubmissionClientService {
         submissionId,
       });
 
+      throw new HttpException(
+        `Submission-service error: ${message}`,
+        status && status >= 400 && status < 600
+          ? status
+          : HttpStatus.BAD_GATEWAY,
+      );
+    }
+  }
+
+  /**
+   * Update submission status
+   */
+  async updateSubmissionStatus(
+    submissionId: string,
+    status: string,
+    authToken: string,
+  ): Promise<Submission> {
+    try {
+      const fullUrl = `${this.submissionServiceUrl}/submissions/${submissionId}/status`;
+      console.log('[SubmissionClient] Updating submission status:', {
+        fullUrl,
+        submissionId,
+        status,
+        hasAuthToken: !!authToken,
+        authTokenLength: authToken.length,
+      });
+
+      const response = await firstValueFrom(
+        this.httpService.patch(
+          fullUrl,
+          { status },
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+            timeout: 10000,
+          },
+        ),
+      );
+
+      console.log('[SubmissionClient] Successfully updated submission status:', {
+        submissionId,
+        newStatus: response.data?.data?.status,
+        responseStatus: response.status,
+      });
+
+      return response.data?.data;
+    } catch (error: any) {
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Lỗi khi cập nhật status submission';
+
+      console.error('[SubmissionClient] Error updating submission status:', {
+        submissionId,
+        status,
+        error: error.message,
+        errorName: error.name,
+        errorCode: error.code,
+        responseStatus: status,
+        responseData: error.response?.data,
+        stack: error.stack,
+      });
+      
       throw new HttpException(
         `Submission-service error: ${message}`,
         status && status >= 400 && status < 600
