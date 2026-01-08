@@ -4,8 +4,10 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { ReportingService } from './reporting.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -60,13 +62,22 @@ export class ReportingController {
   async getSubmissionStats(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
       { id: user.sub, roles: user.roles },
     );
 
-    const stats = await this.reportingService.getSubmissionStats(conferenceId);
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    const stats = await this.reportingService.getSubmissionStats(
+      conferenceId,
+      authToken,
+    );
 
     return {
       message: 'Lấy thống kê submissions thành công',
@@ -86,16 +97,60 @@ export class ReportingController {
   async getAcceptanceRate(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
     await this.conferencesService.ensureCanManageConference(
       conferenceId,
       { id: user.sub, roles: user.roles },
     );
 
-    const stats = await this.reportingService.getAcceptanceRate(conferenceId);
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    const stats = await this.reportingService.getAcceptanceRate(
+      conferenceId,
+      authToken,
+    );
 
     return {
       message: 'Lấy tỷ lệ chấp nhận thành công',
+      data: stats,
+    };
+  }
+
+  @Get('dashboard')
+  @ApiOperation({
+    summary: 'Lấy thống kê dashboard tổng quan',
+    description: 'Lấy tất cả thống kê cần thiết cho dashboard báo cáo và phân tích.',
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê dashboard thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
+  async getDashboardStats(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
+  ) {
+    await this.conferencesService.ensureCanManageConference(
+      conferenceId,
+      { id: user.sub, roles: user.roles },
+    );
+
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    const stats = await this.reportingService.getDashboardStats(
+      conferenceId,
+      authToken,
+    );
+
+    return {
+      message: 'Lấy thống kê dashboard thành công',
       data: stats,
     };
   }

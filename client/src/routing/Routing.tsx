@@ -13,7 +13,7 @@ import SubmissionsPage from '../pages/admin/submission/SubmissionsPage';
 import PCManagementPage from '../pages/admin/pc-management/PCManagementPage';
 import AssignmentsPage from '../pages/admin/review/AssignmentsPage';
 import DecisionsPage from '../pages/admin/DecisionsPage';
-import CameraReadyPage from '../pages/admin/CameraReadyPage';
+import CameraReadyPage from '../pages/admin/camera-ready/CameraReadyPage';
 import ReportsPage from '../pages/admin/ReportsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import ChangePasswordPage from '../pages/profile/ChangePasswordPage';

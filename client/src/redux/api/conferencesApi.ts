@@ -266,6 +266,55 @@ export const conferencesApi = apiSlice.injectEndpoints({
         (_result, _error, trackId) => ({ type: 'TrackMember', id: `track-${trackId}` }),
       ],
     }),
+    // Get dashboard statistics
+    getDashboardStats: builder.query<
+      ApiResponse<{
+        totalSubmissions: number;
+        totalSubmissionsChange?: number;
+        acceptanceRate: number;
+        acceptanceRateChange?: number;
+        totalAccepted: number;
+        totalRejected: number;
+        totalReviewers: number;
+        averageSLA?: number;
+        averageSLAChange?: number;
+        submissionsByTrack: Array<{
+          trackId: number;
+          trackName: string;
+          submissions: number;
+          accepted: number;
+          rejected: number;
+        }>;
+        statusDistribution: {
+          accepted: number;
+          rejected: number;
+          reviewing: number;
+        };
+      }>,
+      number
+    >({
+      query: (conferenceId) => `/conferences/${conferenceId}/stats/dashboard`,
+      providesTags: (_result, _error, conferenceId) => [
+        { type: 'Conference', id: `stats-${conferenceId}` },
+      ],
+    }),
+    // Get audit logs (activity log)
+    getAuditLogs: builder.query<
+      ApiResponse<Array<{
+        id: number;
+        userId: number;
+        action: string;
+        resourceType: string;
+        description: string | null;
+        createdAt: string;
+      }>>,
+      number
+    >({
+      query: (conferenceId) => `/conferences/${conferenceId}/audit-logs`,
+      providesTags: (_result, _error, conferenceId) => [
+        { type: 'Conference', id: `audit-${conferenceId}` },
+      ],
+    }),
   }),
 });
 
@@ -289,5 +338,7 @@ export const {
   useGetMyTrackAssignmentsQuery,
   useAcceptTrackAssignmentMutation,
   useRejectTrackAssignmentMutation,
+  useGetDashboardStatsQuery,
+  useGetAuditLogsQuery,
 } = conferencesApi;
 

@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionsQuery } from '../../redux/api/submissionsApi';
-import { useGetConferencesQuery, useGetTracksQuery } from '../../redux/api/conferencesApi';
-import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
-import ReviewedSubmissionCard from '../../components/admin/ReviewedSubmissionCard';
-import type { Submission } from '../../types/api.types';
+import { useGetSubmissionsQuery } from '../../../redux/api/submissionsApi';
+import { useGetConferencesQuery, useGetTracksQuery } from '../../../redux/api/conferencesApi';
+import { useGetReviewsForSubmissionQuery } from '../../../redux/api/reviewsApi';
+import ReviewedSubmissionCard from '../../../components/admin/ReviewedSubmissionCard';
+import type { Submission } from '../../../types/api.types';
 
 const CameraReadyPage = () => {
   const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);

@@ -9,6 +9,7 @@ import { Conference } from './conference.entity';
 export enum ConferenceMemberRole {
   CHAIR = 'CHAIR',
   PC_MEMBER = 'PC_MEMBER',
+  REVIEWER = 'REVIEWER',
 }
 
 @Entity({ name: 'conference_members' })

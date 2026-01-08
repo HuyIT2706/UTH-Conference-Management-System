@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { HttpModule } from '@nestjs/axios';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
 import { TemplatesController } from './template/templates.controller';
@@ -25,6 +26,7 @@ import { FormTemplate } from './template/entities/form-template.entity';
 import { CfpTemplate } from './template/entities/cfp-template.entity';
 import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { SubmissionClientService } from './integrations/submission-client.service';
 
 @Module({
   imports: [
@@ -85,6 +87,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
       AuditLog,
     ]),
     PassportModule,
+    HttpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -112,6 +115,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     ReportingService,
     AuditService,
     JwtStrategy,
+    SubmissionClientService,
   ],
 })
 export class ConferenceServiceModule {}
