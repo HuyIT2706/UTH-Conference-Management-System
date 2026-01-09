@@ -20,8 +20,10 @@ import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
 import ContactStudent from '../components/ContactStudent';
 import Competition from '../components/Competition';
+import CompetitionWithTabs from '../components/CompetitionWithTabs';
 import StudentSubmissionLanding from '../pages/student/StudentSubmissionLanding';
 import StudentSubmitForm from '../pages/student/StudentSubmitForm';
+import StudentSubmissionDetail from '../pages/student/StudentSubmissionDetail';
 import ReviewerDashboard from '../pages/reviewer/ReviewerDashboard';
 import RoleProtectedRoute from '../components/RoleProtectedRoute';
 
@@ -116,6 +118,10 @@ const appRouter = createBrowserRouter([
         path: 'submit',
         element: <StudentSubmitForm />,
       },
+      {
+        path: 'submission/:id',
+        element: <StudentSubmissionDetail />,
+      },
     ],
   },
   {
@@ -143,7 +149,7 @@ const appRouter = createBrowserRouter([
       {
         index: true,
         element: <>
-          <Competition />
+          <CompetitionWithTabs />
           <ContactStudent />
         </>,
       },

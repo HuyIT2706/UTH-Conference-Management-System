@@ -91,7 +91,7 @@ const Competition = () => {
   }
 
   return (
-    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+    <div className="bg-white">
       <div className="max-w-7xl mx-auto" id='conferences'>
         <h1 className="text-2xl font-semibold mb-6 text-center">
           Hội nghị gần đây

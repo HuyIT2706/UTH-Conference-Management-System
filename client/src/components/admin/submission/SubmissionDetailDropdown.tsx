@@ -1,8 +1,10 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../../redux/api/submissionsApi';
 import { useGetReviewsForSubmissionQuery } from '../../../redux/api/reviewsApi';
+import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import { getStatusColor, getStatusLabel } from '../../../utils/submission-helpers';
+import { useIsInLayoutApp } from '../../../utils/layout-helpers';
 import type { Review } from '../../../types/api.types';
 
 interface SubmissionDetailDropdownProps {
@@ -14,9 +16,44 @@ const SubmissionDetailDropdown = memo(({ submissionId, onClose }: SubmissionDeta
   const { data: submissionData, isLoading: submissionLoading } = useGetSubmissionByIdQuery(submissionId);
   const { data: reviewsData, isLoading: reviewsLoading } = useGetReviewsForSubmissionQuery(submissionId);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isInLayoutApp = useIsInLayoutApp();
+
+  // Fetch users to enrich reviewer names if in LayoutApp
+  const { data: usersData } = useGetUsersQuery(undefined, {
+    skip: !isInLayoutApp,
+  });
 
   const submission = submissionData?.data;
-  const reviews: Review[] = reviewsData?.data || [];
+  const rawReviews: Review[] = reviewsData?.data || [];
+
+  // Enrich reviews with reviewer names from users API if in LayoutApp
+  const reviews = useMemo(() => {
+    if (!isInLayoutApp || !usersData?.data) {
+      return rawReviews;
+    }
+
+    const userMap = new Map(
+      usersData.data.map((u) => [u.id, u])
+    );
+
+    return rawReviews.map((review) => {
+      // If reviewerName already exists and is not a fallback "Reviewer #ID", use it
+      if (review.reviewerName && !review.reviewerName.startsWith('Reviewer #')) {
+        return review;
+      }
+
+      // Try to get reviewer name from users list
+      const reviewer = review.reviewerId ? userMap.get(review.reviewerId) : null;
+      if (reviewer) {
+        return {
+          ...review,
+          reviewerName: reviewer.fullName || reviewer.email || `Reviewer #${review.reviewerId}`,
+        };
+      }
+
+      return review;
+    });
+  }, [rawReviews, usersData, isInLayoutApp]);
 
   const isLoading = submissionLoading || reviewsLoading;
 
@@ -170,22 +207,28 @@ const SubmissionDetailDropdown = memo(({ submissionId, onClose }: SubmissionDeta
               ) : (
                 <div className="space-y-4">
                   {reviews.map((review) => {
-                    const reviewerName = (review as any)?.reviewerName 
-                      || (review as any)?.assignment?.reviewerName 
-                      || (review.reviewerId ? `Reviewer #${review.reviewerId}` : 'Reviewer');
-
-                    const recommendationText = review.recommendation === 'ACCEPT' && 'Chấp nhận với sửa nhỏ'
-                      || review.recommendation === 'WEAK_ACCEPT' && 'Chấp nhận yếu'
-                      || review.recommendation === 'WEAK_REJECT' && 'Từ chối yếu'
-                      || review.recommendation === 'REJECT' && 'Từ chối'
-                      || '';
+                    // Show reviewer name if in LayoutApp (admin pages), otherwise show anonymous
+                    // Reviewer name is enriched from users API in useMemo above
+                    let reviewerName: string;
+                    if (isInLayoutApp) {
+                      // In admin pages (LayoutApp), use enriched reviewerName
+                      if (review.reviewerName && !review.reviewerName.startsWith('Reviewer #')) {
+                        reviewerName = review.reviewerName;
+                      } else if (review.reviewerId) {
+                        reviewerName = `Reviewer #${review.reviewerId}`;
+                      } else {
+                        reviewerName = 'Reviewer';
+                      }
+                    } else {
+                      // In other pages (student/reviewer), always show anonymous
+                      reviewerName = review.reviewerId ? `Reviewer #${review.reviewerId}` : 'Reviewer';
+                    }
 
                     return (
                       <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h4 className="text-base font-semibold text-gray-800">{reviewerName}</h4>
-                            <p className="text-sm text-gray-600">{recommendationText}</p>
                           </div>
                           <div className="px-3 py-1 bg-teal-100 text-teal-700 rounded-lg text-sm font-semibold">
                             {review.score.toFixed(1)}/10
