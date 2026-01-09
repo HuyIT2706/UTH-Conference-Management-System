@@ -13,8 +13,6 @@ export const useAuth = () => {
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
     skip: !hasToken, 
   });
-
-  // Update hasToken when token changes
   useEffect(() => {
     const checkToken = () => {
       const currentHasToken = tokenUtils.hasToken();
@@ -22,11 +20,7 @@ export const useAuth = () => {
         setHasToken(currentHasToken);
       }
     };
-    
-    // Check immediately
     checkToken();
-    
-    // Also check periodically (in case token is set from another tab/window)
     const interval = setInterval(checkToken, 100);
     
     return () => clearInterval(interval);
@@ -35,32 +29,26 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      // Lưu refreshToken trước khi clear
       const refreshToken = tokenUtils.getRefreshToken();
-      
-      // Clear tokens trước để skip query ngay lập tức
-      tokenUtils.clearTokens();
-      
-      // Update state để skip query ngay lập tức
-      setHasToken(false);
-      
-      // Unsubscribe tất cả queries để tránh gọi API sau khi logout
       dispatch(apiSlice.util.resetApiState());
-      
-      // Navigate ngay lập tức để unmount components và tránh gọi API
-      navigate('/login', { replace: true });
-      
-      // Gọi logout API nếu có refreshToken (sau khi navigate để không block UI)
+      setHasToken(false);
       if (refreshToken) {
         try {
-          await logoutMutation({ refreshToken }).unwrap();
+          await Promise.race([
+            logoutMutation({ refreshToken }).unwrap(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Logout timeout')), 1000)
+            )
+          ]);
         } catch (error) {
-          // Ignore logout API error, vì đã clear tokens rồi
-          // Không log error để tránh noise
         }
       }
+      tokenUtils.clearTokens();
+      navigate('/login', { replace: true });
     } catch (error) {
-      // Ignore errors, đảm bảo navigate luôn xảy ra
+      tokenUtils.clearTokens();
+      dispatch(apiSlice.util.resetApiState());
+      setHasToken(false);
       navigate('/login', { replace: true });
     }
   };

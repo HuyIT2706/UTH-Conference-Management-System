@@ -13,12 +13,26 @@ const baseQuery = fetchBaseQuery({
 });
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
+  const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
+  const isLogoutRequest = typeof args === 'object' && args.url === '/auth/logout';
+  const isPublicRequest = typeof args === 'object' && 
+    (args.url?.startsWith('/public/') || args.url?.startsWith('/auth/verify-email') || args.url?.startsWith('/auth/get-verification-token'));
+  if (!isLoginRequest && !isLogoutRequest && !isPublicRequest) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      return { 
+        error: { 
+          status: 'FETCH_ERROR', 
+          error: 'No token available - request skipped after logout',
+          data: { message: 'Authentication required' }
+        } 
+      };
+    }
+  }
+
   let result = await baseQuery(args, api, extraOptions);
 
-  
-  const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
-  
-  if (result.error && result.error.status === 401 && !isLoginRequest) {
+  if (result.error && result.error.status === 401 && !isLoginRequest && !isLogoutRequest) {
     const refreshToken = sessionStorage.getItem('refreshToken');
     if (refreshToken) {
       try {
@@ -42,21 +56,17 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
           result = await baseQuery(args, api, extraOptions);
         } else {
-          // Refresh failed, clear tokens
           localStorage.removeItem('accessToken');
           sessionStorage.removeItem('refreshToken');
-          // Dispatch event to trigger navigation without reload
           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
       } catch (error) {
         localStorage.removeItem('accessToken');
         sessionStorage.removeItem('refreshToken');
-        // Dispatch event to trigger navigation without reload
         window.dispatchEvent(new CustomEvent('auth:logout'));
       }
     } else {
       localStorage.removeItem('accessToken');
-      // Dispatch event to trigger navigation without reload
       window.dispatchEvent(new CustomEvent('auth:logout'));
     }
   }
