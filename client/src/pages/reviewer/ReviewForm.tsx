@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
-import { useCreateReviewMutation, useGetMyAssignmentsQuery } from '../../redux/api/reviewsApi';
+import {
+  useCreateReviewMutation,
+  useGetMyAssignmentsQuery,
+} from '../../redux/api/reviewsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 import { tokenUtils } from '../../utils/token';
@@ -19,7 +22,12 @@ interface ReviewFormProps {
   onBack: () => void;
 }
 
-const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFormProps) => {
+const ReviewForm = ({
+  submissionId,
+  assignmentId,
+  onComplete,
+  onBack,
+}: ReviewFormProps) => {
   const hasToken = tokenUtils.hasToken();
   const { data: submissionData } = useGetSubmissionByIdQuery(submissionId, {
     skip: !hasToken,
@@ -28,21 +36,25 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
     skip: !hasToken,
   });
   const [createReview, { isLoading }] = useCreateReviewMutation();
-  
+
   const submission = submissionData?.data;
   const assignments = assignmentsData?.data || [];
-  const currentAssignment = assignments.find(a => a.id === assignmentId);
+  const currentAssignment = assignments.find((a) => a.id === assignmentId);
   const isCompleted = currentAssignment?.status === 'COMPLETED';
   // Get review from assignment (may need to cast type)
-  const existingReview = (currentAssignment as any)?.review as Review | undefined;
-  
+  const existingReview = (currentAssignment as any)?.review as
+    | Review
+    | undefined;
+
   // Check assignment dueDate to determine if can edit
-  const dueDate = currentAssignment?.dueDate ? new Date(currentAssignment.dueDate) : null;
+  const dueDate = currentAssignment?.dueDate
+    ? new Date(currentAssignment.dueDate)
+    : null;
   const isDeadlinePassed = dueDate ? new Date() > dueDate : false;
-  
+
   // Can edit if not completed, or completed but deadline not passed
   const canEdit = !isCompleted || (isCompleted && !isDeadlinePassed);
-  
+
   // Backend uses 0-10 scale, so no normalization needed
   // Only normalize if score is > 10 (legacy 0-100 scale data)
   const normalizeExistingScore = (score?: number): number => {
@@ -51,9 +63,13 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
     // If score is 10 or less, it's already on 0-10 scale
     return score > 10 ? Math.round(score / 10) : score;
   };
-  
-  const [score, setScore] = useState<number>(normalizeExistingScore(existingReview?.score));
-  const [comment, setComment] = useState(existingReview?.commentForAuthor || '');
+
+  const [score, setScore] = useState<number>(
+    normalizeExistingScore(existingReview?.score),
+  );
+  const [comment, setComment] = useState(
+    existingReview?.commentForAuthor || '',
+  );
   const [showReview, setShowReview] = useState(false);
 
   // Update score and comment when existingReview is loaded
@@ -66,21 +82,21 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
   }, [existingReview]);
 
   const handleSubmit = async () => {
-      if (!comment.trim()) {
-        showToast.error('Vui lòng nhập nhận xét chi tiết');
-        return;
+    if (!comment.trim()) {
+      showToast.error('Vui lòng nhập nhận xét chi tiết');
+      return;
     }
 
     try {
-        await createReview({
-          assignmentId,
-          score,
-          confidence: 'MEDIUM',
-          commentForAuthor: comment,
+      await createReview({
+        assignmentId,
+        score,
+        confidence: 'MEDIUM',
+        commentForAuthor: comment,
         recommendation: 'ACCEPT', // Default recommendation, can be changed later by chair
-        }).unwrap();
-        showToast.success('Đánh giá bài viết thành công');
-        onComplete();
+      }).unwrap();
+      showToast.success('Đánh giá bài viết thành công');
+      onComplete();
     } catch (error) {
       showToast.error(formatApiError(error));
     }
@@ -114,12 +130,7 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
     <div className="space-y-6">
       {/* Article Information */}
       <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-            {submission.id.substring(0, 8)}...
-          </span>
-          {statusBadge}
-        </div>
+        <div className="flex items-center gap-2 mb-4">{statusBadge}</div>
         <SubmissionInfoSection submission={submission} />
       </div>
 
@@ -164,28 +175,30 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
         </button>
         <div className="flex gap-2">
           {isCompleted && !canEdit && (
-          <button
+            <button
               onClick={() => setShowReview(!showReview)}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
+            >
               {showReview ? 'Ẩn đánh giá' : 'Xem đánh giá'}
-          </button>
+            </button>
           )}
           {(canEdit || !isCompleted) && (
-          <button
+            <button
               onClick={handleSubmit}
-            disabled={isLoading}
-            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <CircularProgress size={16} disableShrink />
-                Đang xử lý...
-              </span>
-            ) : (
-                canEdit ? 'Cập nhật đánh giá' : 'Nộp đánh giá'
-            )}
-          </button>
+              disabled={isLoading}
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <CircularProgress size={16} disableShrink />
+                  Đang xử lý...
+                </span>
+              ) : canEdit ? (
+                'Cập nhật đánh giá'
+              ) : (
+                'Nộp đánh giá'
+              )}
+            </button>
           )}
         </div>
       </div>
@@ -194,5 +207,3 @@ const ReviewForm = ({ submissionId, assignmentId, onComplete, onBack }: ReviewFo
 };
 
 export default ReviewForm;
-
-
