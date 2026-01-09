@@ -24,11 +24,11 @@ const Competition = () => {
       const submissionDate = new Date(submissionDeadline);
       // Nếu chưa đến thời gian diễn ra hội nghị → Chưa mở
       if (now < conferenceStartDate) {
-        return { text: 'Chưa mở', color: 'bg-gray-400' };
+        return { text: 'Chưa mở', color: 'border-3 border-gray-400' };
       }
       // Nếu đã đến thời gian diễn ra hội nghị và chưa hết hạn nộp bài → Đang nhận bài nộp
       if (now >= conferenceStartDate && now < submissionDate) {
-        return { text: 'Đang nhận bài nộp', color: 'bg-green-500' };
+        return { text: 'Đang nhận bài nộp', color: 'border-3 border-green-500' };
       }
     }
 
@@ -44,17 +44,17 @@ const Competition = () => {
       const notificationDateObj = new Date(notificationDate);
       const cameraReadyDate = new Date(cameraReadyDeadline);
       if (now >= notificationDateObj && now < cameraReadyDate) {
-        return { text: 'Nộp bản hoàn thiện', color: 'bg-yellow-500' };
+        return { text: 'Nộp bản hoàn thiện', color: 'border-3 border-yellow-500' };
       }
     }
     
     // Nếu không có deadline nào hoặc đã qua tất cả các deadline
     if (!submissionDeadline && !notificationDate && !cameraReadyDeadline) {
-      return { text: 'Đã đóng', color: 'bg-red-300' };
+      return { text: 'Đã đóng', color: 'border-3 border-red-300' };
     }
     
     // Nếu đã qua tất cả các deadline
-    return { text: 'Đã đóng', color: 'bg-red-300' };
+    return { text: 'Đã đóng', color: 'border-3 border-red-300' };
   };
 
   if (isLoading) {

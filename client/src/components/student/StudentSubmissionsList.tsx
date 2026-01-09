@@ -108,7 +108,7 @@ const StudentSubmissionsList = () => {
       {submittedSubmissions.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Bài đã nộp</h2>
-          <div className="space-y-4 border border-solid border-primary rounded-lg">
+          <div className="space-y-4 border border-solid border-border rounded-lg p-4">
             {submittedSubmissions.map((submission) => (
               <SubmissionCard
                 key={submission.id}

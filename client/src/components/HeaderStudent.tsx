@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import iconUth from '../assets/icon_uth.svg';
 
 const HeaderStudent = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
@@ -33,7 +32,7 @@ const HeaderStudent = () => {
     'U';
 
   return (
-    <header className="bg-primary text-white shadow-md">
+    <header className="bg-primary text-text-main shadow-md">
       <div className="flex items-center justify-between px-6 py-4 gap-5">
         <div className="flex items-center w-52">
           <Link to="/home">
@@ -44,7 +43,7 @@ const HeaderStudent = () => {
             />
           </Link>
         </div>
-        <nav className="hidden md:flex items-center space-x-1 ">
+        <nav className="hidden md:flex items-center text-white ">
           <Link to="/home" className="p-4 rounded-lg transition-colors text-lg hover:text-hover hover:font-semibold">
             Trang chủ
           </Link>
@@ -77,7 +76,7 @@ const HeaderStudent = () => {
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-lg hover:bg-green-400"
+              className="flex items-center gap-2 bg-transparent hover:bg-white/10 text-white transition-colors rounded-md px-4 py-2"
             >
               <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold">
                 {initials}

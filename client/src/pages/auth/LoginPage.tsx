@@ -14,7 +14,6 @@ const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false,
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -52,22 +51,15 @@ const LoginPage = () => {
         email: formData.email,
         password: formData.password,
       }).unwrap();
-
       tokenUtils.setTokens(result.accessToken, result.refreshToken);
-
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('rememberMe');
-      }
       const userRoles = result.user?.roles || [];
-      
-      const roleNames = userRoles.map((role: any) => 
-        typeof role === 'string' ? role : role?.name || role?.role || role
+      const roleNames = userRoles.map((role: any) =>
+        typeof role === 'string' ? role : role?.name || role?.role || role,
       );
-      const isChairOrAdmin = roleNames.includes('CHAIR') || roleNames.includes('ADMIN');
+      const isChairOrAdmin =
+        roleNames.includes('CHAIR') || roleNames.includes('ADMIN');
       const isReviewer = roleNames.includes('REVIEWER');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       if (isChairOrAdmin) {
         navigate('/conference-setup', { replace: true });
       } else if (isReviewer) {
@@ -185,18 +177,6 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
-                />
-                <span className="ml-2 text-[16px] text-gray-700">
-                  Ghi nhớ đăng nhập
-                </span>
-              </label>
               <div className="flex items-center justify-between">
                 <Link
                   to="/activate-account"
@@ -224,9 +204,9 @@ const LoginPage = () => {
 
           {/* Right Side*/}
           <div className="hidden lg:flex flex-1 bg-gradient-to-br from-teal-50  to-blue-50 items-center justify-center relative overflow-hidden">
-            <img 
-              className="w-full h-2/3 object-fill rounded-md" 
-              src={imageUth} 
+            <img
+              className="w-full h-2/3 object-fill rounded-md"
+              src={imageUth}
               alt="UTH - Trường Giao Thông Vận Tải TPHCM"
             />
           </div>

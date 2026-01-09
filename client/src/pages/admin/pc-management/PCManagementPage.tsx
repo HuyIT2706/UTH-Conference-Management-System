@@ -102,7 +102,7 @@ const PCManagementPage = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm hội nghị..."
-            className="p-4 w-3xl border border-primary rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="py-2 px-4 w-3xl border border-primary rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
       </div>

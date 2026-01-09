@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useGetConferencesQuery } from '../../redux/api/conferencesApi';
@@ -11,6 +11,30 @@ const StudentSubmissionLanding = () => {
   const conferences: Conference[] = data?.data || [];
   const [expandedConference, setExpandedConference] = useState<number | null>(null);
 
+  // Check if conference is open for submission
+  const isConferenceOpenForSubmission = (c: Conference): boolean => {
+    const now = new Date();
+    const submissionDeadline = c.cfpSetting?.submissionDeadline || c.submissionDeadline;
+    const conferenceStartDate = new Date(c.startDate);
+
+    if (!submissionDeadline) {
+      return false;
+    }
+
+    const submissionDate = new Date(submissionDeadline);
+    return now >= conferenceStartDate && now < submissionDate;
+  };
+
+  // Auto-close expanded conference if it becomes closed
+  useEffect(() => {
+    if (expandedConference !== null) {
+      const conference = conferences.find((c) => c.id === expandedConference);
+      if (conference && !isConferenceOpenForSubmission(conference)) {
+        setExpandedConference(null);
+      }
+    }
+  }, [conferences, expandedConference]);
+
   if (isLoading)
     return (
       <div className="p-6 flex justify-center items-center">
@@ -20,11 +44,27 @@ const StudentSubmissionLanding = () => {
   if (error) return <div className="p-6 text-red-600">Lỗi tải dữ liệu</div>;
 
   const handleSubmit = (conferenceId: number, trackId?: number) => {
+    const conference = conferences.find((c) => c.id === conferenceId);
+    if (!conference || !isConferenceOpenForSubmission(conference)) {
+      return; // Don't navigate if conference is closed
+    }
     if (trackId) {
       navigate(`/student/submit?conferenceId=${conferenceId}&trackId=${trackId}`);
     } else {
       navigate(`/student/submit?conferenceId=${conferenceId}`);
     }
+  };
+
+  const handleToggle = (conferenceId: number) => {
+    const conference = conferences.find((c) => c.id === conferenceId);
+    if (!conference || !isConferenceOpenForSubmission(conference)) {
+      // Don't allow toggle if conference is closed
+      if (expandedConference === conferenceId) {
+        setExpandedConference(null); // Close if already expanded
+      }
+      return;
+    }
+    setExpandedConference(expandedConference === conferenceId ? null : conferenceId);
   };
 
   return (
@@ -41,9 +81,7 @@ const StudentSubmissionLanding = () => {
               key={c.id}
               conference={c}
               isExpanded={expandedConference === c.id}
-              onToggle={() =>
-                setExpandedConference(expandedConference === c.id ? null : c.id)
-              }
+              onToggle={() => handleToggle(c.id)}
               onSubmit={handleSubmit}
             />
           ))}

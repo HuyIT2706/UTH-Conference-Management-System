@@ -9,6 +9,23 @@ interface ConferenceCardProps {
   onSubmit: (conferenceId: number, trackId?: number) => void;
 }
 
+// Check if conference is open for submission (not closed)
+const isConferenceOpenForSubmission = (c: Conference): boolean => {
+  const now = new Date();
+  const submissionDeadline = c.cfpSetting?.submissionDeadline || c.submissionDeadline;
+  const conferenceStartDate = new Date(c.startDate);
+
+  // If no submission deadline, consider it closed
+  if (!submissionDeadline) {
+    return false;
+  }
+
+  const submissionDate = new Date(submissionDeadline);
+
+  // Check if conference has started and submission deadline hasn't passed
+  return now >= conferenceStartDate && now < submissionDate;
+};
+
 const ConferenceCard = ({
   conference,
   isExpanded,
@@ -22,6 +39,7 @@ const ConferenceCard = ({
     },
   );
   const tracks: Track[] = tracksData?.data || [];
+  const isOpen = isConferenceOpenForSubmission(conference);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
@@ -39,7 +57,13 @@ const ConferenceCard = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onToggle}
-            className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors"
+            disabled={!isOpen}
+            className={`px-4 py-2 text-teal-600 border border-teal-600 rounded-lg transition-colors ${
+              isOpen
+                ? 'hover:bg-teal-50 cursor-pointer'
+                : 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-300 text-gray-500'
+            }`}
+            title={!isOpen ? 'Hội nghị đã đóng, không thể xem chủ đề' : ''}
           >
             {isExpanded ? 'Ẩn chủ đề' : 'Xem chủ đề'}
           </button>
@@ -48,7 +72,13 @@ const ConferenceCard = ({
 
       {isExpanded && (
         <div className="border-t border-gray-100 p-4 bg-gray-50">
-          {tracksLoading ? (
+          {!isOpen ? (
+            <div className="text-center py-4">
+              <p className="text-sm text-red-600 font-medium">
+                Hội nghị đã đóng, không thể xem chủ đề và nộp bài.
+              </p>
+            </div>
+          ) : tracksLoading ? (
             <div className="flex justify-center items-center py-2">
               <CircularProgress size={20} disableShrink />
             </div>
@@ -66,7 +96,13 @@ const ConferenceCard = ({
                     <span className="text-sm text-gray-800">{track.name}</span>
                     <button
                       onClick={() => onSubmit(conference.id, track.id)}
-                      className="p-3 text-xs bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors cursor-pointer"
+                      disabled={!isOpen}
+                      className={`p-3 text-xs rounded transition-colors ${
+                        isOpen
+                          ? 'bg-teal-600 text-white hover:bg-teal-700 cursor-pointer'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
+                      }`}
+                      title={!isOpen ? 'Hội nghị đã đóng, không thể nộp bài' : ''}
                     >
                       Nộp bài
                     </button>

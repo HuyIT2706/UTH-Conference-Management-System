@@ -22,21 +22,21 @@ const MySubmissions = () => {
   const getStatusColor = (status: SubmissionStatus) => {
     switch (status) {
       case 'DRAFT':
-        return 'bg-gray-400';
+        return 'border-3 border-gray-400';
       case 'SUBMITTED':
-        return 'bg-blue-400';
+        return 'border-3 border-blue-400';
       case 'REVIEWING':
-        return 'bg-yellow-400';
+        return 'border-3 border-yellow-400';
       case 'ACCEPTED':
-        return 'bg-green-500';
+        return 'border-3 border-green-500';
       case 'REJECTED':
-        return 'bg-red-500';
+        return 'border-3 border-red-500';
       case 'CAMERA_READY':
-        return 'bg-purple-500';
+        return 'border-3 border-purple-500';
       case 'WITHDRAWN':
-        return 'bg-gray-500';
+        return 'border-3 border-gray-500';
       default:
-        return 'bg-gray-400';
+        return 'border-3 border-gray-400';
     }
   };
 
@@ -180,7 +180,7 @@ const MySubmissions = () => {
                 </div>
                 <button
                   onClick={() => navigate(`/student/submission/${submission.id}`)}
-                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-lg hover:bg-teal-50 transition-colors text-sm"
+                  className="px-4 py-2 text-teal-600 border border-teal-600 rounded-xl hover:bg-teal-50 hover:cursor-pointer transition-colors text-sm"
                 >
                   Xem chi tiết
                 </button>

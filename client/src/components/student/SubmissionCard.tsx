@@ -152,7 +152,7 @@ const SubmissionCard = ({
               href={submission.fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary"
+              className="px-4 py-2 border border-primary text-text-main rounded-3xl hover:bg-primary hover:cursor-pointer hover:text-white font-medium transition-colors"
             >
               Xem file
             </a>

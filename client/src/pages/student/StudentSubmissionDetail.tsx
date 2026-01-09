@@ -60,21 +60,21 @@ const StudentSubmissionDetail = () => {
   const getStatusBadgeColor = (status: SubmissionStatus) => {
     switch (status) {
       case 'DRAFT':
-        return 'bg-gray-400';
+        return 'border-3 border-gray-400';
       case 'SUBMITTED':
-        return 'bg-blue-400';
+        return 'border-3 border-blue-400';
       case 'REVIEWING':
-        return 'bg-yellow-400';
+        return 'border-3 border-yellow-400';
       case 'ACCEPTED':
-        return 'bg-green-500';
+        return 'border-3 border-green-500';
       case 'REJECTED':
-        return 'bg-red-500';
+        return 'border-3 border-red-500';
       case 'CAMERA_READY':
-        return 'bg-green-400';
+        return 'border-3 border-green-400';
       case 'WITHDRAWN':
-        return 'bg-gray-500';
+        return 'border-3 border-gray-500';
       default:
-        return 'bg-gray-400';
+        return 'border-3 border-gray-400';
     }
   };
 

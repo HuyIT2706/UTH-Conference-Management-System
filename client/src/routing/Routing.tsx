@@ -5,14 +5,12 @@ import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import ActivateAccount from '../pages/auth/ActivateAccount';
-import DashboardPage from '../pages/admin/DashboardPage';
 import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
 import TrackManagementPage from '../pages/admin/tracks/TrackManagementPage';
 import SubmissionsPage from '../pages/admin/submission/SubmissionsPage';
 import PCManagementPage from '../pages/admin/pc-management/PCManagementPage';
 import AssignmentsPage from '../pages/admin/review/AssignmentsPage';
-import DecisionsPage from '../pages/admin/DecisionsPage';
 import CameraReadyPage from '../pages/admin/camera-ready/CameraReadyPage';
 import ReportsPage from '../pages/admin/ReportsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
@@ -65,10 +63,6 @@ const appRouter = createBrowserRouter([
         element: <ConferenceSetupPage />,
       },
       {
-        path: 'dashboard',
-        element: <DashboardPage />,
-      },
-      {
         path: 'conference-setup',
         element: <ConferenceSetupPage />,
       },
@@ -112,7 +106,7 @@ const appRouter = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <StudentSubmissionLanding />
+        element: <StudentSubmissionLanding />,
       },
       {
         path: 'submit',
@@ -148,19 +142,21 @@ const appRouter = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <>
-          <CompetitionWithTabs />
-          <ContactStudent />
-        </>,
+        element: (
+          <>
+            <CompetitionWithTabs />
+            <ContactStudent />
+          </>
+        ),
       },
       {
         path: 'publicconference',
-        element: <Competition />
+        element: <Competition />,
       },
       {
         path: 'contact',
-        element: <ContactStudent/>
-      }
+        element: <ContactStudent />,
+      },
     ],
   },
   {
