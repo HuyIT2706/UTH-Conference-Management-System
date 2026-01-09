@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetMyTrackAssignmentsQuery,
@@ -24,8 +23,17 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
 
   const assignments: TrackMember[] = assignmentsData?.data || [];
   
-  // Filter only PENDING assignments
-  const pendingAssignments = assignments.filter((a) => a.status === 'PENDING');
+  // Chỉ hiển thị PENDING assignments ở đây (có buttons chấp nhận/từ chối)
+  // ACCEPTED assignments sẽ hiển thị ở phần "Các chủ đề đã chấp nhận" bên dưới
+  // Nếu status không có hoặc undefined/null, coi như là PENDING (cho tương thích với dữ liệu cũ)
+  const pendingAssignments = assignments.filter((a) => {
+    const status = a.status || 'PENDING';
+    return status === 'PENDING';
+  });
+  
+  // Debug: log để kiểm tra data
+  console.log('TrackAssignmentList - All assignments:', assignments);
+  console.log('TrackAssignmentList - Pending assignments:', pendingAssignments);
 
   const handleAccept = async (trackId: number, conferenceId: number) => {
     try {
@@ -81,8 +89,13 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
         return (
           <div key={assignment.id} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">{track.name}</h3>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800">{track.name}</h3>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-medium">
+                    Chờ xác nhận
+                  </span>
+                </div>
                 {conference && (
                   <p className="text-sm text-gray-500">{conference.name}</p>
                 )}

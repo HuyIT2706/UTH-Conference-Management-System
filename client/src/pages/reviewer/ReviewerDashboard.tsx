@@ -37,7 +37,10 @@ const ReviewerDashboard = () => {
   
   const acceptedTrackAssignments = useMemo(
     () => trackAssignmentsData?.data?.filter(
-      (ta) => ta.status === 'ACCEPTED' && ta.track
+      (ta) => {
+        const status = ta.status || 'PENDING';
+        return status === 'ACCEPTED' && ta.track;
+      }
     ) || [],
     [trackAssignmentsData?.data]
   );
@@ -121,12 +124,19 @@ const ReviewerDashboard = () => {
         <div>
           {activeTab === 'assignment' && (
             <>
-              <TrackAssignmentList
-                onAcceptTrack={(trackId, conferenceId) => {
-                  // Handle track acceptance - will refresh track assignments
-                }}
-              />
+              {/* Hiển thị các track assignments đang chờ chấp nhận/từ chối */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Phân công chờ xác nhận
+                </h2>
+                <TrackAssignmentList
+                  onAcceptTrack={(trackId, conferenceId) => {
+                    // Handle track acceptance - will refresh track assignments
+                  }}
+                />
+              </div>
               
+              {/* Hiển thị các track đã chấp nhận với các bài nộp */}
               {acceptedTrackAssignments.length > 0 && (
                 <div className="mt-6">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">

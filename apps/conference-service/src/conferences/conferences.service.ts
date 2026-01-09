@@ -406,11 +406,16 @@ export class ConferencesService {
 
   // Get tracks assigned to a reviewer
   async getMyTrackAssignments(userId: number): Promise<TrackMember[]> {
-    return this.trackMemberRepository.find({
+    const assignments = await this.trackMemberRepository.find({
       where: { userId },
       relations: ['track', 'track.conference'],
       order: { createdAt: 'DESC' },
     });
+    // Đảm bảo field status luôn có giá trị (mặc định là PENDING nếu null/undefined)
+    return assignments.map((assignment) => ({
+      ...assignment,
+      status: assignment.status || 'PENDING',
+    }));
   }
 
   // Accept track assignment
