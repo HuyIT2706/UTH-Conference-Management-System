@@ -62,10 +62,10 @@ const SubmissionRow = memo(({
           <div className="flex items-center justify-end relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 border ${
                 isDropdownOpen
-                  ? 'bg-emerald-700 text-white'
-                  : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-transparent text-emerald-600 border-emerald-600 hover:bg-emerald-600 hover:text-white'
               }`}
               title="Xem chi tiết bài nộp"
             >

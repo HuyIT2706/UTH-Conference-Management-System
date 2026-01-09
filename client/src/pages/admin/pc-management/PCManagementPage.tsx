@@ -16,14 +16,16 @@ const removeVietnameseTones = (str: string): string => {
 
 const PCManagementPage = () => {
   const [view, setView] = useState<'list' | 'detail'>('list');
-  const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
+  const [selectedConferenceId, setSelectedConferenceId] = useState<
+    number | null
+  >(null);
   const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, error } = useGetConferencesQuery();
 
   const conferences = useMemo(() => {
-    return (data?.data && Array.isArray(data.data)) ? data.data : [];
+    return data?.data && Array.isArray(data.data) ? data.data : [];
   }, [data]);
 
   const filteredConferences = useMemo(() => {
@@ -81,14 +83,11 @@ const PCManagementPage = () => {
               </svg>
             </button>
             <h1 className="text-3xl font-bold text-gray-800">
-              Quản lý Ban Chương trình
+              Phân ban bản biện
             </h1>
           </div>
         </div>
-        <PCMemberDetail
-          trackId={selectedTrackId}
-          onBack={handleBackToList}
-        />
+        <PCMemberDetail trackId={selectedTrackId} onBack={handleBackToList} />
       </div>
     );
   }
@@ -96,30 +95,15 @@ const PCManagementPage = () => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Quản lý Ban Chương trình</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Phân ban bản biện</h1>
         <div className="relative flex items-center space-x-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm hội nghị..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="p-4 w-3xl border border-primary rounded-2xl font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
-          <button className="absolute right-5 w-8 h-8 bg-button rounded-full flex items-center justify-center shadow-lg hover:bg-orange-600 transition-colors cursor-pointer">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -133,7 +117,9 @@ const PCManagementPage = () => {
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">Có lỗi xảy ra khi tải danh sách hội nghị</p>
+          <p className="text-red-600">
+            Có lỗi xảy ra khi tải danh sách hội nghị
+          </p>
         </div>
       )}
 
@@ -149,4 +135,3 @@ const PCManagementPage = () => {
 };
 
 export default PCManagementPage;
-

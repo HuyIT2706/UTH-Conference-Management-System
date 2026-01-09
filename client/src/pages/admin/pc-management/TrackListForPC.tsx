@@ -85,7 +85,7 @@ const ConferenceTracks = ({
       </div>
 
       {isExpanded && (
-        <div className="mt-4 border-t pt-4">
+        <div className="mt-4 border-t border-solid border-t-border pt-4">
           {isLoading ? (
             <div className="flex justify-center items-center py-4">
               <CircularProgress size={20} disableShrink />

@@ -73,14 +73,14 @@ const PCMemberDetail = ({
           {!showCreateForm && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+              className="p-3 border border-primary text-text-main rounded-2xl hover:bg-teal-700 hover:text-white hover:cursor-pointer transition-colors"
             >
               + Thêm thành viên
             </button>
           )}
           <button
             onClick={onBack}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="py-3 px-5 border border-primary text-text-main rounded-2xl hover:bg-teal-700 hover:text-white hover:cursor-pointer transition-colors"
           >
             Quay lại
           </button>
