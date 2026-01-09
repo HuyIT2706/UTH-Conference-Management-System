@@ -117,9 +117,6 @@ const SubmissionsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Danh sách bài nộp
           </h1>
-          <p className="text-gray-600">
-            Quản lý và xem danh sách các bài nộp từ thí sinh
-          </p>
         </div>
 
         {/* Filters Card */}

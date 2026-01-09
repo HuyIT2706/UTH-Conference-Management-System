@@ -134,7 +134,7 @@ const ConferenceSetupPage = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm hội nghị..."
-            className="p-4 border w-4xl text-text-main font-medium border-primary rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="px-4 py-2 border text-text-main font-medium border-primary rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
