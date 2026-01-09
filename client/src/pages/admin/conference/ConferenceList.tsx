@@ -36,19 +36,19 @@ const ConferenceList = ({
       {conferences.map((conference: Conference) => (
         <div
           key={conference.id}
-          className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+          className="bg-surface rounded-lg shadow p-6 hover:shadow-md transition-shadow"
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              <h2 className="text-xl font-semibold text-text-main mb-2">
                 {conference.name}
               </h2>
               {conference.description && (
-                <p className="text-gray-600 mb-4 line-clamp-2">
+                <p className="text-text-sub mb-4 line-clamp-2">
                   {conference.description}
                 </p>
               )}
-              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+              <div className="flex flex-wrap gap-4 text-sm text-text-sub">
                 <div>
                   <span className="font-medium">Ngày bắt đầu:</span>{' '}
                   {formatDate(conference.startDate)}
@@ -74,7 +74,7 @@ const ConferenceList = ({
               </button>
               <button
                 onClick={() => onDelete(conference.id)}
-                className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors cursor-pointer"
+                className="w-10 h-10 bg-danger rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 transition-colors cursor-pointer"
                 title="Xóa hội nghị"
               >
                 <svg

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import iconUth from '../assets/icon_uth.svg';
 
@@ -8,29 +8,38 @@ const Header = () => {
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const initials = user?.fullName
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || user?.email?.[0].toUpperCase() || 'U';
+  const initials =
+    user?.fullName
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) ||
+    user?.email?.[0].toUpperCase() ||
+    'U';
 
   return (
-    <header className="bg-primary text-white shadow-md">
+    <header className="bg-primary text-text-main shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center">
-          <img className="w-2/3 h-2/3" src={iconUth} alt="UTH - Trường Giao Thông Vận Tải TPHCM" />
-        </div>
+        <Link to="/conference-setup" className="flex items-center">
+          <img
+            className="w-2/3 h-2/3"
+            src={iconUth}
+            alt="UTH - Trường Giao Thông Vận Tải TPHCM"
+          />
+        </Link>
         <div className="flex items-center">
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 bg-green-500 px-4 py-2 rounded-lg hover:bg-green-400"
+              className="flex items-center gap-2 bg-transparent hover:bg-white/10 text-white transition-colors rounded-md px-4 py-2"
             >
               <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold">
                 {initials}
               </div>
-              <span className="hidden md:block">{user?.fullName || user?.email}</span>
+              <span className="hidden md:block">
+                {user?.fullName || user?.email}
+              </span>
               <svg
                 className="w-4 h-4"
                 fill="none"

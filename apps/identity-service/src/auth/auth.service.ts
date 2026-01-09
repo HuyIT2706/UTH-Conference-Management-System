@@ -147,16 +147,32 @@ export class AuthService {
       throw new UnauthorizedException('Mã xác minh không hợp lệ');
     }
 
+    // Check if user is already verified before processing
+    const user = await this.usersService.findById(record.userId);
+    if (user?.isVerified) {
+      // Mark token as used even though user is already verified
+      record.used = true;
+      await this.emailVerificationTokenRepository.save(record);
+      
+      return { 
+        message: 'Email đã được xác minh trước đó',
+        isVerified: true,
+      };
+    }
+
     if (record.expiresAt.getTime() < Date.now()) {
       throw new UnauthorizedException('Mã xác minh đã hết hạn');
     }
 
-    const user = await this.usersService.markEmailVerified(record.userId);
+    const verifiedUser = await this.usersService.markEmailVerified(record.userId);
 
     record.used = true;
     await this.emailVerificationTokenRepository.save(record);
 
-    return { message: 'Xác minh email thành công' };
+    return { 
+      message: 'Xác minh email thành công',
+      isVerified: true,
+    };
   }
 
   async getVerificationTokenByEmail(email: string) {

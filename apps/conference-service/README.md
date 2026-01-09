@@ -340,4 +340,3 @@ http://localhost:3002/api
 
 ### Email Service
 - Cần tích hợp email provider (SMTP, SendGrid, AWS SES) để gửi email thực tế trong Bulk Notifications
-

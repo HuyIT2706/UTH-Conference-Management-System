@@ -59,7 +59,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 min-h-screen" style={{ backgroundColor: '#0F172A' }}>
+    <div className="w-64 min-h-screen bg-sidebar">
       <div className="p-4">
         <nav className="space-y-1">
           {menuItems.map((item) => (
@@ -68,8 +68,8 @@ const Sidebar = () => {
               to={item.to}
               className={`block px-4 py-3 rounded-lg transition-colors ${
                 isActive(item.to)
-                  ? 'text-white font-semibold'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? 'text-sidebar-text font-semibold'
+                  : 'text-sidebar-text hover:bg-gray-800 hover:text-white'
               }`}
               style={
                 isActive(item.to)
