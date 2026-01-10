@@ -8,7 +8,9 @@ import {
   Patch,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { ConferencesService } from './conferences.service';
 import { CreateConferenceDto } from './dto/create-conference.dto';
@@ -435,11 +437,18 @@ export class ConferencesController {
     @Param('trackId', ParseIntPipe) trackId: number,
     @Body() dto: AddTrackMemberDto,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
+    // Extract auth token from request header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : undefined;
+
     const member = await this.conferencesService.addTrackMember(trackId, dto, {
       id: user.sub,
       roles: user.roles ?? [],
-    });
+    }, authToken);
     return { message: 'Thêm thành viên thành công', data: member };
   }
 

@@ -13,6 +13,8 @@ import { SubmissionsService } from './submissions/submissions.service';
 import { SupabaseService } from './supabase/supabase.config';
 import { ConferenceClientService } from './integrations/conference-client.service';
 import { ReviewClientService } from './integrations/review-client.service';
+import { IdentityClientService } from './integrations/identity-client.service';
+import { EmailService } from './common/services/email.service';
 import { JwtStrategy } from './auth/jwt.strategy';
 
 @Module({
@@ -72,6 +74,8 @@ import { JwtStrategy } from './auth/jwt.strategy';
     SupabaseService,
     ConferenceClientService,
     ReviewClientService,
+    IdentityClientService,
+    EmailService,
     JwtStrategy,
   ],
 })

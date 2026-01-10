@@ -16,6 +16,8 @@ import { QuerySubmissionsDto } from './dto/query-submissions.dto';
 import { SupabaseService } from '../supabase/supabase.config';
 import { ConferenceClientService } from '../integrations/conference-client.service';
 import { ReviewClientService } from '../integrations/review-client.service';
+import { IdentityClientService } from '../integrations/identity-client.service';
+import { EmailService } from '../common/services/email.service';
 import { log } from 'console';
 
 @Injectable()
@@ -29,6 +31,8 @@ export class SubmissionsService {
     private dataSource: DataSource,
     private conferenceClient: ConferenceClientService,
     private reviewClient: ReviewClientService,
+    private identityClient: IdentityClientService,
+    private emailService: EmailService,
   ) {}
 
   /**
@@ -564,6 +568,7 @@ export class SubmissionsService {
     updateStatusDto: UpdateStatusDto,
     userId: number,
     userRoles: string[],
+    authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
       where: { id },
@@ -614,7 +619,129 @@ export class SubmissionsService {
       oldStatus,
       newStatus: savedSubmission.status,
     });
+
+    // Send email notification when status is ACCEPTED or REJECTED
+    const newStatus = savedSubmission.status; // Use the saved status to avoid type narrowing issues
+    const isAcceptedOrRejected = newStatus === SubmissionStatus.ACCEPTED || 
+                                  newStatus === SubmissionStatus.REJECTED;
+    
+    console.log('[SubmissionsService] Email notification check:', {
+      hasAuthToken: !!authToken,
+      status: newStatus,
+      isAcceptedOrRejected,
+      willSendEmail: isAcceptedOrRejected && !!authToken,
+    });
+
+    if (authToken && isAcceptedOrRejected) {
+      console.log('[SubmissionsService] Triggering email notification...');
+      this.sendSubmissionStatusEmail(
+        savedSubmission,
+        newStatus as 'ACCEPTED' | 'REJECTED',
+        updateStatusDto.decisionNote,
+        authToken,
+      ).catch((error) => {
+        console.error('[SubmissionsService] Failed to send submission status email:', error);
+        // Don't throw - email failure shouldn't break the API response
+      });
+    } else {
+      if (!authToken) {
+        console.warn('[SubmissionsService] Email not sent: No auth token provided');
+      }
+      if (!isAcceptedOrRejected) {
+        console.log('[SubmissionsService] Email not sent: Status is not ACCEPTED or REJECTED', {
+          status: newStatus,
+        });
+      }
+    }
+
     return savedSubmission;
+  }
+
+  /**
+   * Send email notification when submission status changes to ACCEPTED or REJECTED
+   */
+  private async sendSubmissionStatusEmail(
+    submission: Submission,
+    status: 'ACCEPTED' | 'REJECTED',
+    decisionNote?: string,
+    authToken?: string,
+  ): Promise<void> {
+    console.log('[SubmissionsService] sendSubmissionStatusEmail called:', {
+      submissionId: submission.id,
+      authorId: submission.authorId,
+      status,
+      hasDecisionNote: !!decisionNote,
+      hasAuthToken: !!authToken,
+    });
+
+    if (!authToken) {
+      console.warn('[SubmissionsService] Cannot send email: No auth token provided');
+      return;
+    }
+
+    try {
+      // Get author info from identity-service
+      console.log('[SubmissionsService] Fetching author info from identity-service...');
+      const authorInfo = await this.identityClient.getUserById(submission.authorId, authToken);
+      
+      if (!authorInfo || !authorInfo.email) {
+        console.warn(`[SubmissionsService] Cannot send email: Author ${submission.authorId} not found or has no email`, {
+          hasAuthorInfo: !!authorInfo,
+          hasEmail: !!authorInfo?.email,
+        });
+        return;
+      }
+
+      console.log('[SubmissionsService] Author info retrieved:', {
+        authorId: submission.authorId,
+        email: authorInfo.email,
+        fullName: authorInfo.fullName,
+      });
+
+      // Get conference info from conference-service
+      // For now, use a placeholder or fetch from conference service
+      // You might need to add a method to get conference name from conference-service
+      const conferenceName = `Hội nghị #${submission.conferenceId}`;
+      
+      // TODO: Fetch actual conference name from conference-service if needed
+      // For now, use placeholder
+
+      console.log('[SubmissionsService] Sending email...', {
+        email: authorInfo.email,
+        status,
+        submissionTitle: submission.title,
+        conferenceName,
+      });
+
+      if (status === 'ACCEPTED') {
+        await this.emailService.sendSubmissionAcceptedEmail(
+          authorInfo.email,
+          authorInfo.fullName || 'Tác giả',
+          submission.title,
+          conferenceName,
+          decisionNote,
+        );
+        console.log('[SubmissionsService] Acceptance email sent successfully to:', authorInfo.email);
+      } else if (status === 'REJECTED') {
+        await this.emailService.sendSubmissionRejectedEmail(
+          authorInfo.email,
+          authorInfo.fullName || 'Tác giả',
+          submission.title,
+          conferenceName,
+          decisionNote,
+        );
+        console.log('[SubmissionsService] Rejection email sent successfully to:', authorInfo.email);
+      }
+    } catch (error) {
+      console.error('[SubmissionsService] Error sending submission status email:', {
+        submissionId: submission.id,
+        authorId: submission.authorId,
+        status,
+        error: error instanceof Error ? error.message : error,
+        errorStack: error instanceof Error ? error.stack : undefined,
+      });
+      // Don't throw - email failure shouldn't break the API response
+    }
   }
 
   /**

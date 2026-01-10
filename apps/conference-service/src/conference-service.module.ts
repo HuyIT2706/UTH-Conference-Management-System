@@ -27,6 +27,8 @@ import { CfpTemplate } from './template/entities/cfp-template.entity';
 import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { SubmissionClientService } from './integrations/submission-client.service';
+import { IdentityClientService } from './integrations/identity-client.service';
+import { EmailService } from './common/services/email.service';
 
 @Module({
   imports: [
@@ -116,6 +118,8 @@ import { SubmissionClientService } from './integrations/submission-client.servic
     AuditService,
     JwtStrategy,
     SubmissionClientService,
+    IdentityClientService,
+    EmailService,
   ],
 })
 export class ConferenceServiceModule {}

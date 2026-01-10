@@ -154,10 +154,7 @@ export class AuthService {
       record.used = true;
       await this.emailVerificationTokenRepository.save(record);
       
-      return { 
-        message: 'Email đã được xác minh trước đó',
-        isVerified: true,
-      };
+      throw new BadRequestException('Tài khoản này đã được xác minh email trước đó');
     }
 
     if (record.expiresAt.getTime() < Date.now()) {
@@ -181,11 +178,7 @@ export class AuthService {
       throw new NotFoundException('Không tìm thấy người dùng');
     }
     if (user.isVerified) {
-      return {
-        email: user.email,
-        message: 'Email đã được xác minh',
-        isVerified: true,
-      };
+      throw new BadRequestException('Tài khoản này đã được xác minh email. Bạn không cần xác minh lại.');
     }
     await this.emailVerificationTokenRepository.delete({
       userId: user.id,

@@ -20,6 +20,8 @@ import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
 import { AddTrackMemberDto } from './dto/add-track-member.dto';
+import { EmailService } from '../common/services/email.service';
+import { IdentityClientService } from '../integrations/identity-client.service';
 
 @Injectable()
 export class ConferencesService {
@@ -34,6 +36,8 @@ export class ConferencesService {
     private readonly trackMemberRepository: Repository<TrackMember>,
     @InjectRepository(CfpSetting)
     private readonly cfpSettingRepository: Repository<CfpSetting>,
+    private readonly emailService: EmailService,
+    private readonly identityClient: IdentityClientService,
   ) {}
 
   async createConference(
@@ -358,9 +362,11 @@ export class ConferencesService {
     trackId: number,
     dto: AddTrackMemberDto,
     user: { id: number; roles: string[] },
+    authToken?: string,
   ): Promise<TrackMember> {
     const track = await this.trackRepository.findOne({
       where: { id: trackId },
+      relations: ['conference'],
     });
     if (!track) {
       throw new NotFoundException('Không tìm thấy chủ đề');
@@ -379,7 +385,50 @@ export class ConferencesService {
       userId: dto.userId,
       track,
     });
-    return this.trackMemberRepository.save(member);
+    const savedMember = await this.trackMemberRepository.save(member);
+
+    // Send email notification to reviewer (async, don't wait for it)
+    if (authToken) {
+      this.sendTrackAssignmentEmail(savedMember, track, authToken).catch((error) => {
+        console.error('[ConferencesService] Failed to send track assignment email:', error);
+        // Don't throw - email failure shouldn't break the API response
+      });
+    }
+
+    return savedMember;
+  }
+
+  /**
+   * Send email notification when reviewer is assigned to track
+   */
+  private async sendTrackAssignmentEmail(
+    member: TrackMember,
+    track: Track,
+    authToken: string,
+  ): Promise<void> {
+    try {
+      // Get user info from identity-service
+      const userInfo = await this.identityClient.getUserById(member.userId, authToken);
+      if (!userInfo || !userInfo.email) {
+        console.warn(`[ConferencesService] Cannot send email: User ${member.userId} not found or has no email`);
+        return;
+      }
+
+      // Get conference info
+      const conference = await this.conferenceRepository.findOne({
+        where: { id: track.conferenceId },
+      });
+
+      await this.emailService.sendTrackAssignmentEmail(
+        userInfo.email,
+        userInfo.fullName || 'Reviewer',
+        track.name,
+        conference?.name || 'Hội nghị',
+      );
+    } catch (error) {
+      console.error('[ConferencesService] Error sending track assignment email:', error);
+      // Don't throw - email failure shouldn't break the API response
+    }
   }
 
   async removeTrackMember(

@@ -65,6 +65,7 @@ export class AuthController {
   @Post('verify-email')
   @ApiOperation({ summary: 'Xác minh email bằng mã 6 số' })
   @ApiResponse({ status: 200, description: 'Xác minh email thành công' })
+  @ApiResponse({ status: 400, description: 'Tài khoản đã được xác minh rồi' })
   @ApiResponse({ status: 401, description: 'Mã không hợp lệ hoặc đã hết hạn' })
   async verifyEmail(@Body('token') code: string) {
     const result = await this.authService.verifyEmail(code);
@@ -78,16 +79,10 @@ export class AuthController {
   })
   @ApiQuery({ name: 'email', description: 'Email của user cần lấy token', required: true, example: 'user@example.com' })
   @ApiResponse({ status: 200, description: 'Lấy token thành công' })
+  @ApiResponse({ status: 400, description: 'Email đã được xác minh rồi' })
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
   async getVerificationToken(@Query('email') email: string) {
     const result = await this.authService.getVerificationTokenByEmail(email);
-    
-    if (result.isVerified) {
-      return {
-        message: result.message || 'Email đã được xác minh',
-        data: result,
-      };
-    }
     
     return {
       message: 'Đã gửi mã kích hoạt tài khoản tới email (tồn tại)',

@@ -435,11 +435,18 @@ export class SubmissionsController {
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
+    // Extract auth token from request header
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : undefined;
+
     const submission = await this.submissionsService.updateStatus(
       id,
       updateStatusDto,
       user.sub,
       user.roles || [],
+      authToken,
     );
 
     return {

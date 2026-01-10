@@ -120,13 +120,11 @@ export class UsersController {
     };
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.ADMIN)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Lấy thông tin user theo ID (Admin only)' })
+  @ApiOperation({ summary: 'Lấy thông tin user theo ID (Authenticated users)' })
   @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
-  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
   async getUserById(@Param('id', ParseIntPipe) userId: number) {
     const user = await this.usersService.findById(userId);

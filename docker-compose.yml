@@ -37,6 +37,8 @@ services:
       dockerfile: ./apps/conference-service/dockerfile
     ports:
       - "3002:3002"
+    env_file:
+      - .env
     environment:
       - PORT=3002
       - DB_HOST=postgres
@@ -44,8 +46,14 @@ services:
       - DB_USERNAME=admin
       - DB_PASSWORD=admin123
       - DB_DATABASE=db_conference
+      - IDENTITY_SERVICE_URL=http://identity-service:3001/api
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
     depends_on:
       - postgres
+      - identity-service
     networks:
       - uth-net
 
@@ -77,6 +85,8 @@ services:
       dockerfile: ./apps/submission-service/Dockerfile
     ports:
       - "3003:3003"
+    env_file:
+      - .env
     environment:
       - PORT=3003
       - DB_HOST=postgres
@@ -84,13 +94,19 @@ services:
       - DB_USERNAME=admin
       - DB_PASSWORD=admin123
       - DB_DATABASE=db_submission
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
       - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
       - REVIEW_SERVICE_URL=http://review-service:3004/api
+      - IDENTITY_SERVICE_URL=http://identity-service:3001/api
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
     depends_on:
       - postgres
       - conference-service
+      - identity-service
     networks:
       - uth-net
 
