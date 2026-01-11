@@ -21,11 +21,14 @@ services:
     ports:
       - "3001:3001"
     environment:
+      - DOCKER_ENV=true
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=admin
       - DB_PASSWORD=admin123
       - DB_DATABASE=db_identity
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
+      - REVIEW_SERVICE_URL=http://review-service:3004/api
     depends_on:
       - postgres 
     networks:
@@ -41,12 +44,15 @@ services:
       - .env
     environment:
       - PORT=3002
+      - DOCKER_ENV=true
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=admin
       - DB_PASSWORD=admin123
       - DB_DATABASE=db_conference
       - IDENTITY_SERVICE_URL=http://identity-service:3001/api
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
+      - REVIEW_SERVICE_URL=http://review-service:3004/api
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
@@ -65,6 +71,7 @@ services:
       - "3004:3004"
     environment:
       - PORT=3004
+      - DOCKER_ENV=true
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=admin
@@ -89,6 +96,7 @@ services:
       - .env
     environment:
       - PORT=3003
+      - DOCKER_ENV=true
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=admin
@@ -118,10 +126,10 @@ services:
       - "3000:3000"
     environment:
       - DOCKER_ENV=true
-      - IDENTITY_SERVICE_URL=http://identity-service:3001
-      - CONFERENCE_SERVICE_URL=http://conference-service:3002
-      - SUBMISSION_SERVICE_URL=http://submission-service:3003
-      - REVIEW_SERVICE_URL=http://review-service:3004
+      - IDENTITY_SERVICE_URL=http://identity-service:3001/api
+      - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
+      - REVIEW_SERVICE_URL=http://review-service:3004/api
     depends_on:
       - identity-service
       - conference-service

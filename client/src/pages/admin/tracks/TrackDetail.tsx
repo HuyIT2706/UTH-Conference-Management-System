@@ -7,6 +7,7 @@ import {
 } from '../../../redux/api/conferencesApi';
 import type { Track } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { formatApiError } from '../../../utils/api-helpers';
 import TrackList from './TrackList';
 import CreateTrackForm from './CreateTrackForm';
 
@@ -56,7 +57,7 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
       handleCancelEdit();
     } catch (err) {
       console.error('Error updating track:', err);
-      showToast.error('Có lỗi xảy ra khi cập nhật chủ đề');
+      showToast.error(formatApiError(err));
     }
   };
 
@@ -70,7 +71,7 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
       showToast.success('Xóa chủ đề thành công');
     } catch (err) {
       console.error('Error deleting track:', err);
-      showToast.error('Có lỗi xảy ra khi xóa chủ đề');
+      showToast.error(formatApiError(err));
     }
   };
 

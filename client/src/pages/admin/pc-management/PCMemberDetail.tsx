@@ -7,6 +7,7 @@ import {
 import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import type { TrackMember, User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { formatApiError } from '../../../utils/api-helpers';
 import PCMemberList from './PCMemberList';
 import CreatePCMemberForm from './CreatePCMemberForm';
 
@@ -47,7 +48,7 @@ const PCMemberDetail = ({
       showToast.success('Xóa thành viên thành công');
     } catch (err) {
       console.error('Error deleting member:', err);
-      showToast.error('Có lỗi xảy ra khi xóa thành viên');
+      showToast.error(formatApiError(err));
     }
   };
 

@@ -6,6 +6,7 @@ import {
 } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { formatApiError } from '../../../utils/api-helpers';
 import CreateAccountForm from './CreateAccountForm';
 import AccountList from './AccountList';
 import AccountDetail from './AccountDetail';
@@ -84,7 +85,7 @@ const AccountManagementPage = () => {
       }
     } catch (err) {
       console.error('Error deleting user:', err);
-      showToast.error('Có lỗi xảy ra khi xóa tài khoản');
+      showToast.error(formatApiError(err));
     }
   };
 
