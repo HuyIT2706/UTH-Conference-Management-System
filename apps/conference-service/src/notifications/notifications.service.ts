@@ -20,9 +20,7 @@ export class NotificationsService {
     private conferenceRepository: Repository<Conference>,
   ) {}
 
-  /**
-   * Render email template với variables
-   */
+  // Hiển thị template với các biến đã được thay thế
   private renderTemplate(
     template: string,
     variables: Record<string, string> = {},
@@ -34,10 +32,7 @@ export class NotificationsService {
     }
     return rendered;
   }
-
-  /**
-   * Get recipients based on recipient type
-   */
+// Lấy danh sách người nhận dựa trên loại
   private async getRecipients(
     conferenceId: number,
     recipientType: RecipientType,
@@ -58,17 +53,12 @@ export class NotificationsService {
       }
       case RecipientType.AUTHORS:
       case RecipientType.REVIEWERS:
-        // These require integration with submission-service and review-service
-        // For now, return empty array
         return [];
       default:
         return [];
     }
   }
-
-  /**
-   * Send bulk notification
-   */
+// Gửi email hàng loạt
   async sendBulkNotification(
     conferenceId: number,
     dto: BulkNotificationDto,
@@ -85,8 +75,6 @@ export class NotificationsService {
     if (!conference) {
       throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
     }
-
-    // Get template if provided
     let template: EmailTemplate | null = null;
     if (dto.templateId) {
       template = await this.emailTemplateRepository.findOne({
@@ -99,15 +87,9 @@ export class NotificationsService {
         );
       }
     }
-
-    // Get recipients
     const recipients = await this.getRecipients(conferenceId, dto.recipientType);
-
-    // Prepare email content
     const subject = dto.subject || template?.subject || 'Notification';
     const body = dto.body || template?.body || '';
-
-    // Merge variables with conference info
     const variables = {
       conferenceName: conference.name,
       conferenceVenue: conference.venue,
@@ -115,12 +97,8 @@ export class NotificationsService {
       conferenceEndDate: conference.endDate.toISOString(),
       ...dto.variables,
     };
-
     const renderedSubject = this.renderTemplate(subject, variables);
     const renderedBody = this.renderTemplate(body, variables);
-
-    // TODO: Integrate with actual email service (SMTP, SendGrid, AWS SES, etc.)
-    // For now, simulate sending
     const sentCount = recipients.length;
     const failedCount = 0;
     const errors: Array<{ recipientEmail: string; error: string }> = [];
@@ -132,10 +110,7 @@ export class NotificationsService {
       errors,
     };
   }
-
-  /**
-   * Preview email before sending
-   */
+// Xem trước thông báo
   async previewNotification(
     conferenceId: number,
     dto: BulkNotificationDto,

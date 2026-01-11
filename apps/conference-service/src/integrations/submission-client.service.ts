@@ -34,13 +34,8 @@ export class SubmissionClientService {
       (isDocker 
         ? 'http://submission-service:3003/api' 
         : 'http://localhost:3003/api');
-
-    console.log('[SubmissionClient] Initialized with URL:', this.submissionServiceUrl);
   }
-
-  /**
-   * Get all submissions for a conference
-   */
+  // Lấy danh sách submissions theo conferenceId 
   async getSubmissionsByConference(
     conferenceId: number,
     authToken: string,
@@ -69,19 +64,18 @@ export class SubmissionClientService {
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi lấy danh sách submissions';
-
-      // Log warning instead of error for service unavailability (502)
       if (status === HttpStatus.BAD_GATEWAY || !status) {
-        console.warn('[SubmissionClient] Submission-service unavailable:', {
-          conferenceId,
-          message: 'Submission-service không khả dụng hoặc chưa chạy',
-        });
-      } else {
-        console.error('[SubmissionClient] Error getting submissions:', {
-          conferenceId,
-          status,
-          error: error.message,
-        });
+        throw new HttpException(
+          {
+            message: 'Không thể lấy danh sách submissions. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
+            detail: {
+              conferenceId,
+              service: 'submission-service',
+              reason: 'Service unavailable or timeout',
+            },
+          },
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
       }
 
       throw new HttpException(
@@ -92,10 +86,7 @@ export class SubmissionClientService {
       );
     }
   }
-
-  /**
-   * Get submission statistics for a conference
-   */
+  // Lấy thống kê submissions theo conferenceId
   async getSubmissionStatistics(
     conferenceId: number,
     authToken: string,
@@ -123,11 +114,9 @@ export class SubmissionClientService {
       let totalRejected = 0;
 
       submissions.forEach((submission) => {
-        // Count by status
         submissionsByStatus[submission.status] =
           (submissionsByStatus[submission.status] || 0) + 1;
 
-        // Count by track
         if (!submissionsByTrackMap.has(submission.trackId)) {
           submissionsByTrackMap.set(submission.trackId, {
             trackName: `Track ${submission.trackId}`,
@@ -171,18 +160,11 @@ export class SubmissionClientService {
         totalRejected,
       };
     } catch (error: any) {
-      // Error already logged in getSubmissionsByConference
       throw error;
     }
   }
 
-  /**
-   * Get submission IDs by trackId (for Guard Clause Case 3)
-   * Used by conference-service to check if track member can be removed
-   * 
-   * CRITICAL: Uses fail-secure approach - if service is down/error, THROWS ERROR
-   * to PREVENT track member removal and potential data loss.
-   */
+//  Lấy danh sách submission IDs theo trackId
   async getSubmissionIdsByTrack(
     trackId: number,
     authToken: string,
@@ -205,18 +187,9 @@ export class SubmissionClientService {
         error.response?.data?.message ||
         error.message ||
         'Unknown error';
-
-      // If service is down or unreachable, THROW ERROR to PREVENT removal (fail-secure)
-      // This ensures data integrity - we cannot verify track has no submissions if service is down
       if (!status || status >= 500) {
-        console.error('[SubmissionClient] Service seems down/unreachable, BLOCKING track member removal to prevent data loss:', {
-          trackId,
-          serviceUrl: this.submissionServiceUrl,
-          error: errorMessage,
-        });
         throw new HttpException(
           {
-            code: 'SUBMISSION_SERVICE_UNAVAILABLE',
             message: 'Không thể xác minh track có submissions hay không. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               trackId,
@@ -224,25 +197,15 @@ export class SubmissionClientService {
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE, // 503
+          HttpStatus.SERVICE_UNAVAILABLE, 
         );
       }
 
-      // If track not found or has no submissions (404), safe to return empty array
       if (status === HttpStatus.NOT_FOUND) {
         return [];
       }
-
-      // For other errors (401, 403, 400), log and throw to prevent removal
-      console.error('[SubmissionClient] Error getting submission IDs by track, BLOCKING removal:', {
-        trackId,
-        status,
-        message: errorMessage,
-      });
-
       throw new HttpException(
         {
-          code: 'SUBMISSION_SERVICE_ERROR',
           message: `Không thể lấy danh sách submissions của track: ${errorMessage}`,
           detail: {
             trackId,
@@ -250,7 +213,7 @@ export class SubmissionClientService {
             service: 'submission-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, // 502
+        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
       );
     }
   }

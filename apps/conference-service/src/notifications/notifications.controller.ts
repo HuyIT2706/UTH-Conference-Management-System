@@ -23,31 +23,11 @@ export class NotificationsController {
     private readonly notificationsService: NotificationsService,
     private readonly conferencesService: ConferencesService,
   ) {}
-
+// Tạo email hàng loạt
   @Post('bulk')
   @ApiOperation({
     summary: 'Gửi email hàng loạt',
-    description: `Gửi email hàng loạt cho nhiều người cùng lúc (PC members, Authors, Reviewers, hoặc Chairs). Có thể sử dụng email template hoặc custom body.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "recipientType": "PC_MEMBERS",
-  "templateId": 1,
-  "variables": {
-    "deadline": "2025-03-15",
-    "conferenceName": "International UTH Conference 2025"
-  },
-  "subject": "Reminder: Review Deadline Approaching",
-  "body": "Custom email body (optional if using template)"
-}
-\`\`\`
-
-**Các loại recipientType:**
-- \`PC_MEMBERS\`: Tất cả PC members
-- \`AUTHORS\`: Tất cả authors có submission
-- \`REVIEWERS\`: Tất cả reviewers
-- \`CHAIRS\`: Tất cả chairs`
+    description: 'Gửi email hàng loạt cho nhiều người cùng lúc (PC members, Authors, Reviewers, hoặc Chairs). Có thể sử dụng email template hoặc custom body.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Gửi email hàng loạt thành công' })
@@ -73,23 +53,11 @@ export class NotificationsController {
       data: result,
     };
   }
-
+// Xem trước email trước khi gửi
   @Post('preview')
   @ApiOperation({
     summary: 'Preview email trước khi gửi',
-    description: `Xem trước nội dung email với template và variables trước khi gửi thực sự.
-    
-**Ví dụ request body (giống như bulk notification):**
-\`\`\`json
-{
-  "recipientType": "PC_MEMBERS",
-  "templateId": 1,
-  "variables": {
-    "deadline": "2025-03-15",
-    "conferenceName": "International UTH Conference 2025"
-  }
-}
-\`\`\``
+    description: `Xem trước nội dung email với template và variables trước khi gửi thực sự.`,
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Preview email thành công' })

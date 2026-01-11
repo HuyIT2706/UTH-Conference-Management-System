@@ -3,7 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Conference } from '../conferences/entities/conference.entity';
 import { Track } from '../conferences/entities/track.entity';
-import { ConferenceMember, ConferenceMemberRole } from '../conferences/entities/conference-member.entity';
+import {
+  ConferenceMember,
+  ConferenceMemberRole,
+} from '../conferences/entities/conference-member.entity';
 import { SubmissionClientService } from '../integrations/submission-client.service';
 
 @Injectable()
@@ -17,7 +20,7 @@ export class ReportingService {
     private conferenceMemberRepository: Repository<ConferenceMember>,
     private submissionClient: SubmissionClientService,
   ) {}
-
+  // Lấy thống kê tổng quan của hội nghị
   async getConferenceStats(conferenceId: number): Promise<{
     totalTracks: number;
     totalMembers: number;
@@ -25,7 +28,7 @@ export class ReportingService {
     tracks: Array<{ id: number; name: string }>;
   }> {
     const conference = await this.conferenceRepository.findOne({
-      where: { 
+      where: {
         id: conferenceId,
         deletedAt: IsNull(),
         isActive: true,
@@ -33,11 +36,13 @@ export class ReportingService {
     });
 
     if (!conference) {
-      throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
+      throw new NotFoundException(
+        `Conference với ID ${conferenceId} không tồn tại`,
+      );
     }
 
     const tracks = await this.trackRepository.find({
-      where: { 
+      where: {
         conferenceId,
         deletedAt: IsNull(),
         isActive: true,
@@ -64,9 +69,7 @@ export class ReportingService {
     };
   }
 
-  /**
-   * Get submission statistics
-   */
+  //  Lấy thống kê về submissions
   async getSubmissionStats(
     conferenceId: number,
     authToken: string,
@@ -89,10 +92,8 @@ export class ReportingService {
         conferenceId,
         authToken,
       );
-
-      // Map track names from database
       const tracks = await this.trackRepository.find({
-        where: { 
+        where: {
           conferenceId,
           deletedAt: IsNull(),
           isActive: true,
@@ -102,7 +103,8 @@ export class ReportingService {
 
       const submissionsByTrack = stats.submissionsByTrack.map((trackStat) => ({
         ...trackStat,
-        trackName: trackMap.get(trackStat.trackId) || `Track ${trackStat.trackId}`,
+        trackName:
+          trackMap.get(trackStat.trackId) || `Track ${trackStat.trackId}`,
       }));
 
       return {
@@ -114,12 +116,12 @@ export class ReportingService {
         totalRejected: stats.totalRejected,
       };
     } catch (error: any) {
-      // Only log if it's not a service unavailability error (502)
       const status = error?.status || error?.response?.status;
       if (status !== 502) {
-        console.error('[ReportingService] Error getting submission stats:', error);
+        throw new NotFoundException(
+          `Không thể lấy thống kê submissions: ${error.message || 'Lỗi không xác định'}`,
+        );
       }
-      // Return empty stats if submission-service is unavailable
       return {
         totalSubmissions: 0,
         submissionsByTrack: [],
@@ -130,10 +132,7 @@ export class ReportingService {
       };
     }
   }
-
-  /**
-   * Get acceptance rate
-   */
+  // Lấy tỷ lệ chấp nhận
   async getAcceptanceRate(
     conferenceId: number,
     authToken: string,
@@ -156,7 +155,6 @@ export class ReportingService {
         totalSubmissions: stats.totalSubmissions,
       };
     } catch (error: any) {
-      console.error('[ReportingService] Error getting acceptance rate:', error);
       return {
         acceptanceRate: 0,
         totalAccepted: 0,
@@ -165,106 +163,4 @@ export class ReportingService {
       };
     }
   }
-
-  /**
-   * Get comprehensive dashboard statistics
-   */
-  async getDashboardStats(
-    conferenceId: number,
-    authToken: string,
-  ): Promise<{
-    totalSubmissions: number;
-    totalSubmissionsChange?: number;
-    acceptanceRate: number;
-    acceptanceRateChange?: number;
-    totalAccepted: number;
-    totalRejected: number;
-    totalReviewers: number;
-    averageSLA?: number;
-    averageSLAChange?: number;
-    submissionsByTrack: Array<{
-      trackId: number;
-      trackName: string;
-      submissions: number;
-      accepted: number;
-      rejected: number;
-    }>;
-    statusDistribution: {
-      accepted: number;
-      rejected: number;
-      reviewing: number;
-    };
-  }> {
-    const conference = await this.conferenceRepository.findOne({
-      where: { 
-        id: conferenceId,
-        deletedAt: IsNull(),
-        isActive: true,
-      },
-    });
-
-    if (!conference) {
-      throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
-    }
-
-    // Get submission stats (with error handling)
-    // getSubmissionStats already handles errors and returns empty stats
-    const submissionStats = await this.getSubmissionStats(conferenceId, authToken);
-
-    // Get reviewers count (members with REVIEWER role)
-    const members = await this.conferenceMemberRepository.find({
-      where: { conferenceId },
-    });
-    const totalReviewers = members.filter(
-      (m) => m.role === ConferenceMemberRole.REVIEWER,
-    ).length;
-
-    // Calculate status distribution percentages
-    const total = submissionStats.totalSubmissions;
-    const statusDistribution = {
-      accepted:
-        total > 0
-          ? Math.round((submissionStats.totalAccepted / total) * 100)
-          : 0,
-      rejected:
-        total > 0
-          ? Math.round((submissionStats.totalRejected / total) * 100)
-          : 0,
-      reviewing:
-        total > 0
-          ? Math.round(
-              ((submissionStats.submissionsByStatus['REVIEWING'] || 0) / total) *
-                100,
-            )
-          : 0,
-    };
-
-    return {
-      totalSubmissions: submissionStats.totalSubmissions,
-      acceptanceRate: submissionStats.acceptanceRate,
-      totalAccepted: submissionStats.totalAccepted,
-      totalRejected: submissionStats.totalRejected,
-      totalReviewers,
-      submissionsByTrack: submissionStats.submissionsByTrack.map((t) => ({
-        trackId: t.trackId,
-        trackName: t.trackName,
-        submissions: t.count,
-        accepted: t.accepted,
-        rejected: t.rejected,
-      })),
-      statusDistribution,
-    };
-  }
 }
-
-
-
-
-
-
-
-
-
-
-
-

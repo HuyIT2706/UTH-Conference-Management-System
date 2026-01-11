@@ -8,9 +8,7 @@ export class PublicController {
     private readonly conferencesService: ConferencesService,
     private readonly templatesService: TemplatesService,
   ) {}
-
-  // Đặt các route cụ thể trước route generic để tránh conflict
-  // Route check-deadline phải đặt trước route :id/cfp để tránh conflict
+//  Lấy thông tin deadline CFP công khai
   @Get(':conferenceId/cfp/check-deadline')
   async checkDeadline(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -63,7 +61,7 @@ export class PublicController {
         : `${deadlineName} đã qua`,
     };
   }
-
+// lấy thông tin track và xác thực track công khai
   @Get(':conferenceId/tracks/:trackId/validate')
   async validateTrack(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -77,7 +75,7 @@ export class PublicController {
       track: track || undefined,
     };
   }
-
+// Lấy thông tin CFP công khai
   @Get(':id/cfp')
   async getPublicCfp(@Param('id', ParseIntPipe) conferenceId: number) {
     const conference = await this.conferencesService.findOne(conferenceId);
@@ -119,7 +117,7 @@ export class PublicController {
       },
     };
   }
-
+// lấy danh sách track công khai
   @Get(':id/tracks')
   async getPublicTracks(@Param('id', ParseIntPipe) conferenceId: number) {
     const tracks = await this.conferencesService.findAllTracks(conferenceId);
