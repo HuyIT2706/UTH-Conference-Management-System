@@ -11,7 +11,7 @@ export class Rebuttal {
   id: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; // UUID from submission-service
+  submissionId: string; 
 
   @Column({ type: 'int' })
   authorId: number;

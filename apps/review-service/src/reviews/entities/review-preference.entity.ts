@@ -24,7 +24,7 @@ export class ReviewPreference {
   reviewerId: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; // UUID from submission-service
+  submissionId: string; 
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;

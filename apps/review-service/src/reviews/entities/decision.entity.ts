@@ -19,7 +19,7 @@ export class Decision {
   id: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; // UUID from submission-service
+  submissionId: string; 
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -31,7 +31,7 @@ export class Decision {
   decision: FinalDecision;
 
   @Column({ type: 'int' })
-  decidedBy: number; // Chair/Admin user id
+  decidedBy: number; 
 
   @Column({ type: 'text', nullable: true })
   note: string | null;

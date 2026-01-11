@@ -34,7 +34,7 @@ export class Review {
   conferenceId: number | null;
 
   @Column({ type: 'int' })
-  score: number; // 0-10
+  score: number; 
 
   @Column({
     type: 'enum',
@@ -47,7 +47,7 @@ export class Review {
   commentForAuthor: string | null;
 
   @Column({ type: 'text', nullable: true })
-  commentForPC: string | null; // Confidential comment
+  commentForPC: string | null; 
 
   @Column({
     type: 'enum',

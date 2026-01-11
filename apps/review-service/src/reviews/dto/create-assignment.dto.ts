@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAssignmentDto {
   @ApiProperty({
-    description: 'ID của reviewer',
+    description: 'number id của reviewer',
     example: 5,
   })
   @IsInt()
@@ -11,12 +11,12 @@ export class CreateAssignmentDto {
   reviewerId: number;
 
   @ApiProperty({
-    description: 'ID của submission (UUID)',
+    description: 'string id của submission',
     example: '8ccd4365-3258-4b87-8903-c48d06189ed1',
   })
   @IsUUID()
   @IsNotEmpty()
-  submissionId: string; // UUID from submission-service
+  submissionId: string; 
 
   @ApiProperty({
     description: 'ID của conference',

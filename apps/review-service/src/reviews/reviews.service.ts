@@ -19,7 +19,6 @@ import { PcDiscussion } from './entities/pc-discussion.entity';
 import { Decision, FinalDecision } from './entities/decision.entity';
 import { Rebuttal } from './entities/rebuttal.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
-import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ConferenceClientService } from '../integrations/conference-client.service';
 import { SubmissionClientService, Submission } from '../integrations/submission-client.service';
@@ -45,28 +44,22 @@ export class ReviewsService {
     private readonly identityClient: IdentityClientService,
   ) {}
 
-  /**
-   * Bidding Logic: Reviewer submit preference for a submission
-   */
+  // Reviewer submit preference cho bài báo
   async submitBid(reviewerId: number, dto: CreateBidDto): Promise<ReviewPreference> {
-    // Check if bid already exists
     const existingBid = await this.reviewPreferenceRepository.findOne({
       where: {
         reviewerId,
-        submissionId: dto.submissionId, // Already UUID string from DTO
+        submissionId: dto.submissionId, 
       },
     });
 
     if (existingBid) {
-      // Update existing bid
       existingBid.preference = dto.preference;
       return this.reviewPreferenceRepository.save(existingBid);
     }
-
-    // Create new bid
     const bid = this.reviewPreferenceRepository.create({
       reviewerId,
-      submissionId: dto.submissionId, // Already UUID string from DTO
+      submissionId: dto.submissionId, 
       conferenceId: dto.conferenceId,
       preference: dto.preference,
     });
@@ -74,24 +67,17 @@ export class ReviewsService {
     return this.reviewPreferenceRepository.save(bid);
   }
 
-  /**
-   * Check Conflict of Interest (COI)
-   * Returns true if reviewer has CONFLICT preference for this submission
-   */
+  // Kiểm tra Conflict of Interest (COI)
   async checkConflictOfInterest(
     reviewerId: number,
     submissionId: string | number,
     conferenceId?: number,
   ): Promise<boolean> {
-    // Ensure submissionId is string (UUID)
     const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const where: Record<string, any> = {
       reviewerId,
       submissionId: submissionIdStr,
     };
-
-    // Nếu truyền conferenceId thì filter theo conferenceId,
-    // còn không thì bỏ field này ra khỏi điều kiện where
     if (typeof conferenceId === 'number') {
       where.conferenceId = conferenceId;
     }
@@ -103,71 +89,12 @@ export class ReviewsService {
     return preference?.preference === PreferenceType.CONFLICT;
   }
 
-  /**
-   * Assignment Logic: Chair assigns submission to reviewer
-   */
-  async createAssignment(
-    chairId: number,
-    dto: CreateAssignmentDto,
-  ): Promise<Assignment> {
-    // Check for Conflict of Interest
-    const hasConflict = await this.checkConflictOfInterest(
-      dto.reviewerId,
-      dto.submissionId,
-      dto.conferenceId,
-    );
-
-    if (hasConflict) {
-      throw new BadRequestException(
-        'Không thể gán bài này vì Reviewer đã báo cáo xung đột lợi ích (CONFLICT)',
-      );
-    }
-
-    // Mock check: Verify reviewer exists in system
-    // In real system, this would call Identity Service
-    // For now, we'll just check if reviewerId > 0
-    if (dto.reviewerId <= 0) {
-      throw new BadRequestException('Reviewer không tồn tại trong hệ thống');
-    }
-
-    // Check if assignment already exists
-    const existingAssignment = await this.assignmentRepository.findOne({
-      where: {
-        reviewerId: dto.reviewerId,
-        submissionId: dto.submissionId,
-        conferenceId: dto.conferenceId,
-      },
-    });
-
-    if (existingAssignment) {
-      throw new BadRequestException(
-        'Bài này đã được gán cho Reviewer này rồi',
-      );
-    }
-
-    // Create assignment
-    const assignment = this.assignmentRepository.create({
-      reviewerId: dto.reviewerId,
-      submissionId: dto.submissionId,
-      conferenceId: dto.conferenceId,
-      assignedBy: chairId,
-      status: AssignmentStatus.PENDING,
-      dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
-    });
-
-    return this.assignmentRepository.save(assignment);
-  }
-
-  /**
-   * Reviewer self-assigns a submission for review
-   * This is allowed when reviewer has accepted the track assignment
-   */
+  // Reviewer tự phân công bài báo cho chính mình (khi đã chấp nhận track)
   async selfAssignSubmission(
     reviewerId: number,
-    submissionId: string, // UUID from submission-service
+    submissionId: string, 
     conferenceId: number,
   ): Promise<Assignment> {
-    // Check for Conflict of Interest
     const hasConflict = await this.checkConflictOfInterest(
       reviewerId,
       submissionId,
@@ -180,7 +107,6 @@ export class ReviewsService {
       );
     }
 
-    // Check if assignment already exists
     const existingAssignment = await this.assignmentRepository.findOne({
       where: {
         reviewerId,
@@ -190,11 +116,9 @@ export class ReviewsService {
     });
 
     if (existingAssignment) {
-      // If exists and is ACCEPTED, return it
       if (existingAssignment.status === AssignmentStatus.ACCEPTED) {
         return existingAssignment;
       }
-      // If exists but not ACCEPTED, accept it
       existingAssignment.status = AssignmentStatus.ACCEPTED;
       return this.assignmentRepository.save(existingAssignment);
     }
@@ -212,9 +136,7 @@ export class ReviewsService {
     return this.assignmentRepository.save(assignment);
   }
 
-  /**
-   * Get assignments for a reviewer (with simple pagination)
-   */
+  // Lấy danh sách assignments của reviewer (có phân trang)
   async getMyAssignments(
     reviewerId: number,
     page = 1,
@@ -231,9 +153,7 @@ export class ReviewsService {
     });
   }
 
-  /**
-   * Accept or reject assignment
-   */
+  // Chấp nhận hoặc từ chối assignment
   async updateAssignmentStatus(
     assignmentId: number,
     reviewerId: number,
@@ -263,12 +183,8 @@ export class ReviewsService {
     return this.assignmentRepository.save(assignment);
   }
 
-  /**
-   * Review Logic: Submit review for an assignment
-   * Supports both creating new review and updating existing review if deadline not passed
-   */
+  // Reviewer nộp bài chấm (có thể tạo mới hoặc cập nhật nếu deadline chưa hết)
   async submitReview(reviewerId: number, dto: CreateReviewDto, authToken?: string): Promise<Review> {
-    // Find assignment
     const assignment = await this.assignmentRepository.findOne({
       where: { id: dto.assignmentId },
     });
@@ -276,18 +192,6 @@ export class ReviewsService {
     if (!assignment) {
       throw new NotFoundException('Assignment không tồn tại');
     }
-
-    // Log assignment details immediately to debug
-    console.log('[ReviewsService] submitReview - Assignment found:', {
-      assignmentId: assignment.id,
-      submissionId: assignment.submissionId,
-      hasSubmissionId: !!assignment.submissionId,
-      submissionIdType: typeof assignment.submissionId,
-      reviewerId: assignment.reviewerId,
-      status: assignment.status,
-    });
-
-    // Verify reviewer owns this assignment
     if (assignment.reviewerId !== reviewerId) {
       throw new ForbiddenException(
         'Bạn không có quyền nộp review cho assignment này',
@@ -364,90 +268,34 @@ export class ReviewsService {
     return savedReview;
   }
 
-  /**
-   * Helper method to update submission status to REVIEWING if needed
-   */
+  // Cập nhật submission status sang REVIEWING nếu cần
   private async updateSubmissionStatusIfNeeded(
     assignment: Assignment,
     authToken?: string,
   ): Promise<void> {
-    // Log assignment info for debugging
-    console.log('[ReviewsService] updateSubmissionStatusIfNeeded - Assignment info:', {
-      assignmentId: assignment.id,
-      submissionId: assignment.submissionId,
-      hasSubmissionId: !!assignment.submissionId,
-      submissionIdType: typeof assignment.submissionId,
-      hasAuthToken: !!authToken,
-      authTokenLength: authToken?.length || 0,
-    });
-
-    // Update submission status to REVIEWING if it's still SUBMITTED
-    // Only update if we have authToken and submissionId
     if (!authToken || !assignment.submissionId) {
-      console.warn('[ReviewsService] Cannot update submission status - missing authToken or submissionId:', {
-        hasAuthToken: !!authToken,
-        hasSubmissionId: !!assignment.submissionId,
-        submissionId: assignment.submissionId,
-      });
       return;
     }
 
     try {
-      console.log('[ReviewsService] Attempting to update submission status:', {
-        submissionId: assignment.submissionId,
-        hasAuthToken: !!authToken,
-        authTokenLength: authToken.length,
-      });
-
-      // Get current submission to check status
       const submission = await this.submissionClient.getSubmissionById(
         assignment.submissionId,
         authToken,
       );
       
-      console.log('[ReviewsService] Current submission status:', {
-        submissionId: assignment.submissionId,
-        currentStatus: submission?.status,
-        submissionExists: !!submission,
-      });
-      
-      // Only update to REVIEWING if current status is SUBMITTED
       if (submission && submission.status === 'SUBMITTED') {
-        console.log('[ReviewsService] Updating submission status from SUBMITTED to REVIEWING');
-        const updatedSubmission = await this.submissionClient.updateSubmissionStatus(
+        await this.submissionClient.updateSubmissionStatus(
           assignment.submissionId,
           'REVIEWING',
           authToken,
         );
-        console.log('[ReviewsService] Successfully updated submission status to REVIEWING:', {
-          submissionId: assignment.submissionId,
-          newStatus: updatedSubmission?.status,
-        });
-      } else if (submission) {
-        console.log('[ReviewsService] Submission status is not SUBMITTED, skipping update:', {
-          submissionId: assignment.submissionId,
-          currentStatus: submission.status,
-        });
-      } else {
-        console.warn('[ReviewsService] Submission not found:', {
-          submissionId: assignment.submissionId,
-        });
       }
     } catch (error) {
-      // Log detailed error but don't fail the review submission
-      console.error('[ReviewsService] Error updating submission status - DETAILED:', {
-        submissionId: assignment.submissionId,
-        error: error instanceof Error ? error.message : String(error),
-        errorName: error instanceof Error ? error.name : 'Unknown',
-        errorStack: error instanceof Error ? error.stack : undefined,
-        hasAuthToken: !!authToken,
-      });
+      // Không throw error để không làm fail review submission
     }
   }
 
-  /**
-   * Check if reviewer has assignment for a submission
-   */
+  // Kiểm tra reviewer có assignment cho submission này không
   async checkReviewerAssignment(
     reviewerId: number,
     submissionId: string | number,
@@ -463,9 +311,7 @@ export class ReviewsService {
     return !!assignment;
   }
 
-  /**
-   * Get all reviews for a submission (Chair/Reviewer view)
-   */
+  // Lấy tất cả reviews của một submission
   async getReviewsBySubmission(
     submissionId: string | number,
     page = 1,
@@ -503,8 +349,6 @@ export class ReviewsService {
     if (reviewerIds.length > 0 && authToken) {
       try {
         const userMap = await this.identityClient.getUsersByIds(reviewerIds, authToken);
-        
-        // Map reviews with reviewer names
         return reviews.map((review) => {
           const reviewerId = review.assignment?.reviewerId;
           const reviewer = reviewerId ? userMap.get(reviewerId) : null;
@@ -516,7 +360,6 @@ export class ReviewsService {
           };
         });
       } catch (error) {
-        console.error('[ReviewsService] Error enriching reviews with reviewer names:', error);
         // Return reviews without names if identity service fails
         return reviews.map((review) => ({
           ...review,
@@ -534,9 +377,7 @@ export class ReviewsService {
     }));
   }
 
-  /**
-   * Get all bids for a submission (optional helper)
-   */
+  // Lấy tất cả bids cho một submission
   async getBidsBySubmission(
     submissionId: string | number,
     page = 1,
@@ -554,28 +395,7 @@ export class ReviewsService {
     });
   }
 
-  /**
-   * Create PC Discussion message
-   */
-  async createDiscussion(
-    userId: number,
-    submissionId: string | number,
-    message: string,
-  ): Promise<PcDiscussion> {
-    // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
-    const discussion = this.pcDiscussionRepository.create({
-      userId,
-      submissionId: submissionIdStr,
-      message,
-    });
-
-    return this.pcDiscussionRepository.save(discussion);
-  }
-
-  /**
-   * Get PC Discussion for a submission
-   */
+  // Lấy PC Discussions cho một submission
   async getDiscussionsBySubmission(
     submissionId: string | number,
     page = 1,
@@ -593,76 +413,7 @@ export class ReviewsService {
     });
   }
 
-  /**
-   * Auto-assign a submission to multiple reviewers (simple version)
-   */
-  async autoAssignSubmission(
-    chairId: number,
-    submissionId: string | number,
-    conferenceId: number,
-    reviewerIds: number[],
-  ): Promise<{
-    created: Assignment[];
-    failed: Array<{ reviewerId: number; reason: string }>;
-  }> {
-    const created: Assignment[] = [];
-    const failed: Array<{ reviewerId: number; reason: string }> = [];
-
-    for (const reviewerId of reviewerIds) {
-      try {
-        // Ensure submissionId is string (UUID)
-        const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
-        const assignment = await this.createAssignment(chairId, {
-          reviewerId,
-          submissionId: submissionIdStr,
-          conferenceId,
-          // no dueDate in auto mode; chair can update later
-        } as any);
-        created.push(assignment);
-      } catch (error: any) {
-        failed.push({
-          reviewerId,
-          reason: error?.message || 'Unknown error',
-        });
-      }
-    }
-
-    return { created, failed };
-  }
-
-  /**
-   * Rebuttal Logic: Author submits rebuttal for a submission
-   */
-  async createRebuttal(
-    authorId: number,
-    submissionId: string | number,
-    conferenceId: number | null,
-    message: string,
-  ): Promise<Rebuttal> {
-    // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
-    const rebuttal = this.rebuttalRepository.create({
-      submissionId: submissionIdStr,
-      authorId,
-      conferenceId: conferenceId ?? null,
-      message,
-    });
-
-    return this.rebuttalRepository.save(rebuttal);
-  }
-
-  async getRebuttalsBySubmission(submissionId: string | number): Promise<Rebuttal[]> {
-    // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
-    return this.rebuttalRepository.find({
-      where: { submissionId: submissionIdStr },
-      order: { createdAt: 'ASC' },
-    });
-  }
-
-  /**
-   * Anonymized reviews for authors (single-blind)
-   */
+  // Lấy reviews đã ẩn danh cho tác giả xem (single-blind)
   async getAnonymizedReviewsBySubmission(submissionId: string | number): Promise<
     Array<{
       score: number;
@@ -681,9 +432,7 @@ export class ReviewsService {
     }));
   }
 
-  /**
-   * Basic progress tracking for a single submission
-   */
+  // Lấy tiến độ review cho một submission
   async getSubmissionProgress(submissionId: string | number): Promise<{
     submissionId: string | number;
     totalAssignments: number;
@@ -725,9 +474,7 @@ export class ReviewsService {
     };
   }
 
-  /**
-   * Basic progress tracking for a conference
-   */
+  // Lấy tiến độ review cho cả hội nghị
   async getConferenceProgress(conferenceId: number): Promise<{
     conferenceId: number;
     totalAssignments: number;
@@ -765,10 +512,7 @@ export class ReviewsService {
     };
   }
 
-  /**
-   * Aggregate reviews for a submission (average score, counts)
-   * and return together with current final decision (if any)
-   */
+  // Tổng hợp reviews và quyết định cho một submission
   async getDecisionSummaryBySubmission(submissionId: string | number): Promise<{
     submissionId: string | number;
     stats: {
@@ -832,9 +576,7 @@ export class ReviewsService {
     };
   }
 
-  /**
-   * Create or update final decision for a submission (Chair/Admin)
-   */
+  // Tạo hoặc cập nhật quyết định cuối cùng cho submission
   async upsertDecisionForSubmission(
     submissionId: string | number,
     decidedBy: number,
@@ -863,158 +605,60 @@ export class ReviewsService {
     return this.decisionRepository.save(decision);
   }
 
-  /**
-   * Get submissions for reviewer in accepted tracks
-   * This endpoint aggregates data from conference-service and submission-service
-   */
+  // Lấy submissions cho reviewer trong các track đã chấp nhận
   async getSubmissionsForReviewer(
     reviewerId: number,
     authToken: string,
     status?: string[],
   ): Promise<Submission[]> {
-    console.log('[ReviewsService] getSubmissionsForReviewer called:', {
-      reviewerId,
-      status,
-      hasAuthToken: !!authToken,
-    });
-
-    // 1. Get accepted track assignments from conference-service
     let acceptedTracks: any[] = [];
     try {
-      console.log('[ReviewsService] Calling conferenceClient.getMyTrackAssignments...');
       const trackAssignments = await this.conferenceClient.getMyTrackAssignments(authToken);
-      
-      console.log('[ReviewsService] Got track assignments from conference-service:', {
-        count: trackAssignments.length,
-        assignments: trackAssignments.map(a => ({
-          id: a.id,
-          trackId: a.trackId,
-          status: a.status,
-          trackName: a.track?.name,
-        })),
-      });
-      
-      // Filter only ACCEPTED tracks
       acceptedTracks = trackAssignments.filter(
         (assignment) => assignment.status === 'ACCEPTED',
       );
-
-      console.log('[ReviewsService] Accepted tracks for reviewer:', {
-        reviewerId,
-        totalAssignments: trackAssignments.length,
-        acceptedTracksCount: acceptedTracks.length,
-        trackIds: acceptedTracks.map((t) => t.trackId),
-        trackNames: acceptedTracks.map((t) => t.track?.name),
-      });
     } catch (error) {
-      console.error('[ReviewsService] Error getting track assignments:', {
-        error: error instanceof Error ? error.message : error,
-        reviewerId,
-        errorStack: error instanceof Error ? error.stack : undefined,
-      });
-      // If conference-service is down or error, return empty array
       return [];
     }
 
     if (acceptedTracks.length === 0) {
-      console.log('[ReviewsService] No accepted tracks for reviewer');
       return [];
     }
 
-    // 2. Get submissions for each accepted track
     const allSubmissions: Submission[] = [];
-    
-    console.log('[ReviewsService] Starting to fetch submissions for accepted tracks:', {
-      acceptedTracksCount: acceptedTracks.length,
-      trackIds: acceptedTracks.map(t => t.trackId),
-    });
     
     for (const trackAssignment of acceptedTracks) {
       try {
-        console.log('[ReviewsService] Fetching submissions for track:', {
-          trackId: trackAssignment.trackId,
-          trackName: trackAssignment.track?.name,
-        });
-        
-        // Get submissions - if status filter provided, use it; otherwise get all and filter later
-        // Note: submission-service only supports single status, so we'll get all and filter
         const submissions = await this.submissionClient.getSubmissionsByTrack(
           trackAssignment.trackId,
           authToken,
-          undefined, // Don't pass status - get all submissions, filter in this service
+          undefined,
         );
         
-        console.log('[ReviewsService] Got submissions for track (before filter):', {
-          trackId: trackAssignment.trackId,
-          trackName: trackAssignment.track?.name,
-          count: submissions.length,
-          statuses: submissions.map(s => s.status),
-          submissionIds: submissions.map(s => s.id),
-        });
-        
-        // Filter by status if provided
         let filteredSubmissions = submissions;
         if (status && status.length > 0) {
-          // Ensure status is an array (handle case where it might be a string)
           const statusArray = Array.isArray(status) ? status : [status];
           filteredSubmissions = submissions.filter((s) => statusArray.includes(s.status));
-          console.log('[ReviewsService] After status filter:', {
-            trackId: trackAssignment.trackId,
-            trackName: trackAssignment.track?.name,
-            before: submissions.length,
-            after: filteredSubmissions.length,
-            filterStatus: statusArray,
-            submissionStatuses: submissions.map(s => s.status),
-            filteredSubmissions: filteredSubmissions.map(s => ({
-              id: s.id,
-              title: s.title?.substring(0, 50),
-              status: s.status,
-            })),
-          });
         } else {
-          // Default: exclude DRAFT and WITHDRAWN
           filteredSubmissions = submissions.filter(
             (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN'
           );
-          console.log('[ReviewsService] After filtering out DRAFT/WITHDRAWN:', {
-            trackId: trackAssignment.trackId,
-            trackName: trackAssignment.track?.name,
-            before: submissions.length,
-            after: filteredSubmissions.length,
-            excludedStatuses: submissions.filter(s => s.status === 'DRAFT' || s.status === 'WITHDRAWN').map(s => ({
-              id: s.id,
-              status: s.status,
-            })),
-          });
         }
         
         allSubmissions.push(...filteredSubmissions);
       } catch (error) {
-        console.error('[ReviewsService] Error getting submissions for track:', {
-          trackId: trackAssignment.trackId,
-          error: error instanceof Error ? error.message : error,
-        });
         // Continue with other tracks even if one fails
       }
     }
 
-    // Remove duplicates (in case same submission appears in multiple tracks - shouldn't happen but just in case)
     const uniqueSubmissions = Array.from(
       new Map(allSubmissions.map((s) => [s.id, s])).values(),
     );
 
-    console.log('[ReviewsService] Total unique submissions for reviewer:', {
-      reviewerId,
-      total: uniqueSubmissions.length,
-    });
-
     return uniqueSubmissions;
   }
 
-  /**
-   * Get reviewer activity stats (for Guard Clause Case 2)
-   * Used by identity-service to check if user can be deleted
-   */
+  // Lấy thống kê hoạt động reviewer (Guard Clause Case 2)
   async getReviewerActivityStats(reviewerId: number): Promise<{
     assignmentCount: number;
     reviewCount: number;

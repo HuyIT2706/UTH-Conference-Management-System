@@ -24,7 +24,7 @@ export class Assignment {
   reviewerId: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; // UUID from submission-service
+  submissionId: string; 
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -37,7 +37,7 @@ export class Assignment {
   status: AssignmentStatus;
 
   @Column({ type: 'int' })
-  assignedBy: number; // ID của Chair
+  assignedBy: number; 
 
   @Column({ type: 'timestamptz', nullable: true })
   dueDate: Date | null;
