@@ -42,8 +42,6 @@ export class TemplatesService {
     if (!conference) {
       throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
     }
-
-    // Check if template type already exists
     const existing = await this.emailTemplateRepository.findOne({
       where: { conferenceId, type: createDto.type },
     });
@@ -68,7 +66,7 @@ export class TemplatesService {
       order: { createdAt: 'DESC' },
     });
   }
-
+// Lấy chi tiết một email template
   async findOneEmailTemplate(
     conferenceId: number,
     templateId: number,
@@ -93,7 +91,6 @@ export class TemplatesService {
   ): Promise<EmailTemplate> {
     const template = await this.findOneEmailTemplate(conferenceId, templateId);
 
-    // If changing type, check for conflicts
     if (updateDto.type && updateDto.type !== template.type) {
       const existing = await this.emailTemplateRepository.findOne({
         where: { conferenceId, type: updateDto.type },
@@ -109,7 +106,7 @@ export class TemplatesService {
     Object.assign(template, updateDto);
     return await this.emailTemplateRepository.save(template);
   }
-
+// Xóa email template
   async deleteEmailTemplate(
     conferenceId: number,
     templateId: number,
@@ -148,14 +145,14 @@ export class TemplatesService {
 
     return await this.formTemplateRepository.save(template);
   }
-
+// Lấy tất cả form templates
   async findAllFormTemplates(conferenceId: number): Promise<FormTemplate[]> {
     return await this.formTemplateRepository.find({
       where: { conferenceId },
       order: { createdAt: 'DESC' },
     });
   }
-
+// Lấy chi tiết một form template
   async findOneFormTemplate(
     conferenceId: number,
     templateId: number,
@@ -172,7 +169,7 @@ export class TemplatesService {
 
     return template;
   }
-
+// Cập nhật form template
   async updateFormTemplate(
     conferenceId: number,
     templateId: number,
@@ -195,7 +192,7 @@ export class TemplatesService {
     Object.assign(template, updateDto);
     return await this.formTemplateRepository.save(template);
   }
-
+// Xóa form template
   async deleteFormTemplate(
     conferenceId: number,
     templateId: number,
@@ -232,13 +229,13 @@ export class TemplatesService {
 
     return await this.cfpTemplateRepository.save(template);
   }
-
+// Lấy CFP template
   async getCfpTemplate(conferenceId: number): Promise<CfpTemplate | null> {
     return await this.cfpTemplateRepository.findOne({
       where: { conferenceId },
     });
   }
-
+// Cập nhật CFP template
   async updateCfpTemplate(
     conferenceId: number,
     updateDto: UpdateCfpTemplateDto,

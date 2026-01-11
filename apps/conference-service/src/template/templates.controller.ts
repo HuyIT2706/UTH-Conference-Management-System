@@ -42,29 +42,7 @@ export class TemplatesController {
   @Post('email')
   @ApiOperation({
     summary: 'Tạo email template mới',
-    description: `Tạo một email template mới cho hội nghị.
-
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "name": "buivanhuy2706@gmail.com",
-      "type": "DECISION_ACCEPTED",
-      "subject": "Chúc mừng bài thi đã được chấp nhận",
-      "body": "Kính gửi người nộp, bài nộp của bạn (Bài học docker) đã được chấp nhận cho hội nghị thi công nghệ 2026, Trân trọng Ban tổ chức Bui Van Huy",
-      "variables": {
-        "authorName": "Bùi Văn Huy",
-        "submissionTitle": "Bài học docker",
-        "conferenceName": "Cuộc THi Công Nghệ 2026"
-      }
-    }
-    \`\`\`
-
-    **Các loại email template (type):**
-    - \`DECISION_ACCEPTED\`: Email thông báo bài được chấp nhận
-    - \`DECISION_REJECTED\`: Email thông báo bài bị từ chối
-    - \`REMINDER_REVIEW\`: Email nhắc nhở deadline review
-    - \`INVITATION_PC\`: Email mời PC member
-    - \`NOTIFICATION_DEADLINE\`: Email thông báo deadline`,
+    description: 'Tạo một email template mới cho hội nghị.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo email template thành công' })
@@ -89,7 +67,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+// Lấy danh sách tất cả email templates của hội nghị
   @Get('email')
   @ApiOperation({
     summary: 'Lấy danh sách tất cả email templates của hội nghị',
@@ -116,7 +94,7 @@ export class TemplatesController {
       data: templates,
     };
   }
-
+// Lấy chi tiết một email template
   @Get('email/:templateId')
   @ApiOperation({ summary: 'Lấy chi tiết một email template' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -143,7 +121,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+// Cap nhật email template
   @Patch('email/:templateId')
   @ApiOperation({
     summary: 'Cập nhật email template',
@@ -178,7 +156,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+//  Xóaa email template
   @Delete('email/:templateId')
   @ApiOperation({ summary: 'Xóa email template' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -209,44 +187,7 @@ export class TemplatesController {
   @Post('form')
   @ApiOperation({
     summary: 'Tạo form template mới',
-    description: `Tạo một form template mới với các fields tùy chỉnh.
-    
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "type": "SUBMISSION_FORM",
-      "name": "Submission Form Template",
-      "description": "Template for submission form",
-      "fields": [
-        {
-          "name": "title",
-          "label": "Title",
-          "type": "text",
-          "required": true,
-          "validation": {
-            "maxLength": 500
-          }
-        },
-        {
-          "name": "abstract",
-          "label": "Abstract",
-          "type": "textarea",
-          "required": true
-        },
-        {
-          "name": "keywords",
-          "label": "Keywords",
-          "type": "text",
-          "required": false
-        }
-      ]
-    }
-    \`\`\`
-
-    **Các loại form template (type):**
-    - \`SUBMISSION_FORM\`: Form nộp bài
-    - \`REVIEW_FORM\`: Form đánh giá
-    - \`CFP_FORM\`: Form CFP`,
+    description: 'Tạo một form template mới với các fields tùy chỉnh.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo form template thành công' })
@@ -271,7 +212,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+// Lấy form template
   @Get('form')
   @ApiOperation({ summary: 'Lấy danh sách tất cả form templates của hội nghị' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -296,7 +237,7 @@ export class TemplatesController {
       data: templates,
     };
   }
-
+// Lấy chi tiết một form template
   @Get('form/:templateId')
   @ApiOperation({ summary: 'Lấy chi tiết một form template' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -323,26 +264,11 @@ export class TemplatesController {
       data: template,
     };
   }
-
+//  Cập nhật email template
   @Patch('form/:templateId')
   @ApiOperation({
     summary: 'Cập nhật form template',
-    description: `Cập nhật thông tin form template. Tất cả các trường đều tùy chọn.
-    
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "name": "Updated Submission Form",
-      "fields": [
-        {
-          "name": "title",
-          "label": "Title",
-          "type": "text",
-          "required": true
-        }
-      ]
-    }
-    \`\`\``,
+    description: 'Cập nhật thông tin form template. Tất cả các trường đều tùy chọn.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiParam({ name: 'templateId', description: 'ID của form template' })
@@ -373,7 +299,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+//  Xóa form template
   @Delete('form/:templateId')
   @ApiOperation({ summary: 'Xóa form template' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -401,19 +327,7 @@ export class TemplatesController {
   @Post('cfp')
   @ApiOperation({
     summary: 'Tạo hoặc cập nhật CFP template',
-    description: `Tạo hoặc cập nhật template HTML cho trang CFP công khai.
-    
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "htmlContent": "<html><body><h1>{{conferenceName}}</h1><p>Welcome to our conference!</p><p>Submission deadline: {{submissionDeadline}}</p></body></html>",
-      "customStyles": {
-        "primaryColor": "#007bff",
-        "fontFamily": "Arial, sans-serif",
-        "backgroundColor": "#ffffff"
-      }
-    }
-    \`\`\``,
+    description: 'Tạo hoặc cập nhật template HTML cho trang CFP công khai.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Tạo CFP template thành công' })
@@ -438,7 +352,7 @@ export class TemplatesController {
       data: template,
     };
   }
-
+// Lấy CFP template
   @Get('cfp')
   @ApiOperation({ summary: 'Lấy CFP template của hội nghị' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -460,21 +374,11 @@ export class TemplatesController {
       data: template,
     };
   }
-
+// Câp nhật CFP template
   @Patch('cfp')
   @ApiOperation({
     summary: 'Cập nhật CFP template',
-    description: `Cập nhật CFP template.
-    
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "htmlContent": "<html><body><h1>Updated CFP Page</h1></body></html>",
-      "customStyles": {
-        "primaryColor": "#28a745"
-      }
-    }
-    \`\`\``,
+    description: 'Cập nhật CFP template.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Cập nhật CFP template thành công' })

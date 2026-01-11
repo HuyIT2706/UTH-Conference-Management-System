@@ -14,7 +14,7 @@ export class ValidationController {
   constructor(
     private readonly conferencesService: ConferencesService,
   ) {}
-
+// Lây tất cả deadlines của conference
   @Get('cfp/deadlines')
   @ApiOperation({
     summary: 'Lấy tất cả deadlines của conference',
@@ -40,6 +40,7 @@ export class ValidationController {
       }
     }
   })
+  // Lấy tất cả deadlines của conference
   async getDeadlines(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
   ): Promise<{ deadlines: CfpSetting | null }> {

@@ -51,11 +51,6 @@ import { EmailService } from './common/services/email.service';
         const password = config.get<string>('DB_PASSWORD') || 'admin123';
         const database =
           config.get<string>('DB_DATABASE') || 'db_conference';
-
-        console.log(
-          `[Conference-Service] DB -> host=${host} port=${port} user=${username} db=${database}`,
-        );
-
         return {
           type: 'postgres' as const,
           host,
@@ -97,7 +92,7 @@ import { EmailService } from './common/services/email.service';
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
-          expiresIn: Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 3600,
+          expiresIn: Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
         },
       }),
     }),

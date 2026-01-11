@@ -36,7 +36,6 @@ async function bootstrap() {
 
   const port = process.env.PORT || process.env.port || 3002;
   await app.listen(port);
-  console.log(`[Conference-Service] Application is running on: http://localhost:${port}/api`);
   console.log(`[Conference-Service] Swagger documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();
