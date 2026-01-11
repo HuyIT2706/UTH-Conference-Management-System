@@ -112,7 +112,7 @@ export class EmailService {
               </div>
 
               <div class="warning">
-                <strong>⚠️ Lưu ý:</strong>
+                <strong> Lưu ý:</strong>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                   <li>Mã này chỉ có hiệu lực trong <strong>15 phút</strong></li>
                   <li>Không chia sẻ mã này với bất kỳ ai</li>
@@ -153,9 +153,8 @@ Trân trọng,
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Password reset code sent to ${email}`);
     } catch (error) {
-      console.error(`[EmailService] Failed to send email to ${email}:`, error);
+      throw new Error(`Failed to send password reset email to ${email}`);
     }
   }
 
@@ -285,9 +284,8 @@ Trân trọng,
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Verification email sent to ${email}`);
     } catch (error) {
-      console.error(`[EmailService] Failed to send verification email to ${email}:`, error);
+      throw new Error(`Failed to send verification email to ${email}`);
     }
   }
 
@@ -297,10 +295,8 @@ Trân trọng,
   async verifyConnection(): Promise<boolean> {
     try {
       await this.transporter.verify();
-      console.log('[EmailService] SMTP connection verified');
       return true;
     } catch (error) {
-      console.error('[EmailService] SMTP connection failed:', error);
       return false;
     }
   }

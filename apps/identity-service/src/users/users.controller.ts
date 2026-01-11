@@ -208,7 +208,6 @@ export class UsersController {
     @Param('id', ParseIntPipe) userId: number,
     @Req() req: Request,
   ) {
-    // Extract JWT token from Authorization header for cross-service calls
     const authHeader = req.headers.authorization;
     const authToken = authHeader?.startsWith('Bearer ') 
       ? authHeader.substring(7) 

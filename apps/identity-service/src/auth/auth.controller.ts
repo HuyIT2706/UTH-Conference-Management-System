@@ -11,7 +11,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+// Đăng ký tài admin
   @Post('register')
   @ApiOperation({ summary: 'Đăng ký tài khoản mới' })
   @ApiResponse({ status: 201, description: 'Đăng ký thành công' })
@@ -21,10 +21,10 @@ export class AuthController {
     const { message: _, ...rest } = result;
     return {
       message: 'Đăng ký tài khoản thành công',
-      ...rest,
+      user: rest.user,
     };
   }
-
+// Đăng nhập 
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập và lấy JWT tokens' })
   @ApiResponse({ status: 200, description: 'Đăng nhập thành công' })
@@ -33,10 +33,12 @@ export class AuthController {
     const result = await this.authService.login(dto);
     return {
       message: 'Đăng nhập thành công',
-      ...result,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
     };
   }
-
+// refresh token
   @Post('refresh-token')
   @ApiOperation({ summary: 'Làm mới access token bằng refresh token' })
   @ApiResponse({ status: 200, description: 'Token được làm mới thành công' })
@@ -45,10 +47,12 @@ export class AuthController {
     const result = await this.authService.refreshToken(dto);
     return {
       message: 'Làm mới access token thành công',
-      ...result,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
     };
   }
-
+// Đăng xuất
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @ApiBearerAuth('JWT-auth')
@@ -61,7 +65,7 @@ export class AuthController {
   ) {
     return this.authService.logout(dto);
   }
-
+// Api 2: Xác minh email
   @Post('verify-email')
   @ApiOperation({ summary: 'Xác minh email bằng mã 6 số' })
   @ApiResponse({ status: 200, description: 'Xác minh email thành công' })
@@ -71,7 +75,7 @@ export class AuthController {
     const result = await this.authService.verifyEmail(code);
     return result;
   }
-
+// Lấy verification code
   @Get('get-verification-token')
   @ApiOperation({ 
     summary: 'Lấy code từ db để xác thực',

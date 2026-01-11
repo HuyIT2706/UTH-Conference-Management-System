@@ -29,9 +29,6 @@ import { PasswordResetToken } from './users/entities/password-reset-token.entity
         const username = config.get<string>('DB_USERNAME') || 'admin';
         const password = config.get<string>('DB_PASSWORD') || 'admin123';
         const database = config.get<string>('DB_DATABASE') || 'db_identity';
-        console.log(
-          `[Identity-Service] DB -> host=${host} port=${port} user=${username} db=${database}`,
-        );
 
         return {
           type: 'postgres',

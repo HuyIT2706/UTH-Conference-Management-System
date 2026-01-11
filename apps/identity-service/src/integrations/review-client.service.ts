@@ -26,17 +26,8 @@ export class ReviewClientService {
       (isDocker 
         ? 'http://review-service:3004/api' 
         : 'http://localhost:3004/api');
-
-    console.log('[ReviewClient] Initialized with URL:', this.reviewServiceUrl);
   }
-
-  /**
-   * Get reviewer activity stats (for Guard Clause Case 2)
-   * Returns statistics about assignments and reviews for a reviewer
-   * 
-   * CRITICAL: Uses fail-secure approach - if service is down/error, THROWS ERROR
-   * to PREVENT user deletion and potential data loss.
-   */
+  // Lấy thống kê hoạt động của reviewer từ review-service
   async getReviewerActivityStats(
     reviewerId: number, 
     authToken?: string
@@ -65,18 +56,9 @@ export class ReviewClientService {
     } catch (error: any) {
       const status = error.response?.status;
       const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
-      
-      // If service is down or unreachable, THROW ERROR to PREVENT deletion (fail-secure)
-      // This ensures data integrity - we cannot verify user has no reviews if service is down
       if (!status || status >= 500) {
-        console.error('[ReviewClient] Service seems down/unreachable, BLOCKING user deletion to prevent data loss:', {
-          reviewerId,
-          serviceUrl: this.reviewServiceUrl,
-          error: errorMessage,
-        });
         throw new HttpException(
           {
-            code: 'REVIEW_SERVICE_UNAVAILABLE',
             message: 'Không thể xác minh người dùng có đang chấm bài hay không. Review-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               reviewerId,
@@ -84,11 +66,10 @@ export class ReviewClientService {
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE, // 503
+          HttpStatus.SERVICE_UNAVAILABLE
         );
       }
 
-      // If reviewer not found (404), reviewer has no activity - safe to return zeros
       if (status === HttpStatus.NOT_FOUND) {
         return {
           assignmentCount: 0,
@@ -97,17 +78,8 @@ export class ReviewClientService {
           completedReviews: 0,
         };
       }
-
-      // For other errors (401, 403, 400), log and throw to prevent deletion
-      console.error('[ReviewClient] Error getting reviewer activity stats, BLOCKING deletion:', {
-        reviewerId,
-        status,
-        message: errorMessage,
-      });
-
       throw new HttpException(
         {
-          code: 'REVIEW_SERVICE_ERROR',
           message: `Không thể kiểm tra hoạt động reviewer của người dùng: ${errorMessage}`,
           detail: {
             reviewerId,
@@ -115,7 +87,7 @@ export class ReviewClientService {
             service: 'review-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, // 502
+        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
       );
     }
   }

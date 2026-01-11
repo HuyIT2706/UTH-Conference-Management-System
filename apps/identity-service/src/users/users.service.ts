@@ -29,6 +29,7 @@ export class UsersService {
     private readonly submissionClient: SubmissionClientService,
     private readonly reviewClient: ReviewClientService,
   ) {}
+  // Đánh dấu email của user đã được xác minh
   async markEmailVerified(userId: number): Promise<User> {
     const user = await this.findById(userId);
     if (!user) {
@@ -48,12 +49,7 @@ export class UsersService {
       relations: ['roles'],
     });
   }
-
-  /**
-   * Find user by email including soft deleted (for registration check)
-   * Used to prevent email reuse even if previous user was soft deleted
-   * Note: This queries without deletedAt filter to include soft deleted users
-   */
+// Tìm user theo email bao gồm cả những user đã bị xóa mềm
   async findByEmailIncludingDeleted(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email }, // No deletedAt filter - includes soft deleted
@@ -71,7 +67,7 @@ export class UsersService {
       relations: ['roles'],
     });
   }
-
+// Tìm all
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
       where: {
@@ -82,7 +78,7 @@ export class UsersService {
       order: { createdAt: 'DESC' },
     });
   }
-
+// Tạo user với vai trò tùy chỉnh
   async createUser(params: {
     email: string;
     password: string;
@@ -141,19 +137,14 @@ export class UsersService {
       return userWithRoles;
     }
   }
-
+// Tìm vai trò theo tên
   async findRoleByName(name: string): Promise<Role | null> {
     const role = await this.roleRepository.findOne({ 
       where: { name: name as RoleName } 
     });
-    if (role) {
-      console.log(`[findRoleByName] Found role: ${role.name} (ID: ${role.id}) for search: ${name}`);
-    } else {
-      console.log(`[findRoleByName] Role not found for: ${name}`);
-    }
     return role;
   }
-
+// Tạo user với vai trò cụ thể
   async createUserWithRole(params: {
     email: string;
     password: string;
@@ -180,7 +171,7 @@ export class UsersService {
 
     return this.usersRepository.save(user);
   }
-
+// Cập nhật vai trò cho user
   async updateUserRoles(userId: number, roleName: string): Promise<User> {
     const user = await this.findById(userId);
     if (!user) {
@@ -202,7 +193,7 @@ export class UsersService {
     }
     return user;
   }
-
+// Đổi mật khẩu
   async changePassword(
     userId: number,
     dto: ChangePasswordDto,
@@ -224,17 +215,15 @@ export class UsersService {
     user.password = hashed;
     await this.usersRepository.save(user);
   }
-
+// Quên mật khẩu - gửi email đặt lại mật khẩu
   async forgotPassword(email: string): Promise<void> {
     const user = await this.findByEmail(email);
     if (!user) {
       return;
     }
-
-    // Tạo mã 6 chữ số
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); //
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
 
     const resetToken = this.passwordResetTokenRepository.create({
       token: code,
@@ -247,10 +236,10 @@ export class UsersService {
     try {
       await this.emailService.sendPasswordResetCode(user.email, code);
     } catch (error) {
-      console.error(`[ForgotPassword] Failed to send email to ${user.email}:`, error);
+      throw new BadRequestException('Không thể gửi email đặt lại mật khẩu');
     }
   }
-
+// Lấy mã đặt lại mật khẩu theo email
   async getResetCodeByEmail(email: string) {
     const user = await this.findByEmail(email);
     if (!user) {
@@ -280,7 +269,7 @@ export class UsersService {
       createdAt: token.createdAt,
     };
   }
-
+// Xác minh mã đặt lại mật khẩu
   async verifyResetCode(email: string, code: string): Promise<boolean> {
     const user = await this.findByEmail(email);
     if (!user) {
@@ -306,7 +295,7 @@ export class UsersService {
 
     return true;
   }
-
+// Reset mật khẩu
   async resetPassword(
     email: string,
     code: string,
@@ -342,13 +331,8 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  /**
-   * Delete user with Guard Clauses (Soft Delete)
-   * Case 1: Author Protection - Chặn xóa User nếu User đó đã nộp bài
-   * Case 2: Reviewer Protection - Chặn xóa User nếu User đó đang chấm bài
-   */
+  // Xóa mềm user với các soft delete check 
   async deleteUser(userId: number, authToken?: string, force: boolean = false): Promise<void> {
-    // Find user (including soft deleted ones for admin operations)
     const user = await this.usersRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -357,14 +341,9 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('Không tìm thấy tài khoản');
     }
-
-    // Check if already soft deleted
     if (user.deletedAt !== null) {
       throw new BadRequestException('Người dùng này đã bị xóa trước đó');
     }
-
-    // Guard Clause Case 1 & 2: Author Protection & Reviewer Protection
-    // CRITICAL: If authToken is missing, we cannot verify guard clauses - BLOCK deletion
     if (!force) {
       if (!authToken) {
         throw new BadRequestException({
@@ -376,10 +355,6 @@ export class UsersService {
           },
         });
       }
-
-      // Guard Clause Case 1: Author Protection
-      // Check if user has submitted any papers
-      // If service is down, this will throw error (fail-secure) to prevent data loss
       const submissionCount = await this.submissionClient.countSubmissionsByAuthorId(
         userId,
         authToken,
@@ -395,10 +370,6 @@ export class UsersService {
           },
         });
       }
-
-      // Guard Clause Case 2: Reviewer Protection
-      // Check if user has assignments or reviews
-      // If service is down, this will throw error (fail-secure) to prevent data loss
       const reviewerStats = await this.reviewClient.getReviewerActivityStats(
         userId,
         authToken,
@@ -416,7 +387,6 @@ export class UsersService {
         });
       }
     }
-
     // Perform Soft Delete
     user.deletedAt = new Date();
     user.isActive = false;

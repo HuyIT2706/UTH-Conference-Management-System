@@ -19,17 +19,8 @@ export class SubmissionClientService {
       (isDocker 
         ? 'http://submission-service:3003/api' 
         : 'http://localhost:3003/api');
-
-    console.log('[SubmissionClient] Initialized with URL:', this.submissionServiceUrl);
   }
-
-  /**
-   * Count submissions by authorId (for Guard Clause Case 1)
-   * Returns the number of submissions where the user is an author
-   * 
-   * CRITICAL: Uses fail-secure approach - if service is down/error, THROWS ERROR
-   * to PREVENT user deletion and potential data loss.
-   */
+// Đếm số bài nộp của author từ submission-service
   async countSubmissionsByAuthorId(authorId: number, authToken?: string): Promise<number> {
     try {
       const headers: Record<string, string> = {};
@@ -50,18 +41,9 @@ export class SubmissionClientService {
     } catch (error: any) {
       const status = error.response?.status;
       const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
-      
-      // If service is down or unreachable, THROW ERROR to PREVENT deletion (fail-secure)
-      // This ensures data integrity - we cannot verify user has no submissions if service is down
       if (!status || status >= 500) {
-        console.error('[SubmissionClient] Service seems down/unreachable, BLOCKING user deletion to prevent data loss:', {
-          authorId,
-          serviceUrl: this.submissionServiceUrl,
-          error: errorMessage,
-        });
         throw new HttpException(
           {
-            code: 'SUBMISSION_SERVICE_UNAVAILABLE',
             message: 'Không thể xác minh người dùng có bài nộp hay không. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               authorId,
@@ -69,25 +51,14 @@ export class SubmissionClientService {
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE, // 503
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
-
-      // If user not found (404), user has no submissions - safe to return 0
       if (status === HttpStatus.NOT_FOUND) {
         return 0;
       }
-
-      // For other errors (401, 403, 400), log and throw to prevent deletion
-      console.error('[SubmissionClient] Error counting submissions by author, BLOCKING deletion:', {
-        authorId,
-        status,
-        message: errorMessage,
-      });
-
       throw new HttpException(
         {
-          code: 'SUBMISSION_SERVICE_ERROR',
           message: `Không thể kiểm tra submissions của người dùng: ${errorMessage}`,
           detail: {
             authorId,
@@ -95,7 +66,7 @@ export class SubmissionClientService {
             service: 'submission-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, // 502
+        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
       );
     }
   }

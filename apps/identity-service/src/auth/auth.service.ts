@@ -43,32 +43,23 @@ export class AuthService {
   }
 // APi 1:  Đăng ký tài admin
   async register(dto: RegisterDto) {
-    // Check if email exists (including soft deleted users)
-    // This prevents reuse of email from soft deleted accounts
     const existingActive = await this.usersService.findByEmail(dto.email);
     if (existingActive) {
       throw new BadRequestException('Email đã tồn tại');
     }
-    
-    // Also check including soft deleted to prevent email reuse
-    // Use UsersService method to check including soft deleted
     const existingIncludingDeleted = await this.usersService.findByEmailIncludingDeleted(dto.email);
     if (existingIncludingDeleted) {
-      // If user exists (including soft deleted), prevent reuse
       if (existingIncludingDeleted.deletedAt !== null) {
         throw new BadRequestException('Email này đã được sử dụng trước đó (tài khoản đã bị xóa)');
       }
-      // This case should not happen as we already checked above, but just in case
       throw new BadRequestException('Email đã tồn tại');
     }
-
     const adminRole = await this.usersService.findRoleByName(RoleName.ADMIN);
     if (!adminRole || !adminRole.id) {
       throw new BadRequestException(
         'Không tìm thấy quyền ADMIN.',
       );
     }
-
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.createUser({
       email: dto.email,
@@ -84,9 +75,8 @@ export class AuthService {
   }
 // Api 2: Xác tài khoản qua email với mã 6 số
   private async createAndSendEmailVerificationToken(user: User) {
-    // Tạo mã 6 chữ số
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
 
     const entity = this.emailVerificationTokenRepository.create({
       token: code,
@@ -99,7 +89,7 @@ export class AuthService {
     try {
       await this.emailService.sendVerificationEmail(user.email, code, user.fullName);
     } catch (error) {
-      console.error(`[AuthService] Failed to send verification email to ${user.email}:`, error);
+      throw new BadRequestException('Không thể gửi email xác minh');
     }
   }
 // Api 3: Đăng nhập
@@ -187,7 +177,7 @@ export class AuthService {
       isVerified: true,
     };
   }
-
+// Api 7: Lấy code xác minh từ db
   async getVerificationTokenByEmail(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
