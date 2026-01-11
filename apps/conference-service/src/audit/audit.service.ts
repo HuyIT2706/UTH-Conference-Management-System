@@ -35,16 +35,16 @@ export class AuditService {
 
     return await this.auditLogRepository.save(log);
   }
-
+// Tìm kiếm tất cả các audit log, có thể lọc theo conferenceId
   async findAll(conferenceId: number | null = null): Promise<AuditLog[]> {
     const where = conferenceId ? { conferenceId } : {};
     return await this.auditLogRepository.find({
       where,
       order: { createdAt: 'DESC' },
-      take: 100, // Limit to last 100 logs
+      take: 100, 
     });
   }
-
+// Tìm kiếm các audit log theo loại tài nguyên và ID tài nguyên
   async findByResource(
     resourceType: string,
     resourceId: number,

@@ -3,11 +3,9 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ConferencesService } from '../conferences/conferences.service';
-import { Track } from '../conferences/entities/track.entity';
 import { CfpSetting } from '../cfp/entities/cfp-setting.entity';
 
 @ApiTags('Validation')

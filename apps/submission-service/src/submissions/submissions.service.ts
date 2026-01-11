@@ -726,16 +726,21 @@ export class SubmissionsService {
         fullName: authorInfo.fullName,
       });
 
-      // Get conference info from conference-service
-      // For now, use a placeholder or fetch from conference service
-      // You might need to add a method to get conference name from conference-service
-      const conferenceName = `Hội nghị #${submission.conferenceId}`;
+      // Get conference name from conference-service
+      console.log('[SubmissionsService] Fetching conference name from conference-service...');
+      const conferenceName = await this.conferenceClient.getConferenceName(submission.conferenceId);
       
-      // TODO: Fetch actual conference name from conference-service if needed
-      // For now, use placeholder
+      console.log('[SubmissionsService] Conference name retrieved:', {
+        conferenceId: submission.conferenceId,
+        conferenceName,
+      });
+
+      // Use author's fullName, fallback to email if fullName is not available
+      const authorName = authorInfo.fullName || authorInfo.email || 'Tác giả';
 
       console.log('[SubmissionsService] Sending email...', {
         email: authorInfo.email,
+        authorName,
         status,
         submissionTitle: submission.title,
         conferenceName,
@@ -744,7 +749,7 @@ export class SubmissionsService {
       if (status === 'ACCEPTED') {
         await this.emailService.sendSubmissionAcceptedEmail(
           authorInfo.email,
-          authorInfo.fullName || 'Tác giả',
+          authorName,
           submission.title,
           conferenceName,
           decisionNote,
@@ -753,7 +758,7 @@ export class SubmissionsService {
       } else if (status === 'REJECTED') {
         await this.emailService.sendSubmissionRejectedEmail(
           authorInfo.email,
-          authorInfo.fullName || 'Tác giả',
+          authorName,
           submission.title,
           conferenceName,
           decisionNote,

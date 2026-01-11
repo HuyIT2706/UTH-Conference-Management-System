@@ -196,6 +196,34 @@ export class ConferenceClientService {
   }
 
   /**
+   * Get conference name by ID
+   * Used for email notifications
+   */
+  async getConferenceName(conferenceId: number): Promise<string> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/public/conferences/${conferenceId}/cfp`),
+      );
+      
+      const conference = response.data?.data?.conference;
+      if (conference && conference.name) {
+        return conference.name;
+      }
+      
+      // Fallback to placeholder if conference not found or name missing
+      return `Hội nghị #${conferenceId}`;
+    } catch (error: any) {
+      console.error('[ConferenceClient] Error getting conference name:', {
+        conferenceId,
+        status: error.response?.status,
+        message: error.message,
+      });
+      // Fallback to placeholder on error
+      return `Hội nghị #${conferenceId}`;
+    }
+  }
+
+  /**
    * Check if reviewer has accepted track assignment for a specific track
    * Get all track assignments and check locally
    */

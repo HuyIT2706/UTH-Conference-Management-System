@@ -18,7 +18,6 @@ import { UpdateConferenceDto } from './dto/update-conference.dto';
 import { CfpSetting } from '../cfp/entities/cfp-setting.entity';
 import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
 import { AddTrackMemberDto } from './dto/add-track-member.dto';
 import { EmailService } from '../common/services/email.service';
 import { IdentityClientService } from '../integrations/identity-client.service';
@@ -43,7 +42,7 @@ export class ConferencesService {
     private readonly submissionClient: SubmissionClientService,
     private readonly reviewClient: ReviewClientService,
   ) {}
-
+  // Tạo hội nghị mới
   async createConference(
     dto: CreateConferenceDto,
     organizerId: number,
@@ -72,20 +71,20 @@ export class ConferencesService {
 
     return saved;
   }
-
+  // Lấy tất cả các thông tin hội nghị
   async findAll(): Promise<Conference[]> {
-    return this.conferenceRepository.find({ 
+    return this.conferenceRepository.find({
       where: {
         deletedAt: IsNull(),
         isActive: true,
       },
-      relations: ['tracks', 'members', 'cfpSetting'] 
+      relations: ['tracks', 'members', 'cfpSetting'],
     });
   }
-
+  // Lấy thông tin chi tiết hội nghị theo ID
   async findOne(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: IsNull(),
         isActive: true,
@@ -94,12 +93,12 @@ export class ConferencesService {
     });
 
     if (!conference) {
-      throw new NotFoundException('Conference not found');
+      throw new NotFoundException('Không có hội nghị nào với ID đã cho');
     }
 
     return conference;
   }
-
+  // Thêm chủ đề mới cho hội nghị
   async addTrack(
     conferenceId: number,
     name: string,
@@ -115,7 +114,7 @@ export class ConferencesService {
 
     return this.trackRepository.save(track);
   }
-
+  // Cấu hình các mốc thời gian dealdine
   async setCfpSettings(
     conferenceId: number,
     dto: SetCfpSettingDto,
@@ -143,7 +142,7 @@ export class ConferencesService {
 
     return this.cfpSettingRepository.save(setting);
   }
-
+  // Cập nhật thông tin hội nghị
   async updateConference(
     id: number,
     dto: UpdateConferenceDto,
@@ -161,27 +160,34 @@ export class ConferencesService {
       startDate: dto.startDate ? new Date(dto.startDate) : conference.startDate,
       endDate: dto.endDate ? new Date(dto.endDate) : conference.endDate,
       venue: dto.venue ?? conference.venue,
-      description: dto.description !== undefined ? dto.description : conference.description,
-      shortDescription: dto.shortDescription !== undefined ? dto.shortDescription : conference.shortDescription,
-      contactEmail: dto.contactEmail !== undefined ? dto.contactEmail : conference.contactEmail,
+      description:
+        dto.description !== undefined
+          ? dto.description
+          : conference.description,
+      shortDescription:
+        dto.shortDescription !== undefined
+          ? dto.shortDescription
+          : conference.shortDescription,
+      contactEmail:
+        dto.contactEmail !== undefined
+          ? dto.contactEmail
+          : conference.contactEmail,
     });
 
     return this.conferenceRepository.save(conference);
   }
-
+  // Xóa hội nghị
   async deleteConference(
     id: number,
     user: { id: number; roles: string[] },
   ): Promise<void> {
     await this.ensureCanManageConference(id, user);
     const conference = await this.getConferenceOrThrow(id);
-    
-    // Perform Soft Delete
     conference.deletedAt = new Date();
     conference.isActive = false;
     await this.conferenceRepository.save(conference);
   }
-
+  // Cập nhật chủ đề trong hội nghị
   async updateTrack(
     conferenceId: number,
     trackId: number,
@@ -190,8 +196,8 @@ export class ConferencesService {
   ): Promise<Track> {
     await this.ensureCanManageConference(conferenceId, user);
     const track = await this.trackRepository.findOne({
-      where: { 
-        id: trackId, 
+      where: {
+        id: trackId,
         conferenceId,
         deletedAt: IsNull(),
         isActive: true,
@@ -200,29 +206,29 @@ export class ConferencesService {
     if (!track) {
       throw new NotFoundException('Không tìm thấy chủ đề');
     }
-    
+
     if (dto.name !== undefined && dto.name !== null) {
       track.name = dto.name;
     }
-    
+
     await this.trackRepository.save(track);
-    
+
     const updated = await this.trackRepository.findOne({
-      where: { 
-        id: trackId, 
+      where: {
+        id: trackId,
         conferenceId,
         deletedAt: IsNull(),
         isActive: true,
       },
     });
-    
+
     if (!updated) {
       throw new NotFoundException('Không tìm thấy chủ đề sau khi cập nhật');
     }
-    
+
     return updated;
   }
-
+  // Xóa chủ đề khỏi hội nghị
   async deleteTrack(
     conferenceId: number,
     trackId: number,
@@ -230,8 +236,8 @@ export class ConferencesService {
   ): Promise<void> {
     await this.ensureCanManageConference(conferenceId, user);
     const track = await this.trackRepository.findOne({
-      where: { 
-        id: trackId, 
+      where: {
+        id: trackId,
         conferenceId,
         deletedAt: IsNull(),
         isActive: true,
@@ -240,60 +246,9 @@ export class ConferencesService {
     if (!track) {
       throw new NotFoundException('Chủ đề không tồn tại');
     }
-    
-    // Perform Soft Delete
     track.deletedAt = new Date();
     track.isActive = false;
     await this.trackRepository.save(track);
-  }
-
-  async listMembers(
-    conferenceId: number,
-    user: { id: number; roles: string[] },
-  ): Promise<ConferenceMember[]> {
-    await this.ensureCanManageConference(conferenceId, user);
-    await this.getConferenceOrThrow(conferenceId);
-    return this.conferenceMemberRepository.find({
-      where: { conferenceId },
-    });
-  }
-
-  async addMember(
-    conferenceId: number,
-    dto: AddConferenceMemberDto,
-    user: { id: number; roles: string[] },
-  ): Promise<ConferenceMember> {
-    await this.ensureCanManageConference(conferenceId, user);
-    await this.getConferenceOrThrow(conferenceId);
-
-    const existing = await this.conferenceMemberRepository.findOne({
-      where: { conferenceId, userId: dto.userId },
-    });
-    if (existing) {
-      throw new BadRequestException('Người dùng đã là thành viên của hội nghị này');
-    }
-
-    const member = this.conferenceMemberRepository.create({
-      conferenceId,
-      userId: dto.userId,
-      role: dto.role,
-    });
-    return this.conferenceMemberRepository.save(member);
-  }
-
-  async removeMember(
-    conferenceId: number,
-    memberUserId: number,
-    user: { id: number; roles: string[] },
-  ): Promise<void> {
-    await this.ensureCanManageConference(conferenceId, user);
-    const member = await this.conferenceMemberRepository.findOne({
-      where: { conferenceId, userId: memberUserId },
-    });
-    if (!member) {
-      throw new NotFoundException('Không tìm thấy thành viên này');
-    }
-    await this.conferenceMemberRepository.remove(member);
   }
 
   private ensureValidDateRange(start: string, end: string) {
@@ -306,13 +261,12 @@ export class ConferencesService {
       throw new BadRequestException('startDate phải trước endDate');
     }
   }
-
+  // Check các mốc thời gian CFP có hợp lệ không
   private ensureValidCfpDates(dto: SetCfpSettingDto) {
     const submissionDeadline = new Date(dto.submissionDeadline);
     const reviewDeadline = new Date(dto.reviewDeadline);
     const notificationDate = new Date(dto.notificationDate);
     const cameraReadyDeadline = new Date(dto.cameraReadyDeadline);
-
     if (
       [
         submissionDeadline,
@@ -332,21 +286,19 @@ export class ConferencesService {
       )
     ) {
       throw new BadRequestException(
-        'Thứ tự mốc thời gian CFP không hợp lệ (submission <= review <= notification <= camera ready)',
+        'Thứ tự mốc thời gian CFP không hợp lệ (submissionDeadline <= reviewDeadline <= notificationDate <= cameraReadyDeadline)',
       );
     }
   }
-
+  // Kiểm tra quyền quản lý hội nghị của người dùng
   async ensureCanManageConference(
     conferenceId: number,
     user: { id: number; roles: string[] },
   ) {
     const roles = user?.roles || [];
-    // ADMIN và CHAIR có quyền quản lý tất cả conferences
     if (roles.includes('ADMIN') || roles.includes('CHAIR')) {
       return;
     }
-    // Nếu không phải ADMIN/CHAIR, phải là member của conference với role CHAIR
     const membership = await this.conferenceMemberRepository.findOne({
       where: { conferenceId, userId: user.id },
     });
@@ -354,10 +306,10 @@ export class ConferencesService {
       throw new ForbiddenException('Bạn không có quyền quản lý hội nghị này');
     }
   }
-
+  // Lấy tất cả các chủ đề của hội nghị
   async findAllTracks(conferenceId: number): Promise<Track[]> {
     return await this.trackRepository.find({
-      where: { 
+      where: {
         conferenceId,
         deletedAt: IsNull(),
         isActive: true,
@@ -365,16 +317,16 @@ export class ConferencesService {
       order: { id: 'ASC' },
     });
   }
-
+  // Lấy cài đặt thời gian của hội nghị
   async getCfpSetting(conferenceId: number): Promise<CfpSetting | null> {
     return await this.cfpSettingRepository.findOne({
       where: { conferenceId },
     });
   }
-
+  // Lấy hội nghị hoặc ném lỗi nếu không tìm thấy
   private async getConferenceOrThrow(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: IsNull(),
         isActive: true,
@@ -385,13 +337,13 @@ export class ConferencesService {
     }
     return conference;
   }
-
+  // Lấy tất cả thành viên có trong  chủ đề
   async listTrackMembers(
     trackId: number,
     user: { id: number; roles: string[] },
   ): Promise<TrackMember[]> {
     const track = await this.trackRepository.findOne({
-      where: { 
+      where: {
         id: trackId,
         deletedAt: IsNull(),
         isActive: true,
@@ -406,7 +358,7 @@ export class ConferencesService {
       order: { createdAt: 'DESC' },
     });
   }
-
+  // Thêm thành viên vào chủ đề
   async addTrackMember(
     trackId: number,
     dto: AddTrackMemberDto,
@@ -414,7 +366,7 @@ export class ConferencesService {
     authToken?: string,
   ): Promise<TrackMember> {
     const track = await this.trackRepository.findOne({
-      where: { 
+      where: {
         id: trackId,
         deletedAt: IsNull(),
         isActive: true,
@@ -430,7 +382,9 @@ export class ConferencesService {
       where: { trackId, userId: dto.userId },
     });
     if (existing) {
-      throw new BadRequestException('Người dùng đã là thành viên của chủ đề này');
+      throw new BadRequestException(
+        'Người dùng đã là thành viên của chủ đề này',
+      );
     }
 
     const member = this.trackMemberRepository.create({
@@ -439,43 +393,41 @@ export class ConferencesService {
       track,
     });
     const savedMember = await this.trackMemberRepository.save(member);
-
-    // Send email notification to reviewer (async, don't wait for it)
     if (authToken) {
-      this.sendTrackAssignmentEmail(savedMember, track, authToken).catch((error) => {
-        console.error('[ConferencesService] Failed to send track assignment email:', error);
-        // Don't throw - email failure shouldn't break the API response
-      });
+      this.sendTrackAssignmentEmail(savedMember, track, authToken).catch(
+        (error) => {
+          throw new BadRequestException(
+            'Lỗi khi gửi email thông báo phân công chủ đề',
+          );
+        },
+      );
     }
-
     return savedMember;
   }
-
-  /**
-   * Send email notification when reviewer is assigned to track
-   */
+  // Gửi email thông báo phân công chủ đề
   private async sendTrackAssignmentEmail(
     member: TrackMember,
     track: Track,
     authToken: string,
   ): Promise<void> {
     try {
-      // Get user info from identity-service
-      const userInfo = await this.identityClient.getUserById(member.userId, authToken);
+      // Lấy user info từ identity-service
+      const userInfo = await this.identityClient.getUserById(
+        member.userId,
+        authToken,
+      );
       if (!userInfo || !userInfo.email) {
-        console.warn(`[ConferencesService] Cannot send email: User ${member.userId} not found or has no email`);
-        return;
+        throw new BadRequestException(
+          'Không thể gửi email: Người dùng không tồn tại hoặc không có email',
+        );
       }
-
-      // Get conference info
       const conference = await this.conferenceRepository.findOne({
-        where: { 
+        where: {
           id: track.conferenceId,
           deletedAt: IsNull(),
           isActive: true,
         },
       });
-
       await this.emailService.sendTrackAssignmentEmail(
         userInfo.email,
         userInfo.fullName || 'Reviewer',
@@ -483,11 +435,12 @@ export class ConferencesService {
         conference?.name || 'Hội nghị',
       );
     } catch (error) {
-      console.error('[ConferencesService] Error sending track assignment email:', error);
-      // Don't throw - email failure shouldn't break the API response
+      throw new BadRequestException(
+        'Lỗi khi gửi email thông báo phân công chủ đề',
+      );
     }
   }
-
+  // Xóa thành viên khỏi chủ đề
   async removeTrackMember(
     trackId: number,
     memberUserId: number,
@@ -495,7 +448,7 @@ export class ConferencesService {
     authToken?: string,
   ): Promise<void> {
     const track = await this.trackRepository.findOne({
-      where: { 
+      where: {
         id: trackId,
         deletedAt: IsNull(),
         isActive: true,
@@ -505,20 +458,18 @@ export class ConferencesService {
       throw new NotFoundException('Không tìm thấy chủ đề');
     }
     await this.ensureCanManageConference(track.conferenceId, user);
-
+    // Check nếu thành viên tồn tại trong track
     const member = await this.trackMemberRepository.findOne({
       where: { trackId, userId: memberUserId },
     });
     if (!member) {
       throw new NotFoundException('Không tìm thấy thành viên này');
     }
-
-    // Guard Clause Case 3: Check if user has reviewed submissions in this track
-    // CRITICAL: If authToken is missing, we cannot verify guard clause - BLOCK removal
+    //
     if (!authToken) {
       throw new BadRequestException({
-        code: 'MISSING_AUTH_TOKEN',
-        message: 'Không thể kiểm tra guard clause vì thiếu auth token. Vui lòng cung cấp token để xác minh người dùng không có reviews trong track này trước khi xóa.',
+        message:
+          'Không thể kiểm tra guard clause vì thiếu auth token. Vui lòng cung cấp token để xác minh người dùng không có reviews trong track này trước khi xóa.',
         detail: {
           trackId,
           userId: memberUserId,
@@ -526,24 +477,23 @@ export class ConferencesService {
         },
       });
     }
+    // Check nếu người dùng đã thực hiện review cho bất kỳ submission nào trong track này
+    const submissionIds = await this.submissionClient.getSubmissionIdsByTrack(
+      trackId,
+      authToken,
+    );
 
-    // Get submission IDs for this track from submission-service
-    // If service is down, this will throw error (fail-secure) to prevent data loss
-    const submissionIds = await this.submissionClient.getSubmissionIdsByTrack(trackId, authToken);
-    
     if (submissionIds && submissionIds.length > 0) {
-      // Check if user has reviewed any submissions in this track
-      // If service is down, this will throw error (fail-secure) to prevent data loss
       const hasReviews = await this.reviewClient.hasUserReviewedSubmissions(
         memberUserId,
         submissionIds,
         authToken,
       );
-      
+
       if (hasReviews) {
         throw new BadRequestException({
-          code: 'USER_HAS_REVIEWED_TRACK',
-          message: 'Người dùng này đã thực hiện review cho track này, không thể xóa khỏi track',
+          message:
+            'Người dùng này đã thực hiện review cho track này, không thể xóa khỏi track',
           detail: {
             trackId,
             userId: memberUserId,
@@ -554,16 +504,13 @@ export class ConferencesService {
 
     await this.trackMemberRepository.remove(member);
   }
-
-  // Get tracks assigned to a reviewer
+  // Lấy tất cả phân công chủ đề của người dùng
   async getMyTrackAssignments(userId: number): Promise<TrackMember[]> {
     const assignments = await this.trackMemberRepository.find({
       where: { userId },
       relations: ['track', 'track.conference'],
       order: { createdAt: 'DESC' },
     });
-    
-    // Filter out assignments where track or conference is soft deleted
     const activeAssignments = assignments.filter((assignment) => {
       const track = assignment.track;
       const conference = track?.conference;
@@ -576,15 +523,12 @@ export class ConferencesService {
         conference.isActive === true
       );
     });
-    
-    // Đảm bảo field status luôn có giá trị (mặc định là PENDING nếu null/undefined)
     return activeAssignments.map((assignment) => ({
       ...assignment,
       status: assignment.status || 'PENDING',
     }));
   }
-
-  // Accept track assignment
+  // Chấp nhận phân công chủ đề
   async acceptTrackAssignment(
     trackId: number,
     userId: number,
@@ -596,10 +540,14 @@ export class ConferencesService {
     if (!member) {
       throw new NotFoundException('Không tìm thấy phân công này');
     }
-    
-    // Check if track is soft deleted
-    if (member.track && (member.track.deletedAt !== null || member.track.isActive === false)) {
-      throw new NotFoundException('Chủ đề này đã bị xóa hoặc không còn hoạt động');
+    // Check track có bị xóa không
+    if (
+      member.track &&
+      (member.track.deletedAt !== null || member.track.isActive === false)
+    ) {
+      throw new NotFoundException(
+        'Chủ đề này đã bị xóa hoặc không còn hoạt động',
+      );
     }
     if (member.status === 'ACCEPTED') {
       throw new BadRequestException('Phân công đã được chấp nhận');
@@ -610,13 +558,15 @@ export class ConferencesService {
     member.status = 'ACCEPTED';
     return this.trackMemberRepository.save(member);
   }
-
-  // Check if reviewer has accepted track assignment
+  // Kiểm tra phân công chủ đề của reviewer
   async checkReviewerTrackAssignment(
     reviewerId: number,
     trackId: number,
   ): Promise<{ hasAccepted: boolean }> {
-    console.log('[ConferencesService] checkReviewerTrackAssignment:', { reviewerId, trackId });
+    console.log('[ConferencesService] checkReviewerTrackAssignment:', {
+      reviewerId,
+      trackId,
+    });
     const member = await this.trackMemberRepository.findOne({
       where: {
         userId: reviewerId,
@@ -625,18 +575,14 @@ export class ConferencesService {
       },
       relations: ['track'],
     });
-    
-    // Also check if track is active and not deleted
-    const hasAccepted = !!member && 
-      member.track && 
-      member.track.deletedAt === null && 
+    const hasAccepted =
+      !!member &&
+      member.track &&
+      member.track.deletedAt === null &&
       member.track.isActive === true;
-    
-    console.log('[ConferencesService] checkReviewerTrackAssignment result:', { hasAccepted, memberId: member?.id });
     return { hasAccepted };
   }
-
-  // Reject track assignment
+  // Từ chối phân công chủ đề
   async rejectTrackAssignment(
     trackId: number,
     userId: number,
@@ -648,16 +594,21 @@ export class ConferencesService {
     if (!member) {
       throw new NotFoundException('Không tìm thấy phân công này');
     }
-    
-    // Check if track is soft deleted
-    if (member.track && (member.track.deletedAt !== null || member.track.isActive === false)) {
-      throw new NotFoundException('Chủ đề này đã bị xóa hoặc không còn hoạt động');
+    if (
+      member.track &&
+      (member.track.deletedAt !== null || member.track.isActive === false)
+    ) {
+      throw new NotFoundException(
+        'Chủ đề này đã bị xóa hoặc không còn hoạt động',
+      );
     }
     if (member.status === 'REJECTED') {
       throw new BadRequestException('Phân công đã bị từ chối');
     }
     if (member.status === 'ACCEPTED') {
-      throw new BadRequestException('Không thể từ chối phân công đã được chấp nhận');
+      throw new BadRequestException(
+        'Không thể từ chối phân công đã được chấp nhận',
+      );
     }
     member.status = 'REJECTED';
     return this.trackMemberRepository.save(member);

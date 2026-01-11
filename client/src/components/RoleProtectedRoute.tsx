@@ -45,7 +45,6 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
   }
 
   if (!hasRequiredRole) {
-    // Determine redirect path based on user role
     const isChairOrAdmin = user.roles?.includes('CHAIR') || user.roles?.includes('ADMIN');
     const isReviewer = user.roles?.includes('REVIEWER');
     

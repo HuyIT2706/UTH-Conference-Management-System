@@ -18,7 +18,6 @@ import { SetCfpSettingDto } from '../cfp/dto/set-cfp-setting.dto';
 import { UpdateConferenceDto } from './dto/update-conference.dto';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
 import { AddTrackMemberDto } from './dto/add-track-member.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -30,26 +29,11 @@ import type { JwtPayload } from '../auth/jwt.strategy';
 @ApiBearerAuth('JWT-auth')
 export class ConferencesController {
   constructor(private readonly conferencesService: ConferencesService) {}
-
+// Tạo cuộc thi mới
   @Post()
   @ApiOperation({ 
     summary: 'Tạo hội nghị mới',
-    description: `Tạo một hội nghị mới. Người tạo sẽ tự động trở thành CHAIR của hội nghị.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "name": "International UTH Conference 2025",
-  "startDate": "2025-06-01T09:00:00Z",
-  "endDate": "2025-06-03T18:00:00Z",
-  "venue": "HCMC University of Transport",
-  "description": "International Conference on Transportation and Logistics 2025...",
-  "shortDescription": "Join us for the premier conference on transportation research...",
-  "contactEmail": "conference@uth.edu.vn"
-}
-\`\`\`
-
-**Lưu ý:** \`description\`, \`shortDescription\`, và \`contactEmail\` là các trường tùy chọn.`
+    description: 'Tạo một hội nghị mới. Người tạo sẽ tự động trở thành CHAIR của hội nghị.'
   })
   @ApiResponse({ status: 201, description: 'Tạo hội nghị thành công' })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
@@ -64,7 +48,7 @@ export class ConferencesController {
       data: conference,
     };
   }
-
+// Lấy tất cả cuộc thi
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách tất cả hội nghị' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
@@ -82,9 +66,7 @@ export class ConferencesController {
       data: conferencesWithDeadlines,
     };
   }
-
-  // Alternative endpoint for reviewers to get their track assignments
-  // Using 'reviewer' prefix to avoid route conflicts
+  // Lấy danh sách chủ đề được phân công cho reviewer hiện tại
   @Get('reviewer/my-track-assignments')
   @ApiOperation({ summary: 'Lấy danh sách chủ đề được phân công cho reviewer hiện tại' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách phân công thành công' })
@@ -105,7 +87,7 @@ export class ConferencesController {
     });
     return { message: 'Lấy danh sách phân công thành công', data: assignments };
   }
-
+  // Lấy chi tiết một cuộc thi
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin chi tiết hội nghị' })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
@@ -126,7 +108,7 @@ export class ConferencesController {
       data: conferenceData,
     };
   }
-
+  // Lấy danh sách các chủ đề của cuộc thi đó
   @Get(':id/tracks')
   @ApiOperation({ summary: 'Lấy danh sách tracks của hội nghị' })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
@@ -139,18 +121,11 @@ export class ConferencesController {
       data: tracks,
     };
   }
-
+// Thêm chủ đề vào cuộc thi đó
   @Post(':id/tracks')
   @ApiOperation({ 
     summary: 'Thêm track vào hội nghị',
-    description: `Thêm một track (lĩnh vực/chủ đề) mới vào hội nghị.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "name": "Artificial Intelligence & Machine Learning"
-}
-\`\`\``
+    description: 'Thêm một track (lĩnh vực/chủ đề) mới vào hội nghị.',
   })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Thêm track thành công' })
@@ -170,21 +145,11 @@ export class ConferencesController {
       data: track,
     };
   }
-
+//  Thiết lập mốc thời gian deadline cho cuộc thi
   @Post(':id/cfp')
   @ApiOperation({ 
     summary: 'Thiết lập các mốc thời gian CFP (Call for Papers)',
-    description: `Thiết lập các deadline cho hội nghị. Thứ tự deadline phải hợp lệ: submissionDeadline ≤ reviewDeadline ≤ notificationDate ≤ cameraReadyDeadline.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "submissionDeadline": "2025-03-01T23:59:59.000Z",
-  "reviewDeadline": "2025-03-15T23:59:59.000Z",
-  "notificationDate": "2025-04-01T12:00:00.000Z",
-  "cameraReadyDeadline": "2025-04-15T23:59:59.000Z"
-}
-\`\`\``
+    description: 'Thiết lập hoặc cập nhật các mốc thời gian quan trọng cho CFP của hội nghị.',
   })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 201, description: 'Thiết lập CFP thành công' })
@@ -206,21 +171,11 @@ export class ConferencesController {
       data: cfp,
     };
   }
-
+// Cập nhật thông tin cuộc thi đó
   @Patch(':id')
   @ApiOperation({ 
     summary: 'Cập nhật thông tin hội nghị',
-    description: `Cập nhật thông tin hội nghị. Tất cả các trường đều tùy chọn, chỉ cần gửi các trường muốn cập nhật.
-    
-**Ví dụ request body (cập nhật một số trường):**
-\`\`\`json
-{
-  "name": "International UTH Conference 2025 Updated",
-  "venue": "HCMC University of Transport - Main Campus",
-  "description": "Updated description for the conference",
-  "contactEmail": "conference2025@uth.edu.vn"
-}
-\`\`\``
+    description: 'Cập nhật thông tin hội nghị. Tất cả các trường đều tùy chọn, chỉ cần gửi các trường muốn cập nhật.',
   })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Cập nhật hội nghị thành công' })
@@ -241,7 +196,7 @@ export class ConferencesController {
       data: updated,
     };
   }
-
+// Xóa cuộc thi đó
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa hội nghị' })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
@@ -260,18 +215,11 @@ export class ConferencesController {
       message: 'Xóa hội nghị thành công',
     };
   }
-
+// Cập nhật thông tin track (lĩnh vực/chủ đề)
   @Patch(':conferenceId/tracks/:trackId')
   @ApiOperation({ 
     summary: 'Cập nhật thông tin track (lĩnh vực/chủ đề)',
-    description: `Cập nhật tên của track. Tất cả các trường đều tùy chọn.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "name": "AI & ML Track (Updated)"
-}
-\`\`\``
+    description: 'Cập nhật tên của track. Tất cả các trường đều tùy chọn.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiParam({ name: 'trackId', description: 'ID của track cần cập nhật' })
@@ -291,11 +239,11 @@ export class ConferencesController {
       { id: user.sub, roles: user.roles ?? [] },
     );
     return {
-      message: 'Cập nhật người chấm bài thành công',
+      message: 'Cập nhật track thành công',
       data: updated,
     };
   }
-
+// Xóa track (lĩnh vực/chủ đề) khỏi cuộc thi
   @Delete(':conferenceId/tracks/:trackId')
   @ApiOperation({ summary: 'Xóa track (lĩnh vực/chủ đề) khỏi hội nghị' })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
@@ -312,78 +260,9 @@ export class ConferencesController {
       id: user.sub,
       roles: user.roles ?? [],
     });
-    return { message: 'Xóa người chấm bài thành công' };
+    return { message: 'Xóa track thành công' };
   }
-
-  @Get(':id/members')
-  @ApiOperation({ summary: 'Lấy danh sách thành viên (PC members và Chairs) của hội nghị' })
-  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
-  @ApiResponse({ status: 200, description: 'Lấy danh sách thành viên thành công' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
-  async listMembers(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: JwtPayload,
-  ) {
-    const members = await this.conferencesService.listMembers(id, {
-      id: user.sub,
-      roles: user.roles ?? [],
-    });
-    return { message: 'Lấy danh sách thành viên thành công', data: members };
-  }
-
-  @Post(':id/members')
-  @ApiOperation({ 
-    summary: 'Thêm thành viên (PC member hoặc Chair) vào hội nghị',
-    description: `Thêm một user vào hội nghị với vai trò PC_MEMBER hoặc CHAIR.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "userId": 5,
-  "role": "PC_MEMBER"
-}
-\`\`\`
-
-**Các giá trị role có thể:**
-- \`PC_MEMBER\`: Thành viên ban chương trình
-- \`CHAIR\`: Chủ tịch hội nghị`
-  })
-  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
-  @ApiResponse({ status: 201, description: 'Thêm thành viên thành công' })
-  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc user không tồn tại' })
-  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
-  async addMember(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: AddConferenceMemberDto,
-    @CurrentUser() user: JwtPayload,
-  ) {
-    const member = await this.conferencesService.addMember(id, dto, {
-      id: user.sub,
-      roles: user.roles ?? [],
-    });
-    return { message: 'Thêm thành viên thành công', data: member };
-  }
-
-  @Delete(':id/members/:userId')
-  @ApiOperation({ summary: 'Xóa thành viên khỏi hội nghị' })
-  @ApiParam({ name: 'id', description: 'ID của hội nghị' })
-  @ApiParam({ name: 'userId', description: 'ID của user cần xóa khỏi hội nghị' })
-  @ApiResponse({ status: 200, description: 'Xóa thành viên thành công' })
-  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị hoặc thành viên' })
-  async removeMember(
-    @Param('id', ParseIntPipe) id: number,
-    @Param('userId', ParseIntPipe) userId: number,
-    @CurrentUser() user: JwtPayload,
-  ) {
-    await this.conferencesService.removeMember(id, userId, {
-      id: user.sub,
-      roles: user.roles ?? [],
-    });
-    return { message: 'Xóa thành viên thành công' };
-  }
-
+//  Lấy danh sách thành viên ban chương trình của chủ đề
   @Get('tracks/:trackId/reviewer/:reviewerId/check-assignment')
   @ApiOperation({ summary: 'Kiểm tra reviewer đã chấp nhận track assignment chưa' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -393,12 +272,10 @@ export class ConferencesController {
     @Param('trackId', ParseIntPipe) trackId: number,
     @Param('reviewerId', ParseIntPipe) reviewerId: number,
   ) {
-    console.log('[ConferencesController] checkReviewerTrackAssignment called:', { trackId, reviewerId });
     const result = await this.conferencesService.checkReviewerTrackAssignment(reviewerId, trackId);
-    console.log('[ConferencesController] checkReviewerTrackAssignment result:', result);
     return { message: 'Kiểm tra thành công', data: result };
   }
-
+//  Lấy danh sách thành viên ban chương trình của chủ đề
   @Get('tracks/:trackId/members')
   @ApiOperation({ summary: 'Lấy danh sách thành viên ban chương trình của chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -415,18 +292,11 @@ export class ConferencesController {
     });
     return { message: 'Lấy danh sách thành viên thành công', data: members };
   }
-
+// Thêm thành viên ban chương trình vào chủ đề
   @Post('tracks/:trackId/members')
   @ApiOperation({ 
     summary: 'Thêm thành viên ban chương trình vào chủ đề',
-    description: `Thêm một user vào chủ đề với vai trò PC member.
-    
-**Ví dụ request body:**
-\`\`\`json
-{
-  "userId": 5
-}
-\`\`\``
+    description: 'Thêm một user vào chủ đề với vai trò PC member.'
   })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
   @ApiResponse({ status: 201, description: 'Thêm thành viên thành công' })
@@ -439,19 +309,17 @@ export class ConferencesController {
     @CurrentUser() user: JwtPayload,
     @Req() req: Request,
   ) {
-    // Extract auth token from request header
     const authHeader = req.headers.authorization;
     const authToken = authHeader?.startsWith('Bearer ')
       ? authHeader.substring(7)
       : undefined;
-
     const member = await this.conferencesService.addTrackMember(trackId, dto, {
       id: user.sub,
       roles: user.roles ?? [],
     }, authToken);
-    return { message: 'Thêm thành viên thành công', data: member };
+    return { message: 'Thêm thành viên thành công vào chủ đề', data: member };
   }
-
+//  Xóa thành viên khỏi chủ đề
   @Delete('tracks/:trackId/members/:userId')
   @ApiOperation({ summary: 'Xóa thành viên khỏi chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -465,7 +333,6 @@ export class ConferencesController {
     @CurrentUser() user: JwtPayload,
     @Req() req: Request,
   ) {
-    // Extract JWT token from Authorization header for cross-service calls
     const authHeader = req.headers.authorization;
     const authToken = authHeader?.startsWith('Bearer ') 
       ? authHeader.substring(7) 
@@ -477,7 +344,7 @@ export class ConferencesController {
     }, authToken);
     return { message: 'Xóa thành viên thành công' };
   }
-
+// Chấp nhận phân công chủ đề
   @Post('tracks/:trackId/accept')
   @ApiOperation({ summary: 'Chấp nhận phân công chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })
@@ -491,7 +358,7 @@ export class ConferencesController {
     const member = await this.conferencesService.acceptTrackAssignment(trackId, user.sub);
     return { message: 'Chấp nhận phân công thành công', data: member };
   }
-
+//  Từ chối phân công chủ đề
   @Post('tracks/:trackId/reject')
   @ApiOperation({ summary: 'Từ chối phân công chủ đề' })
   @ApiParam({ name: 'trackId', description: 'ID của chủ đề' })

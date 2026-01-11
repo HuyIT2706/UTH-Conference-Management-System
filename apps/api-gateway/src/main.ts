@@ -43,6 +43,7 @@ async function bootstrap() {
       res.status(500).json({ message: 'Proxy error', error: err.message });
     },
   };
+  // Cài đặt các proxy middleware
   expressApp.use(
     '/api/users',
     createProxyMiddleware({

@@ -7,20 +7,28 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
-    const smtpHost = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
+    const smtpHost =
+      this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
     const smtpPort = Number(this.configService.get<string>('SMTP_PORT')) || 587;
-    const smtpUser = this.configService.get<string>('SMTP_USER') || this.configService.get<string>('EMAIL_USER');
-    const smtpPassword = this.configService.get<string>('SMTP_PASSWORD') || this.configService.get<string>('EMAIL_PASS');
+    const smtpUser =
+      this.configService.get<string>('SMTP_USER') ||
+      this.configService.get<string>('EMAIL_USER');
+    const smtpPassword =
+      this.configService.get<string>('SMTP_PASSWORD') ||
+      this.configService.get<string>('EMAIL_PASS');
     const smtpFrom = this.configService.get<string>('SMTP_FROM') || smtpUser;
 
     this.transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: smtpPort === 465,
-      auth: smtpUser && smtpPassword ? {
-        user: smtpUser,
-        pass: smtpPassword,
-      } : undefined,
+      auth:
+        smtpUser && smtpPassword
+          ? {
+              user: smtpUser,
+              pass: smtpPassword,
+            }
+          : undefined,
     });
   }
 
@@ -34,12 +42,14 @@ export class EmailService {
     conferenceName: string,
   ): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') ||
-            this.configService.get<string>('SMTP_USER') ||
-            this.configService.get<string>('EMAIL_USER'),
+      from:
+        this.configService.get<string>('SMTP_FROM') ||
+        this.configService.get<string>('SMTP_USER') ||
+        this.configService.get<string>('EMAIL_USER'),
       to: email,
       subject: `[${appName}] Bạn đã được phân công phản biện cho chủ đề "${trackName}"`,
       html: `
@@ -116,11 +126,11 @@ export class EmailService {
             </div>
             <div class="content">
               <p>Xin chào <strong>${reviewerName}</strong>,</p>
-              <p>Bạn đã được phân công làm phản biện cho một chủ đề trong hội nghị. Thông tin chi tiết:</p>
+              <p>Bạn đã được phân công làm phản biện cho một chủ đề trong Cuộc thi. Thông tin chi tiết:</p>
               
               <div class="info-box">
                 <div class="info-item">
-                  <span class="info-label">Hội nghị:</span> ${conferenceName}
+                  <span class="info-label">Cuộc thi:</span> ${conferenceName}
                 </div>
                 <div class="info-item">
                   <span class="info-label">Chủ đề:</span> ${trackName}
@@ -128,11 +138,6 @@ export class EmailService {
               </div>
 
               <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết và chấp nhận/từ chối phân công này.</p>
-              
-              <div style="text-align: center;">
-                <a href="${appUrl}/reviewer/dashboard" class="button">Xem phân công</a>
-              </div>
-
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
             <div class="footer">
@@ -144,29 +149,27 @@ export class EmailService {
         </html>
       `,
       text: `
-${appName} - Thông báo phân công phản biện
+              ${appName} - Thông báo phân công phản biện
 
-Xin chào ${reviewerName},
+              Xin chào ${reviewerName},
 
-Bạn đã được phân công làm phản biện cho một chủ đề trong hội nghị. Thông tin chi tiết:
+              Bạn đã được phân công làm phản biện cho một chủ đề trong Cuộc thi. Thông tin chi tiết:
 
-Hội nghị: ${conferenceName}
-Chủ đề: ${trackName}
-
-Vui lòng đăng nhập vào hệ thống để xem chi tiết và chấp nhận/từ chối phân công này.
-
-Truy cập: ${appUrl}/reviewer/dashboard
-
-Trân trọng,
-Đội ngũ ${appName}
-      `,
+              Cuộc thi: ${conferenceName}
+        
+              Chủ đề: ${trackName}
+        
+              Vui lòng đăng nhập vào hệ thống để xem chi tiết và chấp nhận/từ chối phân công này.
+        
+        
+              Trân trọng,
+              Đội ngũ ${appName}
+                    `,
     };
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Track assignment email sent to ${email}`);
     } catch (error) {
-      console.error(`[EmailService] Failed to send track assignment email to ${email}:`, error);
       throw error;
     }
   }
@@ -182,14 +185,16 @@ Trân trọng,
     decisionNote?: string,
   ): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') ||
-            this.configService.get<string>('SMTP_USER') ||
-            this.configService.get<string>('EMAIL_USER'),
+      from:
+        this.configService.get<string>('SMTP_FROM') ||
+        this.configService.get<string>('SMTP_USER') ||
+        this.configService.get<string>('EMAIL_USER'),
       to: email,
-      subject: `[${appName}] 🎉 Bài nộp của bạn đã được chấp nhận`,
+      subject: `[${appName}] Bài nộp của bạn đã được chấp nhận`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -268,7 +273,7 @@ Trân trọng,
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Chúc mừng!</h1>
+              <h1> Chúc mừng!</h1>
               <p>Bài nộp của bạn đã được chấp nhận</p>
             </div>
             <div class="content">
@@ -278,25 +283,23 @@ Trân trọng,
               <div class="info-box">
                 <div class="success-badge">ĐÃ CHẤP NHẬN</div>
                 <div class="info-item">
-                  <span class="info-label">Hội nghị:</span> ${conferenceName}
+                  <span class="info-label">Cuộc thi:</span> ${conferenceName}
                 </div>
                 <div class="info-item">
                   <span class="info-label">Tiêu đề bài nộp:</span> ${submissionTitle}
                 </div>
-                ${decisionNote ? `
+                ${
+                  decisionNote
+                    ? `
                 <div class="info-item">
                   <span class="info-label">Ghi chú từ ban tổ chức:</span><br>
                   ${decisionNote.replace(/\n/g, '<br>')}
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
-
               <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).</p>
-              
-              <div style="text-align: center;">
-                <a href="${appUrl}/student/submissions" class="button">Xem bài nộp</a>
-              </div>
-
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
             <div class="footer">
@@ -308,33 +311,31 @@ Trân trọng,
         </html>
       `,
       text: `
-🎉 Chúc mừng! Bài nộp của bạn đã được chấp nhận
+              Chúc mừng! Bài nộp của bạn đã được chấp nhận
 
-Xin chào ${authorName},
+              Xin chào ${authorName},
 
-Chúng tôi vui mừng thông báo rằng bài nộp của bạn đã được chấp nhận!
+              Chúng tôi vui mừng thông báo rằng bài nộp của bạn đã được chấp nhận!
 
-Hội nghị: ${conferenceName}
-Tiêu đề bài nộp: ${submissionTitle}
-${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
+              Cuộc thi: ${conferenceName}
 
-Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).
+              Tiêu đề bài nộp: ${submissionTitle}
 
-Truy cập: ${appUrl}/student/submissions
+              ${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
 
-Trân trọng,
-Đội ngũ ${appName}
-      `,
-    };
 
-    try {
-      await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Submission accepted email sent to ${email}`);
-    } catch (error) {
-      console.error(`[EmailService] Failed to send submission accepted email to ${email}:`, error);
-      throw error;
-    }
-  }
+              Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).
+              Trân trọng,
+              Đội ngũ ${appName}
+                    `,
+                  };
+                
+                  try {
+                    await this.transporter.sendMail(mailOptions);
+                  } catch (error) {
+                    throw error;
+                  }
+                }
 
   /**
    * Gửi email thông báo khi bài nộp bị từ chối
@@ -347,12 +348,14 @@ Trân trọng,
     decisionNote?: string,
   ): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') ||
-            this.configService.get<string>('SMTP_USER') ||
-            this.configService.get<string>('EMAIL_USER'),
+      from:
+        this.configService.get<string>('SMTP_FROM') ||
+        this.configService.get<string>('SMTP_USER') ||
+        this.configService.get<string>('EMAIL_USER'),
       to: email,
       subject: `[${appName}] Thông báo về bài nộp của bạn`,
       html: `
@@ -443,25 +446,24 @@ Trân trọng,
               <div class="info-box">
                 <div class="rejected-badge">ĐÃ TỪ CHỐI</div>
                 <div class="info-item">
-                  <span class="info-label">Hội nghị:</span> ${conferenceName}
+                  <span class="info-label">Cuộc thi:</span> ${conferenceName}
                 </div>
                 <div class="info-item">
                   <span class="info-label">Tiêu đề bài nộp:</span> ${submissionTitle}
                 </div>
-                ${decisionNote ? `
+                ${
+                  decisionNote
+                    ? `
                 <div class="info-item">
                   <span class="info-label">Ghi chú từ ban tổ chức:</span><br>
                   ${decisionNote.replace(/\n/g, '<br>')}
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
 
-              <p>Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các hội nghị tiếp theo.</p>
-              
-              <div style="text-align: center;">
-                <a href="${appUrl}/student/submissions" class="button">Xem bài nộp</a>
-              </div>
-
+              <p>Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các Cuộc thi tiếp theo.</p>
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
             <div class="footer">
@@ -473,44 +475,38 @@ Trân trọng,
         </html>
       `,
       text: `
-Thông báo về bài nộp - Kết quả đánh giá
+              Thông báo về bài nộp - Kết quả đánh giá
 
-Xin chào ${authorName},
+              Xin chào ${authorName},
 
-Chúng tôi rất tiếc thông báo rằng bài nộp của bạn chưa được chấp nhận trong đợt này.
+              Chúng tôi rất tiếc thông báo rằng bài nộp của bạn chưa được chấp nhận trong đợt này.
 
-Hội nghị: ${conferenceName}
-Tiêu đề bài nộp: ${submissionTitle}
-${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
+              Cuộc thi: ${conferenceName}
+              Tiêu đề bài nộp: ${submissionTitle}
+              ${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
 
-Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các hội nghị tiếp theo.
+              Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các Cuộc thi tiếp theo.
 
-Truy cập: ${appUrl}/student/submissions
 
-Trân trọng,
-Đội ngũ ${appName}
-      `,
-    };
-
-    try {
-      await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Submission rejected email sent to ${email}`);
-    } catch (error) {
-      console.error(`[EmailService] Failed to send submission rejected email to ${email}:`, error);
-      throw error;
-    }
-  }
-
+              Trân trọng,
+              Đội ngũ ${appName}
+                    `,
+                  };
+                
+                  try {
+                    await this.transporter.sendMail(mailOptions);
+                  } catch (error) {
+                    throw error;
+                  }
+        }
   /**
    * Test email connection
    */
   async verifyConnection(): Promise<boolean> {
     try {
       await this.transporter.verify();
-      console.log('[EmailService] SMTP connection verified');
       return true;
     } catch (error) {
-      console.error('[EmailService] SMTP connection failed:', error);
       return false;
     }
   }

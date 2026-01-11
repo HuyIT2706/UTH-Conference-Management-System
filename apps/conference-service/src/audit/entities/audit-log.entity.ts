@@ -24,10 +24,10 @@ export class AuditLog {
   userId: number;
 
   @Column({ type: 'varchar', length: 50 })
-  action: string; // CREATE, UPDATE, DELETE, SEND_NOTIFICATION, etc.
+  action: string; 
 
   @Column({ type: 'varchar', length: 50 })
-  resourceType: string; // CONFERENCE, TRACK, MEMBER, TEMPLATE, etc.
+  resourceType: string; 
 
   @Column({ type: 'int', nullable: true })
   resourceId: number | null;
