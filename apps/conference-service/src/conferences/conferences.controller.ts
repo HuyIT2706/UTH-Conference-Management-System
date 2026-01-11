@@ -463,11 +463,18 @@ export class ConferencesController {
     @Param('trackId', ParseIntPipe) trackId: number,
     @Param('userId', ParseIntPipe) userId: number,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
+    // Extract JWT token from Authorization header for cross-service calls
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
     await this.conferencesService.removeTrackMember(trackId, userId, {
       id: user.sub,
       roles: user.roles ?? [],
-    });
+    }, authToken);
     return { message: 'Xóa thành viên thành công' };
   }
 

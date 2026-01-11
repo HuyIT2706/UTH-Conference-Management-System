@@ -23,7 +23,7 @@ import { EmailService } from '../common/services/email.service';
 export class AuthService {
   private readonly refreshSecret: string;
   private readonly refreshExpiresIn: string;
-
+  
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -32,6 +32,8 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(EmailVerificationToken)
     private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
     private readonly emailService: EmailService,
   ) {
     this.refreshSecret =
@@ -41,8 +43,22 @@ export class AuthService {
   }
 // APi 1:  Đăng ký tài admin
   async register(dto: RegisterDto) {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) {
+    // Check if email exists (including soft deleted users)
+    // This prevents reuse of email from soft deleted accounts
+    const existingActive = await this.usersService.findByEmail(dto.email);
+    if (existingActive) {
+      throw new BadRequestException('Email đã tồn tại');
+    }
+    
+    // Also check including soft deleted to prevent email reuse
+    // Use UsersService method to check including soft deleted
+    const existingIncludingDeleted = await this.usersService.findByEmailIncludingDeleted(dto.email);
+    if (existingIncludingDeleted) {
+      // If user exists (including soft deleted), prevent reuse
+      if (existingIncludingDeleted.deletedAt !== null) {
+        throw new BadRequestException('Email này đã được sử dụng trước đó (tài khoản đã bị xóa)');
+      }
+      // This case should not happen as we already checked above, but just in case
       throw new BadRequestException('Email đã tồn tại');
     }
 

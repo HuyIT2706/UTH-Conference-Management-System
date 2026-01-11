@@ -71,6 +71,12 @@ export class Submission {
   @Column({ type: 'timestamptz', nullable: true, name: 'submitted_at' })
   submittedAt: Date | null;
 
+  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  deletedAt: Date | null;
+
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  isActive: boolean;
+
   @OneToMany(() => SubmissionVersion, (version) => version.submission, {
     cascade: true,
   })

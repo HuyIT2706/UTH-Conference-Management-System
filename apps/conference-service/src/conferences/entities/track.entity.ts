@@ -30,6 +30,12 @@ export class Track {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
+  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  deletedAt: Date | null;
+
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  isActive: boolean;
+
   @ManyToOne(() => Conference, (conference) => conference.tracks, {
     onDelete: 'CASCADE',
   })

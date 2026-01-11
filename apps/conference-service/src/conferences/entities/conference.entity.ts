@@ -36,6 +36,12 @@ export class Conference {
   @Column({ type: 'int' })
   organizerId: number;
 
+  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  deletedAt: Date | null;
+
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  isActive: boolean;
+
   @OneToMany(() => Track, (track) => track.conference)
   tracks: Track[];
 

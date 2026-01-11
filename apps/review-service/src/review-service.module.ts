@@ -70,7 +70,10 @@ import { IdentityClientService } from './integrations/identity-client.service';
             Decision,
             Rebuttal,
           ],
-          synchronize: true,
+          synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' ? true : false,
+          // CRITICAL: Set TYPEORM_SYNCHRONIZE=true in .env ONLY after running migration script
+          // Default: false to prevent schema sync errors with NULL values
+          // IMPORTANT: Before enabling synchronize: true, MUST run migration script (02-migration-fixes.sql) first to clean NULL values
         };
       },
     }),

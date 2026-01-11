@@ -28,6 +28,7 @@ import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { SubmissionClientService } from './integrations/submission-client.service';
 import { IdentityClientService } from './integrations/identity-client.service';
+import { ReviewClientService } from './integrations/review-client.service';
 import { EmailService } from './common/services/email.service';
 
 @Module({
@@ -119,6 +120,7 @@ import { EmailService } from './common/services/email.service';
     JwtStrategy,
     SubmissionClientService,
     IdentityClientService,
+    ReviewClientService,
     EmailService,
   ],
 })

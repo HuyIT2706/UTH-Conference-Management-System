@@ -10,7 +10,7 @@ export class Rebuttal {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'uuid' })
   submissionId: string; // UUID from submission-service
 
   @Column({ type: 'int' })

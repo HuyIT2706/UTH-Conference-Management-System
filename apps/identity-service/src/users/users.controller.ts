@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Delete, Query, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Delete, Query, UnauthorizedException, NotFoundException, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -198,13 +199,23 @@ export class UsersController {
   @Roles(RoleName.ADMIN)
   @Delete(':id')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Xóa user (Admin only)' })
+  @ApiOperation({ summary: 'Xóa user (Admin only) - Soft Delete với Guard Clauses' })
   @ApiResponse({ status: 200, description: 'Xóa user thành công' })
+  @ApiResponse({ status: 400, description: 'Không thể xóa user (có submissions/reviews)' })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
-  async deleteUser(@Param('id', ParseIntPipe) userId: number) {
-    await this.usersService.deleteUser(userId);
-    return { message: 'Xóa user thành công' };
+  async deleteUser(
+    @Param('id', ParseIntPipe) userId: number,
+    @Req() req: Request,
+  ) {
+    // Extract JWT token from Authorization header for cross-service calls
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : undefined;
+
+    await this.usersService.deleteUser(userId, authToken);
+    return { message: 'Xóa user thành công (soft delete)' };
   }
 }
 

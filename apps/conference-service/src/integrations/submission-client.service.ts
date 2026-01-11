@@ -175,5 +175,84 @@ export class SubmissionClientService {
       throw error;
     }
   }
+
+  /**
+   * Get submission IDs by trackId (for Guard Clause Case 3)
+   * Used by conference-service to check if track member can be removed
+   * 
+   * CRITICAL: Uses fail-secure approach - if service is down/error, THROWS ERROR
+   * to PREVENT track member removal and potential data loss.
+   */
+  async getSubmissionIdsByTrack(
+    trackId: number,
+    authToken: string,
+  ): Promise<string[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`${this.submissionServiceUrl}/submissions/track/${trackId}/ids`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          timeout: 10000,
+        }),
+      );
+
+      const data = response.data?.data || response.data || {};
+      return data.submissionIds || [];
+    } catch (error: any) {
+      const status = error.response?.status;
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Unknown error';
+
+      // If service is down or unreachable, THROW ERROR to PREVENT removal (fail-secure)
+      // This ensures data integrity - we cannot verify track has no submissions if service is down
+      if (!status || status >= 500) {
+        console.error('[SubmissionClient] Service seems down/unreachable, BLOCKING track member removal to prevent data loss:', {
+          trackId,
+          serviceUrl: this.submissionServiceUrl,
+          error: errorMessage,
+        });
+        throw new HttpException(
+          {
+            code: 'SUBMISSION_SERVICE_UNAVAILABLE',
+            message: 'Không thể xác minh track có submissions hay không. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
+            detail: {
+              trackId,
+              service: 'submission-service',
+              reason: 'Service unavailable or timeout',
+            },
+          },
+          HttpStatus.SERVICE_UNAVAILABLE, // 503
+        );
+      }
+
+      // If track not found or has no submissions (404), safe to return empty array
+      if (status === HttpStatus.NOT_FOUND) {
+        return [];
+      }
+
+      // For other errors (401, 403, 400), log and throw to prevent removal
+      console.error('[SubmissionClient] Error getting submission IDs by track, BLOCKING removal:', {
+        trackId,
+        status,
+        message: errorMessage,
+      });
+
+      throw new HttpException(
+        {
+          code: 'SUBMISSION_SERVICE_ERROR',
+          message: `Không thể lấy danh sách submissions của track: ${errorMessage}`,
+          detail: {
+            trackId,
+            status,
+            service: 'submission-service',
+          },
+        },
+        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, // 502
+      );
+    }
+  }
 }
 

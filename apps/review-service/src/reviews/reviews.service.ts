@@ -53,7 +53,7 @@ export class ReviewsService {
     const existingBid = await this.reviewPreferenceRepository.findOne({
       where: {
         reviewerId,
-        submissionId: String(dto.submissionId),
+        submissionId: dto.submissionId, // Already UUID string from DTO
       },
     });
 
@@ -66,7 +66,7 @@ export class ReviewsService {
     // Create new bid
     const bid = this.reviewPreferenceRepository.create({
       reviewerId,
-      submissionId: String(dto.submissionId),
+      submissionId: dto.submissionId, // Already UUID string from DTO
       conferenceId: dto.conferenceId,
       preference: dto.preference,
     });
@@ -83,9 +83,11 @@ export class ReviewsService {
     submissionId: string | number,
     conferenceId?: number,
   ): Promise<boolean> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const where: Record<string, any> = {
       reviewerId,
-      submissionId,
+      submissionId: submissionIdStr,
     };
 
     // Nếu truyền conferenceId thì filter theo conferenceId,
@@ -450,10 +452,12 @@ export class ReviewsService {
     reviewerId: number,
     submissionId: string | number,
   ): Promise<boolean> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const assignment = await this.assignmentRepository.findOne({
       where: {
         reviewerId,
-        submissionId: String(submissionId),
+        submissionId: submissionIdStr,
       },
     });
     return !!assignment;
@@ -468,9 +472,11 @@ export class ReviewsService {
     limit = 10,
     authToken?: string,
   ): Promise<any[]> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     // Find all assignments for this submission
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
     });
 
     const assignmentIds = assignments.map((a) => a.id);
@@ -537,9 +543,11 @@ export class ReviewsService {
     limit = 10,
   ): Promise<ReviewPreference[]> {
     const skip = (page - 1) * limit;
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
 
     return this.reviewPreferenceRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
       order: { createdAt: 'DESC' },
       skip,
       take: limit,
@@ -554,9 +562,11 @@ export class ReviewsService {
     submissionId: string | number,
     message: string,
   ): Promise<PcDiscussion> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const discussion = this.pcDiscussionRepository.create({
       userId,
-      submissionId: String(submissionId),
+      submissionId: submissionIdStr,
       message,
     });
 
@@ -572,9 +582,11 @@ export class ReviewsService {
     limit = 20,
   ): Promise<PcDiscussion[]> {
     const skip = (page - 1) * limit;
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
 
     return this.pcDiscussionRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
       order: { createdAt: 'ASC' },
       skip,
       take: limit,
@@ -598,9 +610,11 @@ export class ReviewsService {
 
     for (const reviewerId of reviewerIds) {
       try {
+        // Ensure submissionId is string (UUID)
+        const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
         const assignment = await this.createAssignment(chairId, {
           reviewerId,
-          submissionId: String(submissionId),
+          submissionId: submissionIdStr,
           conferenceId,
           // no dueDate in auto mode; chair can update later
         } as any);
@@ -625,10 +639,12 @@ export class ReviewsService {
     conferenceId: number | null,
     message: string,
   ): Promise<Rebuttal> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const rebuttal = this.rebuttalRepository.create({
-      submissionId: String(submissionId),
+      submissionId: submissionIdStr,
       authorId,
-      conferenceId,
+      conferenceId: conferenceId ?? null,
       message,
     });
 
@@ -636,8 +652,10 @@ export class ReviewsService {
   }
 
   async getRebuttalsBySubmission(submissionId: string | number): Promise<Rebuttal[]> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     return this.rebuttalRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
       order: { createdAt: 'ASC' },
     });
   }
@@ -674,8 +692,10 @@ export class ReviewsService {
     reviewsSubmitted: number;
     lastReviewAt: Date | null;
   }> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
     });
 
     const totalAssignments = assignments.length;
@@ -760,9 +780,11 @@ export class ReviewsService {
     };
     decision: Decision | null;
   }> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     // Get all reviews for this submission
     const assignments = await this.assignmentRepository.find({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
     });
 
     const assignmentIds = assignments.map((a) => a.id);
@@ -794,7 +816,7 @@ export class ReviewsService {
     }
 
     const decision = await this.decisionRepository.findOne({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
     });
 
     return {
@@ -819,13 +841,15 @@ export class ReviewsService {
     decisionValue: FinalDecision,
     note?: string,
   ): Promise<Decision> {
+    // Ensure submissionId is string (UUID)
+    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
     let decision = await this.decisionRepository.findOne({
-      where: { submissionId: String(submissionId) },
+      where: { submissionId: submissionIdStr },
     });
 
     if (!decision) {
       decision = this.decisionRepository.create({
-        submissionId: String(submissionId),
+        submissionId: submissionIdStr,
         decision: decisionValue,
         decidedBy,
         note: note ?? null,
@@ -985,6 +1009,37 @@ export class ReviewsService {
     });
 
     return uniqueSubmissions;
+  }
+
+  /**
+   * Get reviewer activity stats (for Guard Clause Case 2)
+   * Used by identity-service to check if user can be deleted
+   */
+  async getReviewerActivityStats(reviewerId: number): Promise<{
+    assignmentCount: number;
+    reviewCount: number;
+    hasActiveAssignments: boolean;
+    completedReviews: number;
+  }> {
+    const assignments = await this.assignmentRepository.find({
+      where: { reviewerId },
+    });
+
+    const assignmentIds = assignments.map(a => a.id);
+    const reviews = assignmentIds.length > 0
+      ? await this.reviewRepository.find({
+          where: { assignmentId: In(assignmentIds) },
+        })
+      : [];
+
+    return {
+      assignmentCount: assignments.length,
+      reviewCount: reviews.length,
+      hasActiveAssignments: assignments.some(a => 
+        a.status === 'PENDING' || a.status === 'ACCEPTED'
+      ),
+      completedReviews: reviews.length,
+    };
   }
 }
 

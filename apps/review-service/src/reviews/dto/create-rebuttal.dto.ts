@@ -1,14 +1,14 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRebuttalDto {
   @ApiProperty({
-    description: 'ID của submission',
-    example: 1,
+    description: 'ID của submission (UUID)',
+    example: '8ccd4365-3258-4b87-8903-c48d06189ed1',
   })
-  @IsInt()
+  @IsUUID()
   @IsNotEmpty()
-  submissionId: number;
+  submissionId: string;
 
   @ApiProperty({
     description: 'ID của conference (tùy chọn)',

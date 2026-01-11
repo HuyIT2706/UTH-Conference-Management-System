@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  ParseUUIDPipe,
   Post,
   Put,
   ForbiddenException,
@@ -26,6 +27,8 @@ import { CreateDecisionDto } from './dto/create-decision.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { CreateRebuttalDto } from './dto/create-rebuttal.dto';
 import { CreateAutoAssignmentDto } from './dto/create-auto-assignment.dto';
+import { CreateDiscussionDto } from './dto/create-discussion.dto';
+import { SelfAssignDto } from './dto/self-assign.dto';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -71,7 +74,7 @@ export class ReviewsController {
     **Ví dụ request body:**
     \`\`\`json
     {
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "conferenceId": 1,
       "preference": "INTERESTED"
     }
@@ -335,7 +338,7 @@ export class ReviewsController {
     \`\`\`json
     {
       "reviewerId": 5,
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "conferenceId": 1,
       "dueDate": "2025-02-01T23:59:59.000Z"
     }
@@ -379,7 +382,7 @@ export class ReviewsController {
     **Ví dụ request body:**
     \`\`\`json
     {
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "conferenceId": 1,
       "reviewerIds": [2, 3, 4]
     }
@@ -435,11 +438,12 @@ export class ReviewsController {
     - Assignment sẽ được tạo với status ACCEPTED (tự động chấp nhận)
     - Nếu đã có assignment, sẽ tự động accept nếu đang PENDING`
   })
+  @ApiBody({ type: SelfAssignDto })
   @ApiResponse({ status: 201, description: 'Tự phân công thành công' })
   @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ hoặc có CONFLICT' })
   async selfAssign(
     @Req() req: Request,
-    @Body() dto: { submissionId: string; conferenceId: number },
+    @Body() dto: SelfAssignDto,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -489,7 +493,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Không có quyền xem' })
   async getReviewsBySubmission(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
@@ -547,7 +551,7 @@ export class ReviewsController {
   @ApiParam({ name: 'id', description: 'ID của submission (UUID)' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách reviews ẩn danh thành công' })
   async getAnonymizedReviews(
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
   ) {
     const reviews =
       await this.reviewsService.getAnonymizedReviewsBySubmission(submissionId);
@@ -579,7 +583,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getBidsBySubmission(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
@@ -612,7 +616,7 @@ export class ReviewsController {
     **Ví dụ request body:**
     \`\`\`json
     {
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "message": "Tôi nghĩ cần thêm 1 reviewer nữa cho chủ đề này vì có sự khác biệt lớn giữa các reviews hiện tại."
     }
     \`\`\`    
@@ -621,22 +625,13 @@ export class ReviewsController {
     - Chỉ Chair/Admin mới có quyền tạo discussion
     - Discussions là nội bộ PC, tác giả không thể xem`
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        submissionId: { type: 'number', example: 1, description: 'ID của submission' },
-        message: { type: 'string', example: 'Tôi nghĩ cần thêm 1 reviewer nữa cho chủ đề này.', description: 'Nội dung thảo luận' },
-      },
-      required: ['submissionId', 'message'],
-    },
-  })
+  @ApiBody({ type: CreateDiscussionDto })
   @ApiResponse({ status: 201, description: 'Tạo thảo luận thành công' })
-  @ApiResponse({ status: 400, description: 'submissionId và message là bắt buộc' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền tạo discussion' })
   async createDiscussion(
     @Req() req: Request,
-    @Body() body: { submissionId: number; message: string },
+    @Body() dto: CreateDiscussionDto,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -644,14 +639,10 @@ export class ReviewsController {
     }
     this.ensureCanManageConference(user);
 
-    if (!body.submissionId || !body.message) {
-      throw new BadRequestException('submissionId và message là bắt buộc');
-    }
-
     const discussion = await this.reviewsService.createDiscussion(
       user.sub,
-      body.submissionId,
-      body.message,
+      dto.submissionId,
+      dto.message,
     );
 
     return {
@@ -667,7 +658,7 @@ export class ReviewsController {
     **Ví dụ request body:**
     \`\`\`json
     {
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "conferenceId": 1,
       "message": "Chúng tôi đã cập nhật phần thí nghiệm như góp ý của reviewers. Các thay đổi chính bao gồm: (1) Thêm 2 datasets mới, (2) Cải thiện phần so sánh với baseline methods."
     }
@@ -712,7 +703,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getRebuttalsBySubmission(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -749,7 +740,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDiscussionsBySubmission(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
     @Query() query: PaginationQueryDto,
   ) {
     const user = req.user as JwtPayload | undefined;
@@ -785,7 +776,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getDecisionSummary(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -814,7 +805,7 @@ export class ReviewsController {
     **Ví dụ request body:**
     \`\`\`json
     {
-      "submissionId": 1,
+      "submissionId": "8ccd4365-3258-4b87-8903-c48d06189ed1",
       "decision": "ACCEPT",
       "note": "Điểm trung bình cao (85/100), đồng thuận tốt giữa các reviewers. Tất cả đều recommend ACCEPT. Quyết định: Chấp nhận."
     }
@@ -885,7 +876,7 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: 'Chỉ Chair/Admin mới có quyền xem' })
   async getSubmissionProgress(
     @Req() req: Request,
-    @Param('id') submissionId: string,
+    @Param('id', ParseUUIDPipe) submissionId: string,
   ) {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
@@ -937,6 +928,24 @@ export class ReviewsController {
     return {
       message: 'Lấy tiến độ review của hội nghị thành công',
       data: progress,
+    };
+  }
+
+  /**
+   * Guard Clause Endpoint: Get reviewer activity stats (Case 2)
+   * Used by identity-service to check if user can be deleted
+   */
+  @Get('reviewer/:reviewerId/stats')
+  @ApiOperation({ summary: 'Lấy thống kê hoạt động reviewer (Guard Clause - Internal)' })
+  @ApiParam({ name: 'reviewerId', description: 'ID của reviewer' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê thành công' })
+  async getReviewerActivityStats(
+    @Param('reviewerId', ParseIntPipe) reviewerId: number,
+  ) {
+    const stats = await this.reviewsService.getReviewerActivityStats(reviewerId);
+    return {
+      message: 'Lấy thống kê hoạt động reviewer thành công',
+      data: stats,
     };
   }
 }

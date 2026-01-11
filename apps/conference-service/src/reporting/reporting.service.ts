@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Conference } from '../conferences/entities/conference.entity';
 import { Track } from '../conferences/entities/track.entity';
 import { ConferenceMember, ConferenceMemberRole } from '../conferences/entities/conference-member.entity';
@@ -25,7 +25,11 @@ export class ReportingService {
     tracks: Array<{ id: number; name: string }>;
   }> {
     const conference = await this.conferenceRepository.findOne({
-      where: { id: conferenceId },
+      where: { 
+        id: conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
 
     if (!conference) {
@@ -33,7 +37,11 @@ export class ReportingService {
     }
 
     const tracks = await this.trackRepository.find({
-      where: { conferenceId },
+      where: { 
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
 
     const members = await this.conferenceMemberRepository.find({
@@ -84,7 +92,11 @@ export class ReportingService {
 
       // Map track names from database
       const tracks = await this.trackRepository.find({
-        where: { conferenceId },
+        where: { 
+          conferenceId,
+          deletedAt: IsNull(),
+          isActive: true,
+        },
       });
       const trackMap = new Map(tracks.map((t) => [t.id, t.name]));
 
@@ -184,7 +196,11 @@ export class ReportingService {
     };
   }> {
     const conference = await this.conferenceRepository.findOne({
-      where: { id: conferenceId },
+      where: { 
+        id: conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
 
     if (!conference) {

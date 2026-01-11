@@ -5,13 +5,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { Role, RoleName } from './entities/role.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 import { EmailService } from '../common/services/email.service';
+import { SubmissionClientService } from '../integrations/submission-client.service';
+import { ReviewClientService } from '../integrations/review-client.service';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +26,8 @@ export class UsersService {
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
     private readonly dataSource: DataSource,
     private readonly emailService: EmailService,
+    private readonly submissionClient: SubmissionClientService,
+    private readonly reviewClient: ReviewClientService,
   ) {}
   async markEmailVerified(userId: number): Promise<User> {
     const user = await this.findById(userId);
@@ -36,20 +40,44 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email },
+      where: { 
+        email,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+      relations: ['roles'],
+    });
+  }
+
+  /**
+   * Find user by email including soft deleted (for registration check)
+   * Used to prevent email reuse even if previous user was soft deleted
+   * Note: This queries without deletedAt filter to include soft deleted users
+   */
+  async findByEmailIncludingDeleted(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email }, // No deletedAt filter - includes soft deleted
       relations: ['roles'],
     });
   }
 
   async findById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
       relations: ['roles'],
     });
   }
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
+      where: {
+        deletedAt: IsNull(),
+        isActive: true,
+      },
       relations: ['roles'],
       order: { createdAt: 'DESC' },
     });
@@ -314,13 +342,85 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  async deleteUser(userId: number): Promise<void> {
-    const user = await this.findById(userId);
+  /**
+   * Delete user with Guard Clauses (Soft Delete)
+   * Case 1: Author Protection - Chặn xóa User nếu User đó đã nộp bài
+   * Case 2: Reviewer Protection - Chặn xóa User nếu User đó đang chấm bài
+   */
+  async deleteUser(userId: number, authToken?: string, force: boolean = false): Promise<void> {
+    // Find user (including soft deleted ones for admin operations)
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+
     if (!user) {
       throw new NotFoundException('Không tìm thấy tài khoản');
     }
 
-    await this.usersRepository.remove(user);
+    // Check if already soft deleted
+    if (user.deletedAt !== null) {
+      throw new BadRequestException('Người dùng này đã bị xóa trước đó');
+    }
+
+    // Guard Clause Case 1 & 2: Author Protection & Reviewer Protection
+    // CRITICAL: If authToken is missing, we cannot verify guard clauses - BLOCK deletion
+    if (!force) {
+      if (!authToken) {
+        throw new BadRequestException({
+          code: 'MISSING_AUTH_TOKEN',
+          message: 'Không thể kiểm tra guard clauses vì thiếu auth token. Vui lòng cung cấp token để xác minh người dùng không có submissions/reviews trước khi xóa.',
+          detail: {
+            userId,
+            reason: 'Auth token required for cross-service guard clause checks',
+          },
+        });
+      }
+
+      // Guard Clause Case 1: Author Protection
+      // Check if user has submitted any papers
+      // If service is down, this will throw error (fail-secure) to prevent data loss
+      const submissionCount = await this.submissionClient.countSubmissionsByAuthorId(
+        userId,
+        authToken,
+      );
+
+      if (submissionCount > 0) {
+        throw new BadRequestException({
+          code: 'USER_HAS_SUBMISSIONS',
+          message: 'Người dùng này đã nộp bài, không được xóa',
+          detail: {
+            userId,
+            submissionCount,
+          },
+        });
+      }
+
+      // Guard Clause Case 2: Reviewer Protection
+      // Check if user has assignments or reviews
+      // If service is down, this will throw error (fail-secure) to prevent data loss
+      const reviewerStats = await this.reviewClient.getReviewerActivityStats(
+        userId,
+        authToken,
+      );
+
+      if (reviewerStats.assignmentCount > 0 || reviewerStats.reviewCount > 0) {
+        throw new BadRequestException({
+          code: 'USER_IS_REVIEWER',
+          message: 'Người dùng này đang tham gia hội đồng chấm, không được xóa',
+          detail: {
+            userId,
+            assignmentCount: reviewerStats.assignmentCount,
+            reviewCount: reviewerStats.reviewCount,
+          },
+        });
+      }
+    }
+
+    // Perform Soft Delete
+    user.deletedAt = new Date();
+    user.isActive = false;
+    await this.usersRepository.save(user);
   }
 }
 

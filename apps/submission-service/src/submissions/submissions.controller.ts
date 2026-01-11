@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseUUIDPipe,
+  ParseIntPipe,
   UnauthorizedException,
   HttpException,
   UseGuards,
@@ -548,6 +549,40 @@ export class SubmissionsController {
     return {
       message: 'Lấy danh sách reviews đã ẩn danh thành công',
       data: reviews,
+    };
+  }
+
+  /**
+   * Guard Clause Endpoint: Count submissions by authorId (Case 1)
+   * Used by identity-service to check if user can be deleted
+   */
+  @Get('author/:authorId/count')
+  @ApiOperation({ summary: 'Đếm số submissions của author (Guard Clause - Internal)' })
+  @ApiResponse({ status: 200, description: 'Đếm thành công' })
+  async countSubmissionsByAuthorId(
+    @Param('authorId', ParseIntPipe) authorId: number,
+  ) {
+    const count = await this.submissionsService.countSubmissionsByAuthorId(authorId);
+    return {
+      message: 'Đếm submissions thành công',
+      data: { count },
+    };
+  }
+
+  /**
+   * Guard Clause Endpoint: Get submission IDs by trackId (Case 3)
+   * Used by conference-service to check if track member can be removed
+   */
+  @Get('track/:trackId/ids')
+  @ApiOperation({ summary: 'Lấy danh sách submission IDs theo track (Guard Clause - Internal)' })
+  @ApiResponse({ status: 200, description: 'Lấy thành công' })
+  async getSubmissionIdsByTrackId(
+    @Param('trackId', ParseIntPipe) trackId: number,
+  ) {
+    const submissionIds = await this.submissionsService.getSubmissionIdsByTrackId(trackId);
+    return {
+      message: 'Lấy danh sách submission IDs thành công',
+      data: { submissionIds },
     };
   }
 }

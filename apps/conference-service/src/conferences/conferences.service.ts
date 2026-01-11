@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Conference } from './entities/conference.entity';
 import { Track } from './entities/track.entity';
 import {
@@ -22,6 +22,8 @@ import { AddConferenceMemberDto } from './dto/add-conference-member.dto';
 import { AddTrackMemberDto } from './dto/add-track-member.dto';
 import { EmailService } from '../common/services/email.service';
 import { IdentityClientService } from '../integrations/identity-client.service';
+import { SubmissionClientService } from '../integrations/submission-client.service';
+import { ReviewClientService } from '../integrations/review-client.service';
 
 @Injectable()
 export class ConferencesService {
@@ -38,6 +40,8 @@ export class ConferencesService {
     private readonly cfpSettingRepository: Repository<CfpSetting>,
     private readonly emailService: EmailService,
     private readonly identityClient: IdentityClientService,
+    private readonly submissionClient: SubmissionClientService,
+    private readonly reviewClient: ReviewClientService,
   ) {}
 
   async createConference(
@@ -70,12 +74,22 @@ export class ConferencesService {
   }
 
   async findAll(): Promise<Conference[]> {
-    return this.conferenceRepository.find({ relations: ['tracks', 'members', 'cfpSetting'] });
+    return this.conferenceRepository.find({ 
+      where: {
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+      relations: ['tracks', 'members', 'cfpSetting'] 
+    });
   }
 
   async findOne(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
       relations: ['tracks', 'members', 'cfpSetting'],
     });
 
@@ -161,7 +175,11 @@ export class ConferencesService {
   ): Promise<void> {
     await this.ensureCanManageConference(id, user);
     const conference = await this.getConferenceOrThrow(id);
-    await this.conferenceRepository.remove(conference);
+    
+    // Perform Soft Delete
+    conference.deletedAt = new Date();
+    conference.isActive = false;
+    await this.conferenceRepository.save(conference);
   }
 
   async updateTrack(
@@ -172,7 +190,12 @@ export class ConferencesService {
   ): Promise<Track> {
     await this.ensureCanManageConference(conferenceId, user);
     const track = await this.trackRepository.findOne({
-      where: { id: trackId, conferenceId },
+      where: { 
+        id: trackId, 
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     if (!track) {
       throw new NotFoundException('Không tìm thấy chủ đề');
@@ -185,7 +208,12 @@ export class ConferencesService {
     await this.trackRepository.save(track);
     
     const updated = await this.trackRepository.findOne({
-      where: { id: trackId, conferenceId },
+      where: { 
+        id: trackId, 
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     
     if (!updated) {
@@ -202,12 +230,21 @@ export class ConferencesService {
   ): Promise<void> {
     await this.ensureCanManageConference(conferenceId, user);
     const track = await this.trackRepository.findOne({
-      where: { id: trackId, conferenceId },
+      where: { 
+        id: trackId, 
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     if (!track) {
       throw new NotFoundException('Chủ đề không tồn tại');
     }
-    await this.trackRepository.remove(track);
+    
+    // Perform Soft Delete
+    track.deletedAt = new Date();
+    track.isActive = false;
+    await this.trackRepository.save(track);
   }
 
   async listMembers(
@@ -320,7 +357,11 @@ export class ConferencesService {
 
   async findAllTracks(conferenceId: number): Promise<Track[]> {
     return await this.trackRepository.find({
-      where: { conferenceId },
+      where: { 
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
       order: { id: 'ASC' },
     });
   }
@@ -333,7 +374,11 @@ export class ConferencesService {
 
   private async getConferenceOrThrow(id: number): Promise<Conference> {
     const conference = await this.conferenceRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     if (!conference) {
       throw new NotFoundException('Không tìm thấy hội nghị');
@@ -346,7 +391,11 @@ export class ConferencesService {
     user: { id: number; roles: string[] },
   ): Promise<TrackMember[]> {
     const track = await this.trackRepository.findOne({
-      where: { id: trackId },
+      where: { 
+        id: trackId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     if (!track) {
       throw new NotFoundException('Không tìm thấy chủ đề');
@@ -365,7 +414,11 @@ export class ConferencesService {
     authToken?: string,
   ): Promise<TrackMember> {
     const track = await this.trackRepository.findOne({
-      where: { id: trackId },
+      where: { 
+        id: trackId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
       relations: ['conference'],
     });
     if (!track) {
@@ -416,7 +469,11 @@ export class ConferencesService {
 
       // Get conference info
       const conference = await this.conferenceRepository.findOne({
-        where: { id: track.conferenceId },
+        where: { 
+          id: track.conferenceId,
+          deletedAt: IsNull(),
+          isActive: true,
+        },
       });
 
       await this.emailService.sendTrackAssignmentEmail(
@@ -435,9 +492,14 @@ export class ConferencesService {
     trackId: number,
     memberUserId: number,
     user: { id: number; roles: string[] },
+    authToken?: string,
   ): Promise<void> {
     const track = await this.trackRepository.findOne({
-      where: { id: trackId },
+      where: { 
+        id: trackId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
     });
     if (!track) {
       throw new NotFoundException('Không tìm thấy chủ đề');
@@ -450,6 +512,46 @@ export class ConferencesService {
     if (!member) {
       throw new NotFoundException('Không tìm thấy thành viên này');
     }
+
+    // Guard Clause Case 3: Check if user has reviewed submissions in this track
+    // CRITICAL: If authToken is missing, we cannot verify guard clause - BLOCK removal
+    if (!authToken) {
+      throw new BadRequestException({
+        code: 'MISSING_AUTH_TOKEN',
+        message: 'Không thể kiểm tra guard clause vì thiếu auth token. Vui lòng cung cấp token để xác minh người dùng không có reviews trong track này trước khi xóa.',
+        detail: {
+          trackId,
+          userId: memberUserId,
+          reason: 'Auth token required for cross-service guard clause checks',
+        },
+      });
+    }
+
+    // Get submission IDs for this track from submission-service
+    // If service is down, this will throw error (fail-secure) to prevent data loss
+    const submissionIds = await this.submissionClient.getSubmissionIdsByTrack(trackId, authToken);
+    
+    if (submissionIds && submissionIds.length > 0) {
+      // Check if user has reviewed any submissions in this track
+      // If service is down, this will throw error (fail-secure) to prevent data loss
+      const hasReviews = await this.reviewClient.hasUserReviewedSubmissions(
+        memberUserId,
+        submissionIds,
+        authToken,
+      );
+      
+      if (hasReviews) {
+        throw new BadRequestException({
+          code: 'USER_HAS_REVIEWED_TRACK',
+          message: 'Người dùng này đã thực hiện review cho track này, không thể xóa khỏi track',
+          detail: {
+            trackId,
+            userId: memberUserId,
+          },
+        });
+      }
+    }
+
     await this.trackMemberRepository.remove(member);
   }
 
@@ -460,8 +562,23 @@ export class ConferencesService {
       relations: ['track', 'track.conference'],
       order: { createdAt: 'DESC' },
     });
+    
+    // Filter out assignments where track or conference is soft deleted
+    const activeAssignments = assignments.filter((assignment) => {
+      const track = assignment.track;
+      const conference = track?.conference;
+      return (
+        track &&
+        track.deletedAt === null &&
+        track.isActive === true &&
+        conference &&
+        conference.deletedAt === null &&
+        conference.isActive === true
+      );
+    });
+    
     // Đảm bảo field status luôn có giá trị (mặc định là PENDING nếu null/undefined)
-    return assignments.map((assignment) => ({
+    return activeAssignments.map((assignment) => ({
       ...assignment,
       status: assignment.status || 'PENDING',
     }));
@@ -478,6 +595,11 @@ export class ConferencesService {
     });
     if (!member) {
       throw new NotFoundException('Không tìm thấy phân công này');
+    }
+    
+    // Check if track is soft deleted
+    if (member.track && (member.track.deletedAt !== null || member.track.isActive === false)) {
+      throw new NotFoundException('Chủ đề này đã bị xóa hoặc không còn hoạt động');
     }
     if (member.status === 'ACCEPTED') {
       throw new BadRequestException('Phân công đã được chấp nhận');
@@ -501,9 +623,17 @@ export class ConferencesService {
         trackId: trackId,
         status: 'ACCEPTED',
       },
+      relations: ['track'],
     });
-    console.log('[ConferencesService] checkReviewerTrackAssignment result:', { hasAccepted: !!member, memberId: member?.id });
-    return { hasAccepted: !!member };
+    
+    // Also check if track is active and not deleted
+    const hasAccepted = !!member && 
+      member.track && 
+      member.track.deletedAt === null && 
+      member.track.isActive === true;
+    
+    console.log('[ConferencesService] checkReviewerTrackAssignment result:', { hasAccepted, memberId: member?.id });
+    return { hasAccepted };
   }
 
   // Reject track assignment
@@ -517,6 +647,11 @@ export class ConferencesService {
     });
     if (!member) {
       throw new NotFoundException('Không tìm thấy phân công này');
+    }
+    
+    // Check if track is soft deleted
+    if (member.track && (member.track.deletedAt !== null || member.track.isActive === false)) {
+      throw new NotFoundException('Chủ đề này đã bị xóa hoặc không còn hoạt động');
     }
     if (member.status === 'REJECTED') {
       throw new BadRequestException('Phân công đã bị từ chối');

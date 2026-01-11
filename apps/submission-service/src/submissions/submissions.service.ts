@@ -199,7 +199,11 @@ export class SubmissionsService {
       await queryRunner.commitTransaction();
 
       const result = await this.submissionRepository.findOne({
-        where: { id: savedSubmission.id },
+        where: { 
+          id: savedSubmission.id,
+          deletedAt: null as any,
+          isActive: true,
+        },
         relations: ['versions'],
       });
 
@@ -236,7 +240,11 @@ export class SubmissionsService {
 
     try {
       const submission = await queryRunner.manager.findOne(Submission, {
-        where: { id },
+        where: { 
+          id,
+          deletedAt: null as any,
+          isActive: true,
+        },
       });
 
       if (!submission) {
@@ -328,7 +336,11 @@ export class SubmissionsService {
 
       await queryRunner.commitTransaction();
       const result = await this.submissionRepository.findOne({
-        where: { id: updatedSubmission.id },
+        where: { 
+          id: updatedSubmission.id,
+          deletedAt: null as any,
+          isActive: true,
+        },
         relations: ['versions'],
       });
 
@@ -349,7 +361,11 @@ export class SubmissionsService {
 
   async withdraw(id: string, authorId: number): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null as any,
+        isActive: true,
+      },
     });
 
     if (!submission) {
@@ -410,7 +426,11 @@ export class SubmissionsService {
 
     try {
       const submission = await queryRunner.manager.findOne(Submission, {
-        where: { id },
+        where: { 
+          id,
+          deletedAt: null as any,
+          isActive: true,
+        },
       });
 
       if (!submission) {
@@ -479,7 +499,11 @@ export class SubmissionsService {
       await queryRunner.commitTransaction();
 
       const result = await this.submissionRepository.findOne({
-        where: { id: submission.id },
+        where: { 
+          id: submission.id,
+          deletedAt: null as any,
+          isActive: true,
+        },
         relations: ['versions'],
       });
 
@@ -571,7 +595,11 @@ export class SubmissionsService {
     authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null as any,
+        isActive: true,
+      },
     });
 
     if (!submission) {
@@ -753,7 +781,11 @@ export class SubmissionsService {
     authorId: number,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null as any,
+        isActive: true,
+      },
     });
 
     if (!submission) {
@@ -950,6 +982,10 @@ export class SubmissionsService {
       );
     }
 
+    // Soft Delete Filter: Only show active, non-deleted submissions
+    queryBuilder.andWhere('submission.deletedAt IS NULL');
+    queryBuilder.andWhere('submission.isActive = :isActive', { isActive: true });
+
     // Get total count
     let total = 0;
     try {
@@ -1125,7 +1161,11 @@ export class SubmissionsService {
    */
   async findAllByAuthor(authorId: number): Promise<Submission[]> {
     return await this.submissionRepository.find({
-      where: { authorId },
+      where: { 
+        authorId,
+        deletedAt: null as any,
+        isActive: true,
+      },
       relations: ['versions'],
       order: { createdAt: 'DESC' },
     });
@@ -1152,7 +1192,11 @@ export class SubmissionsService {
     authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null as any,
+        isActive: true,
+      },
       relations: ['versions'],
     });
 
@@ -1272,7 +1316,11 @@ export class SubmissionsService {
     Array<{ score: number; commentForAuthor: string; recommendation: string }>
   > {
     const submission = await this.submissionRepository.findOne({
-      where: { id },
+      where: { 
+        id,
+        deletedAt: null as any,
+        isActive: true,
+      },
     });
 
     if (!submission) {
@@ -1291,6 +1339,37 @@ export class SubmissionsService {
     }
 
     return await this.reviewClient.getAnonymizedReviewsForAuthor(id);
+  }
+
+  /**
+   * Count submissions by authorId (for Guard Clause Case 1)
+   * Used by identity-service to check if user can be deleted
+   */
+  async countSubmissionsByAuthorId(authorId: number): Promise<number> {
+    return await this.submissionRepository.count({
+      where: {
+        authorId,
+        deletedAt: null as any,
+        isActive: true,
+      },
+    });
+  }
+
+  /**
+   * Get submission IDs by trackId (for Guard Clause Case 3)
+   * Used by conference-service to check if track member can be removed
+   */
+  async getSubmissionIdsByTrackId(trackId: number): Promise<string[]> {
+    const submissions = await this.submissionRepository.find({
+      where: {
+        trackId,
+        deletedAt: null as any,
+        isActive: true,
+      },
+      select: ['id'],
+    });
+
+    return submissions.map(s => s.id);
   }
 }
 
