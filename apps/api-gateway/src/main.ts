@@ -46,9 +46,6 @@ async function bootstrap() {
     },
   };
 
-  // Configure proxy middleware
-  // When using app.use('/api/auth', proxy), Express strips the prefix
-  // So /api/auth/login becomes /login, we need to rewrite it back to /api/auth/login
   expressApp.use(
     '/api/users',
     createProxyMiddleware({

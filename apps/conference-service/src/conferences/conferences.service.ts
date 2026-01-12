@@ -233,6 +233,7 @@ export class ConferencesService {
     conferenceId: number,
     trackId: number,
     user: { id: number; roles: string[] },
+    authToken?: string,
   ): Promise<void> {
     await this.ensureCanManageConference(conferenceId, user);
     const track = await this.trackRepository.findOne({
@@ -246,6 +247,33 @@ export class ConferencesService {
     if (!track) {
       throw new NotFoundException('Chủ đề không tồn tại');
     }
+
+    // Kiểm tra xem track có submissions hay không
+    if (authToken) {
+      try {
+        const submissionIds = await this.submissionClient.getSubmissionIdsByTrack(
+          trackId,
+          authToken,
+        );
+
+        if (submissionIds && submissionIds.length > 0) {
+          throw new BadRequestException(
+            `Không thể xóa chủ đề này vì đã có ${submissionIds.length} bài nộp. Vui lòng xóa hoặc chuyển các bài nộp trước khi xóa chủ đề.`,
+          );
+        }
+      } catch (error: any) {
+        // Nếu là BadRequestException từ việc có submissions, throw lại
+        if (error instanceof BadRequestException) {
+          throw error;
+        }
+        // Nếu là lỗi service unavailable, cho phép xóa (fallback)
+        // Nhưng log warning để admin biết
+        console.warn(
+          `[ConferencesService] Cannot verify submissions for track ${trackId}: ${error.message}`,
+        );
+      }
+    }
+
     track.deletedAt = new Date();
     track.isActive = false;
     await this.trackRepository.save(track);

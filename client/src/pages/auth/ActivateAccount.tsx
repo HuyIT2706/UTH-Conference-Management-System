@@ -7,6 +7,7 @@ import {
   useVerifyEmailMutation,
 } from '../../redux/api/authApi';
 import { formatApiError } from '../../utils/api-helpers';
+import { showToast } from '../../utils/toast';
 
 const ActivateAccount = () => {
   const navigate = useNavigate();
@@ -27,12 +28,23 @@ const ActivateAccount = () => {
   useEffect(() => {
     if (tokenData?.data) {
       if (tokenData.data.isVerified) {
-        setError('Email đã được xác minh. Vui lòng đăng nhập.');
+        showToast.info('Email đã được xác minh. Bạn có thể đăng nhập ngay.');
+        setError('Email đã được xác minh. Bạn có thể đăng nhập ngay.');
         setIsSubmit(false);
       }
     }
     if (tokenError) {
-      setError(formatApiError(tokenError));
+      const errorMessage = formatApiError(tokenError);
+      // Kiểm tra nếu là lỗi đã được xác minh
+      if (
+        errorMessage.includes('đã được xác minh') ||
+        errorMessage.includes('đã được xác thực')
+      ) {
+        showToast.info('Tài khoản này đã được xác thực. Bạn có thể đăng nhập ngay.');
+        setError('Tài khoản này đã được xác thực. Bạn có thể đăng nhập ngay.');
+      } else {
+        setError(errorMessage);
+      }
       setIsSubmit(false);
     }
   }, [tokenData, tokenError]);
@@ -61,13 +73,28 @@ const ActivateAccount = () => {
     try {
       await verifyEmail({ token: code.trim() }).unwrap();
 
+      // Hiển thị toast thông báo thành công
+      showToast.success('Kích hoạt tài khoản thành công! Vui lòng đăng nhập.');
+
       navigate('/login', {
         state: {
           message: 'Kích hoạt tài khoản thành công! Vui lòng đăng nhập.',
         },
       });
-    } catch (err: unknown) {
-      setError(formatApiError(err));
+    } catch (err: any) {
+      // Kiểm tra nếu tài khoản đã được xác thực rồi
+      const errorMessage = err?.data?.message || err?.message || '';
+      if (
+        err?.status === 400 &&
+        (errorMessage.includes('đã được xác minh') ||
+          errorMessage.includes('đã được xác thực'))
+      ) {
+        // Hiển thị toast thông báo đã được xác thực
+        showToast.info('Tài khoản này đã được xác thực. Bạn có thể đăng nhập ngay.');
+        setError('Tài khoản này đã được xác thực. Bạn có thể đăng nhập ngay.');
+      } else {
+        setError(formatApiError(err));
+      }
     }
   };
 

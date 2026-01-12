@@ -249,17 +249,29 @@ export class ConferencesController {
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
   @ApiParam({ name: 'trackId', description: 'ID của track cần xóa' })
   @ApiResponse({ status: 200, description: 'Xóa track thành công' })
+  @ApiResponse({ status: 400, description: 'Không thể xóa track vì đã có bài nộp' })
   @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị hoặc track' })
   async deleteTrack(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
     @Param('trackId', ParseIntPipe) trackId: number,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
-    await this.conferencesService.deleteTrack(conferenceId, trackId, {
-      id: user.sub,
-      roles: user.roles ?? [],
-    });
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    await this.conferencesService.deleteTrack(
+      conferenceId,
+      trackId,
+      {
+        id: user.sub,
+        roles: user.roles ?? [],
+      },
+      authToken,
+    );
     return { message: 'Xóa track thành công' };
   }
 //  Lấy danh sách thành viên ban chương trình của chủ đề
