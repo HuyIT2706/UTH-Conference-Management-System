@@ -3,29 +3,30 @@ import {
   useGetConferencesQuery,
   useGetDashboardStatsQuery,
   useGetTracksQuery,
-} from '../../redux/api/conferencesApi';
+} from '../../../redux/api/conferencesApi';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const ReportsPage = () => {
-  const [selectedConferenceId, setSelectedConferenceId] = useState<number | null>(null);
+  const [selectedConferenceId, setSelectedConferenceId] = useState<
+    number | null
+  >(null);
   const [selectedTrackId, setSelectedTrackId] = useState<number | null>(null);
-  
-  const { data: conferencesData, isLoading: conferencesLoading } = useGetConferencesQuery();
+
+  const { data: conferencesData, isLoading: conferencesLoading } =
+    useGetConferencesQuery();
   const { data: tracksData } = useGetTracksQuery(selectedConferenceId!, {
     skip: !selectedConferenceId,
   });
-  const { data: dashboardData, isLoading: dashboardLoading } = useGetDashboardStatsQuery(
-    selectedConferenceId!,
-    { skip: !selectedConferenceId },
-  );
+  const { data: dashboardData, isLoading: dashboardLoading } =
+    useGetDashboardStatsQuery(selectedConferenceId!, {
+      skip: !selectedConferenceId,
+    });
 
   const conferences = useMemo(() => {
     return conferencesData?.data && Array.isArray(conferencesData.data)
       ? conferencesData.data
       : [];
   }, [conferencesData]);
-
-  // Auto-select first conference if available
   useMemo(() => {
     if (!selectedConferenceId && conferences.length > 0) {
       setSelectedConferenceId(conferences[0].id);
@@ -49,7 +50,6 @@ const ReportsPage = () => {
     totalReviewers: 0,
   };
 
-  // Get track stats from API
   const trackStats = useMemo(() => {
     if (!dashboardData?.data?.submissionsByTrack) return [];
     return dashboardData.data.submissionsByTrack.map((track) => ({
@@ -65,28 +65,20 @@ const ReportsPage = () => {
     rejected: 0,
     reviewing: 0,
   };
-
-  // Calculate percentages for the chart
-  const totalForChart = stats.totalSubmissions || 1; // Avoid division by zero
+  const totalForChart = stats.totalSubmissions || 1;
   const acceptedPercent = (statusDistribution.accepted / totalForChart) * 100;
   const rejectedPercent = (statusDistribution.rejected / totalForChart) * 100;
   const reviewingPercent = (statusDistribution.reviewing / totalForChart) * 100;
-  
-  // Calculate SVG circle circumference (2 * PI * r = 2 * 3.14159 * 40 ≈ 251.2)
+
   const circumference = 251.2;
   const acceptedDash = (acceptedPercent / 100) * circumference;
   const rejectedDash = (rejectedPercent / 100) * circumference;
   const reviewingDash = (reviewingPercent / 100) * circumference;
 
-
-  const handleExportReport = () => {
-    // Handle export report
-    console.log('Export report');
-  };
-
-  const maxSubmissions = trackStats.length > 0
-    ? Math.max(...trackStats.map((t) => t.submissions), 1)
-    : 1;
+  const maxSubmissions =
+    trackStats.length > 0
+      ? Math.max(...trackStats.map((t) => t.submissions), 1)
+      : 1;
 
   if (conferencesLoading || dashboardLoading) {
     return (
@@ -104,16 +96,13 @@ const ReportsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Báo cáo và Phân tích
           </h1>
-          <p className="text-gray-600">
-            Tổng quan thống kê bài nộp, tỷ lệ chấp nhận và hoạt động của hệ thống
-          </p>
         </div>
-
-        {/* Filter and Export Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">Lọc theo:</label>
+              <label className="text-sm font-medium text-gray-700">
+                Lọc theo:
+              </label>
               <select
                 value={selectedConferenceId || ''}
                 onChange={(e) => {
@@ -132,7 +121,11 @@ const ReportsPage = () => {
               </select>
               <select
                 value={selectedTrackId || ''}
-                onChange={(e) => setSelectedTrackId(e.target.value ? Number(e.target.value) : null)}
+                onChange={(e) =>
+                  setSelectedTrackId(
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
                 disabled={!selectedConferenceId}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
@@ -144,15 +137,6 @@ const ReportsPage = () => {
                 ))}
               </select>
             </div>
-            <button
-              onClick={handleExportReport}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Xuất báo cáo
-            </button>
           </div>
         </div>
 
@@ -162,19 +146,34 @@ const ReportsPage = () => {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </div>
             </div>
             <div className="mb-2">
               <p className="text-sm text-gray-600 mb-1">Tổng bài nộp</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalSubmissions}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats.totalSubmissions}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {stats.totalSubmissionsChange && (
-                <span className={`text-sm font-medium ${stats.totalSubmissionsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.totalSubmissionsChange >= 0 ? '+' : ''}{stats.totalSubmissionsChange}%
+                <span
+                  className={`text-sm font-medium ${stats.totalSubmissionsChange >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {stats.totalSubmissionsChange >= 0 ? '+' : ''}
+                  {stats.totalSubmissionsChange}%
                 </span>
               )}
               <span className="text-xs text-gray-500">Tất cả phân ban</span>
@@ -185,22 +184,39 @@ const ReportsPage = () => {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
                 </svg>
               </div>
             </div>
             <div className="mb-2">
               <p className="text-sm text-gray-600 mb-1">Tỷ lệ chấp nhận</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.acceptanceRate.toFixed(1)}%</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats.acceptanceRate.toFixed(1)}%
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {stats.acceptanceRateChange && (
-                <span className={`text-sm font-medium ${stats.acceptanceRateChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.acceptanceRateChange >= 0 ? '+' : ''}{stats.acceptanceRateChange}%
+                <span
+                  className={`text-sm font-medium ${stats.acceptanceRateChange >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {stats.acceptanceRateChange >= 0 ? '+' : ''}
+                  {stats.acceptanceRateChange}%
                 </span>
               )}
-              <span className="text-xs text-gray-500">{stats.totalAccepted}/{stats.totalSubmissions} bài</span>
+              <span className="text-xs text-gray-500">
+                {stats.totalAccepted}/{stats.totalSubmissions} bài
+              </span>
             </div>
           </div>
 
@@ -208,14 +224,26 @@ const ReportsPage = () => {
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               </div>
             </div>
             <div className="mb-2">
               <p className="text-sm text-gray-600 mb-1">Phản biện viên</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalReviewers}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {stats.totalReviewers}
+              </p>
             </div>
             <div>
               <span className="text-xs text-gray-500">Đang hoạt động</span>
@@ -235,8 +263,12 @@ const ReportsPage = () => {
                 {trackStats.map((track, index) => (
                   <div key={index} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">{track.name}</span>
-                      <span className="text-xs text-gray-500">{track.submissions} bài</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {track.name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {track.submissions} bài
+                      </span>
                     </div>
                     <div className="flex gap-2 h-8">
                       {/* Submissions bar */}
@@ -328,7 +360,9 @@ const ReportsPage = () => {
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-900">{stats.acceptanceRate.toFixed(1)}%</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stats.acceptanceRate.toFixed(1)}%
+                      </p>
                       <p className="text-xs text-gray-500">Chấp nhận</p>
                     </div>
                   </div>
@@ -338,19 +372,25 @@ const ReportsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-green-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Chấp nhận: {acceptedPercent.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-700">
+                      Chấp nhận: {acceptedPercent.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-red-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Từ chối: {rejectedPercent.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-700">
+                      Từ chối: {rejectedPercent.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-orange-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Đang xét: {reviewingPercent.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-700">
+                      Đang xét: {reviewingPercent.toFixed(1)}%
+                    </span>
                   </div>
                 </div>
               </div>

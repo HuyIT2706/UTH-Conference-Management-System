@@ -24,15 +24,33 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
   @ApiResponse({ status: 401, description: 'Không có quyền truy cập' })
   async getProfile(@CurrentUser('sub') userId: number) {
-    const user = await this.usersService.getProfile(userId);
-    const { password, roles, ...rest } = user;
-    return {
-      message: 'Lấy thông tin người dùng thành công',
-      user: {
-        ...rest,
-        roles: roles?.map((role) => role.name) || [],
-      },
-    };
+    try {
+      if (!userId || typeof userId !== 'number') {
+        throw new UnauthorizedException('Token không hợp lệ hoặc thiếu thông tin người dùng');
+      }
+      
+      const user = await this.usersService.getProfile(userId);
+      if (!user) {
+        throw new NotFoundException('Không tìm thấy thông tin người dùng');
+      }
+      
+      const { password, roles, ...rest } = user;
+      return {
+        message: 'Lấy thông tin người dùng thành công',
+        user: {
+          ...rest,
+          roles: roles?.map((role) => role.name) || [],
+        },
+      };
+    } catch (error: any) {
+      // Re-throw known exceptions
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+        throw error;
+      }
+      // Log and throw generic error for unknown errors
+      console.error('[UsersController] Error in getProfile:', error);
+      throw new UnauthorizedException('Lỗi khi lấy thông tin người dùng: ' + (error?.message || 'Unknown error'));
+    }
   }
 
   @UseGuards(JwtAuthGuard)
@@ -103,12 +121,12 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.CHAIR)
   @Get()
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Lấy danh sách tất cả users (Admin only)' })
+  @ApiOperation({ summary: 'Lấy danh sách tất cả users (Admin/Chair only)' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
-  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
+  @ApiResponse({ status: 403, description: 'Không có quyền ADMIN hoặc CHAIR' })
   async getAllUsers() {
     const users = await this.usersService.findAll();
     const usersWithoutPassword = users.map(({ password, roles, ...user }) => ({

@@ -63,25 +63,25 @@ const SubmissionsTable = memo(({
         <>
           {/* Data Table */}
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[300px]">
                     Tiêu đề
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[200px]">
                     Tác giả
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[250px]">
                     Chủ đề
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[120px]">
                     Trạng thái
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[140px]">
                     Ngày nộp
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-900 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-900 uppercase tracking-wider min-w-[150px]">
                     Xem bài nộp
                   </th>
                 </tr>

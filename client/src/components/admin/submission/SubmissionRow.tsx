@@ -16,20 +16,17 @@ const SubmissionRow = memo(({
 
   return (
     <>
-      <tr
-        className="hover:bg-gray-50 transition-colors"
-        style={{ height: '64px' }}
-      >
+      <tr className="hover:bg-gray-50 transition-colors">
         <td className="px-6 py-4">
           <div
-            className="text-sm font-medium text-gray-900 max-w-md truncate"
+            className="text-sm font-medium text-gray-900 break-words"
             title={submission.title}
           >
             {submission.title}
           </div>
         </td>
         <td className="px-6 py-4">
-          <div className="text-sm text-gray-900">
+          <div className="text-sm text-gray-900 break-words">
             <div className="font-medium">
               {submission.authorName || `ID: ${submission.authorId}`}
             </div>
@@ -42,7 +39,7 @@ const SubmissionRow = memo(({
           </div>
         </td>
         <td className="px-6 py-4">
-          <div className="text-sm text-gray-900">{trackName}</div>
+          <div className="text-sm text-gray-900 break-words">{trackName}</div>
         </td>
         <td className="px-6 py-4">
           <span

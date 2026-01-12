@@ -65,7 +65,7 @@ import { IdentityClientService } from './integrations/identity-client.service';
             Decision,
             Rebuttal,
           ],
-          synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' ? true : false,
+          synchronize: true, // Enable auto-sync for development
         };
       },
     }),

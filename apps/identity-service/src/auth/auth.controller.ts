@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -6,11 +6,15 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 // Đăng ký tài admin
   @Post('register')
   @ApiOperation({ summary: 'Đăng ký tài khoản mới' })
@@ -91,6 +95,43 @@ export class AuthController {
     return {
       message: 'Đã gửi mã kích hoạt tài khoản tới email (tồn tại)',
     };
+  }
+
+  // Endpoint /me as alias for /users/profile
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Lấy thông tin profile của user hiện tại (alias cho /users/profile)' })
+  @ApiResponse({ status: 200, description: 'Lấy thông tin thành công' })
+  @ApiResponse({ status: 401, description: 'Không có quyền truy cập' })
+  async getMe(@CurrentUser('sub') userId: number) {
+    try {
+      if (!userId || typeof userId !== 'number') {
+        throw new UnauthorizedException('Token không hợp lệ hoặc thiếu thông tin người dùng');
+      }
+      
+      const user = await this.usersService.getProfile(userId);
+      if (!user) {
+        throw new NotFoundException('Không tìm thấy thông tin người dùng');
+      }
+      
+      const { password, roles, ...rest } = user;
+      return {
+        message: 'Lấy thông tin người dùng thành công',
+        user: {
+          ...rest,
+          roles: roles?.map((role) => role.name) || [],
+        },
+      };
+    } catch (error: any) {
+      // Re-throw known exceptions
+      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+        throw error;
+      }
+      // Log and throw generic error for unknown errors
+      console.error('[AuthController] Error in getMe:', error);
+      throw new UnauthorizedException('Lỗi khi lấy thông tin người dùng: ' + (error?.message || 'Unknown error'));
+    }
   }
 }
 
