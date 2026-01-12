@@ -16,11 +16,6 @@ async function bootstrap() {
   const app = await NestFactory.create(SubmissionServiceModule);
   app.setGlobalPrefix('api');
   
-  const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.use((req: any, res: any, next: any) => {
-    });
-  });
-  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

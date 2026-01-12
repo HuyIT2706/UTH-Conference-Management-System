@@ -49,7 +49,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
     const isReviewer = user.roles?.includes('REVIEWER');
     
     if (isChairOrAdmin) {
-      return <Navigate to="/conference-setup" replace />;
+      return <Navigate to="/reports" replace />;
     }
     if (isReviewer) {
       return <Navigate to="/reviewer" replace />;

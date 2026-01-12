@@ -50,11 +50,6 @@ import { IdentityClientService } from './integrations/identity-client.service';
         const password = config.get<string>('DB_PASSWORD') || 'admin123';
         const database = config.get<string>('DB_DATABASE') || 'db_review';
 
-        // eslint-disable-next-line no-console
-        console.log(
-          `[Review-Service] DB -> host=${host} port=${port} user=${username} db=${database}`,
-        );
-
         return {
           type: 'postgres' as const,
           host,
@@ -71,9 +66,6 @@ import { IdentityClientService } from './integrations/identity-client.service';
             Rebuttal,
           ],
           synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' ? true : false,
-          // CRITICAL: Set TYPEORM_SYNCHRONIZE=true in .env ONLY after running migration script
-          // Default: false to prevent schema sync errors with NULL values
-          // IMPORTANT: Before enabling synchronize: true, MUST run migration script (02-migration-fixes.sql) first to clean NULL values
         };
       },
     }),

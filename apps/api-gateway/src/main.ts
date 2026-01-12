@@ -23,6 +23,7 @@ async function bootstrap() {
   const reviewServiceUrl = process.env.REVIEW_SERVICE_URL || 
     (isDocker ? 'http://review-service:3004' : 'http://localhost:3004');
 
+  // Get Express instance from NestJS
   const httpAdapter = app.getHttpAdapter();
   const expressApp = httpAdapter.getInstance();
 
@@ -40,10 +41,14 @@ async function bootstrap() {
       proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With';
     },
     onError: (err: any, req: any, res: any) => {
+      console.error('Proxy error:', err);
       res.status(500).json({ message: 'Proxy error', error: err.message });
     },
   };
-  // Cài đặt các proxy middleware
+
+  // Configure proxy middleware
+  // When using app.use('/api/auth', proxy), Express strips the prefix
+  // So /api/auth/login becomes /login, we need to rewrite it back to /api/auth/login
   expressApp.use(
     '/api/users',
     createProxyMiddleware({
@@ -64,6 +69,7 @@ async function bootstrap() {
       ...proxyOptions,
     }),
   );
+  // Public endpoints (no auth required) - must be before /api/conferences
   expressApp.use(
     '/api/public/conferences',
     createProxyMiddleware({
@@ -104,6 +110,8 @@ async function bootstrap() {
       ...proxyOptions,
     }),
   );
+
   await app.listen(3000); 
+  console.log('Gateway is running on http://localhost:3000');
 }
 bootstrap();

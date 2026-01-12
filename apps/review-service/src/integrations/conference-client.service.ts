@@ -28,37 +28,23 @@ export class ConferenceClientService {
     private httpService: HttpService,
   ) {
     // Check if running in Docker
-    const isDocker = process.env.DOCKER_ENV === 'true' || 
-                     process.env.CONFERENCE_SERVICE_URL?.includes('conference-service');
-    
+    const isDocker =
+      process.env.DOCKER_ENV === 'true' ||
+      process.env.CONFERENCE_SERVICE_URL?.includes('conference-service');
+
     this.conferenceServiceUrl =
       this.configService.get<string>('CONFERENCE_SERVICE_URL') ||
-      (isDocker 
-        ? 'http://conference-service:3002/api' 
+      (isDocker
+        ? 'http://conference-service:3002/api'
         : 'http://localhost:3002/api');
-
-    console.log('[ConferenceClient] Initialized with URL:', this.conferenceServiceUrl);
-
     this.httpService.axiosRef.defaults.baseURL = this.conferenceServiceUrl;
     this.httpService.axiosRef.defaults.timeout = 10000;
   }
-
-  /**
-   * Get track assignments for a reviewer
-   */
-  async getMyTrackAssignments(
-    authToken: string,
-  ): Promise<TrackMember[]> {
+  // Fetch track assignments for the authenticated user
+  async getMyTrackAssignments(authToken: string): Promise<TrackMember[]> {
     try {
-      console.log('[ConferenceClient] Getting track assignments, baseURL:', this.conferenceServiceUrl);
-      
-      // Use alternative endpoint to avoid route conflicts
-      // Note: baseURL already includes /api, so we just need /conferences/...
       const url = '/conferences/reviewer/my-track-assignments';
       const fullUrl = `${this.conferenceServiceUrl}${url}`;
-      console.log('[ConferenceClient] Full URL will be:', fullUrl);
-      
-      // Use axios directly with full URL to avoid baseURL issues
       const axios = require('axios');
       const response = await axios.get(fullUrl, {
         headers: {
@@ -66,21 +52,8 @@ export class ConferenceClientService {
         },
         timeout: 10000,
       });
-
-      console.log('[ConferenceClient] Response status:', response.status);
       const result = response.data;
       const assignments = result?.data || [];
-      
-      console.log('[ConferenceClient] Got track assignments:', {
-        count: assignments.length,
-        assignments: assignments.map(a => ({
-          id: a.id,
-          trackId: a.trackId,
-          status: a.status,
-          trackName: a.track?.name,
-        })),
-      });
-      
       return assignments;
     } catch (error: any) {
       const status = error.response?.status;
@@ -88,23 +61,14 @@ export class ConferenceClientService {
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi lấy track assignments';
-
-      console.error('[ConferenceClient] Error getting track assignments:', {
-        status,
-        statusText: error.response?.statusText,
-        message,
-        error: error.response?.data || error.message,
-        url: `${this.conferenceServiceUrl}/conferences/reviewer/my-track-assignments`,
-        hasAuthToken: !!authToken,
-      });
-
-      // If service is down or unreachable, return empty array instead of throwing
       if (!status || status >= 500) {
-        console.warn('[ConferenceClient] Conference-service seems down, returning empty array');
         return [];
       }
 
-      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+      if (
+        status === HttpStatus.UNAUTHORIZED ||
+        status === HttpStatus.FORBIDDEN
+      ) {
         throw new HttpException(message, status);
       }
 
@@ -117,4 +81,3 @@ export class ConferenceClientService {
     }
   }
 }
-

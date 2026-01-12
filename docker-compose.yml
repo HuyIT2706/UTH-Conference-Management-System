@@ -126,10 +126,10 @@ services:
       - "3000:3000"
     environment:
       - DOCKER_ENV=true
-      - IDENTITY_SERVICE_URL=http://identity-service:3001/api
-      - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
-      - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
-      - REVIEW_SERVICE_URL=http://review-service:3004/api
+      - IDENTITY_SERVICE_URL=http://identity-service:3001
+      - CONFERENCE_SERVICE_URL=http://conference-service:3002
+      - SUBMISSION_SERVICE_URL=http://submission-service:3003
+      - REVIEW_SERVICE_URL=http://review-service:3004
     depends_on:
       - identity-service
       - conference-service
