@@ -131,4 +131,41 @@ export class ReportingController {
       data: stats,
     };
   }
+
+  // Lấy thống kê dashboard
+  @Get('dashboard')
+  @ApiOperation({
+    summary: 'Lấy thống kê dashboard',
+    description:
+      'Lấy thống kê tổng hợp cho dashboard bao gồm submissions, acceptance rate, reviewers, và phân bố theo track.',
+  })
+  @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
+  @ApiResponse({ status: 200, description: 'Lấy thống kê dashboard thành công' })
+  @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
+  @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
+  async getDashboardStats(
+    @Param('conferenceId', ParseIntPipe) conferenceId: number,
+    @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
+  ) {
+    await this.conferencesService.ensureCanManageConference(conferenceId, {
+      id: user.sub,
+      roles: user.roles,
+    });
+
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    const stats = await this.reportingService.getDashboardStats(
+      conferenceId,
+      authToken,
+    );
+
+    return {
+      message: 'Lấy thống kê dashboard thành công',
+      data: stats,
+    };
+  }
 }

@@ -276,8 +276,6 @@ export const conferencesApi = apiSlice.injectEndpoints({
         totalAccepted: number;
         totalRejected: number;
         totalReviewers: number;
-        averageSLA?: number;
-        averageSLAChange?: number;
         submissionsByTrack: Array<{
           trackId: number;
           trackName: string;

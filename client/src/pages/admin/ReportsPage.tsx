@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import {
   useGetConferencesQuery,
   useGetDashboardStatsQuery,
-  useGetAuditLogsQuery,
   useGetTracksQuery,
 } from '../../redux/api/conferencesApi';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -16,10 +15,6 @@ const ReportsPage = () => {
     skip: !selectedConferenceId,
   });
   const { data: dashboardData, isLoading: dashboardLoading } = useGetDashboardStatsQuery(
-    selectedConferenceId!,
-    { skip: !selectedConferenceId },
-  );
-  const { data: auditLogsData, isLoading: auditLogsLoading, error: auditLogsError } = useGetAuditLogsQuery(
     selectedConferenceId!,
     { skip: !selectedConferenceId },
   );
@@ -52,8 +47,6 @@ const ReportsPage = () => {
     totalAccepted: 0,
     totalRejected: 0,
     totalReviewers: 0,
-    averageSLA: undefined,
-    averageSLAChange: undefined,
   };
 
   // Get track stats from API
@@ -73,37 +66,18 @@ const ReportsPage = () => {
     reviewing: 0,
   };
 
-  // Format activity logs from audit logs
-  const activityLogs = useMemo(() => {
-    if (!auditLogsData?.data) return [];
-    
-    return auditLogsData.data.slice(0, 10).map((log, index) => {
-      const createdAt = new Date(log.createdAt);
-      const now = new Date();
-      const diffMs = now.getTime() - createdAt.getTime();
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffHours / 24);
-      
-      let timestamp = '';
-      if (diffHours < 1) {
-        timestamp = 'Vừa xong';
-      } else if (diffHours < 24) {
-        timestamp = `${diffHours} giờ trước`;
-      } else if (diffDays < 7) {
-        timestamp = `${diffDays} ngày trước`;
-      } else {
-        timestamp = createdAt.toLocaleDateString('vi-VN');
-      }
+  // Calculate percentages for the chart
+  const totalForChart = stats.totalSubmissions || 1; // Avoid division by zero
+  const acceptedPercent = (statusDistribution.accepted / totalForChart) * 100;
+  const rejectedPercent = (statusDistribution.rejected / totalForChart) * 100;
+  const reviewingPercent = (statusDistribution.reviewing / totalForChart) * 100;
+  
+  // Calculate SVG circle circumference (2 * PI * r = 2 * 3.14159 * 40 ≈ 251.2)
+  const circumference = 251.2;
+  const acceptedDash = (acceptedPercent / 100) * circumference;
+  const rejectedDash = (rejectedPercent / 100) * circumference;
+  const reviewingDash = (reviewingPercent / 100) * circumference;
 
-      return {
-        id: log.id,
-        description: log.description || `${log.action} ${log.resourceType}`,
-        detail: log.resourceType === 'SUBMISSION' ? `Bài báo - Track: ${log.resourceType}` : undefined,
-        timestamp,
-        hasIcon: index > 0, // First entry doesn't have icon
-      };
-    });
-  }, [auditLogsData]);
 
   const handleExportReport = () => {
     // Handle export report
@@ -114,7 +88,7 @@ const ReportsPage = () => {
     ? Math.max(...trackStats.map((t) => t.submissions), 1)
     : 1;
 
-  if (conferencesLoading || dashboardLoading || auditLogsLoading) {
+  if (conferencesLoading || dashboardLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <CircularProgress disableShrink />
@@ -183,7 +157,7 @@ const ReportsPage = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {/* Total Submissions Card */}
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -245,31 +219,6 @@ const ReportsPage = () => {
             </div>
             <div>
               <span className="text-xs text-gray-500">Đang hoạt động</span>
-            </div>
-          </div>
-
-          {/* Average SLA Card */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mb-2">
-              <p className="text-sm text-gray-600 mb-1">SLA trung bình</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {stats.averageSLA ? `${stats.averageSLA} ngày` : 'N/A'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {stats.averageSLAChange && (
-                <span className={`text-sm font-medium ${stats.averageSLAChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.averageSLAChange >= 0 ? '+' : ''}{stats.averageSLAChange}%
-                </span>
-              )}
-              <span className="text-xs text-gray-500">Thời gian phản biện</span>
             </div>
           </div>
         </div>
@@ -343,7 +292,7 @@ const ReportsPage = () => {
                 <div className="relative w-64 h-64">
                   {/* Pie Chart using CSS */}
                   <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                    {/* Accepted segment (57%) */}
+                    {/* Accepted segment */}
                     <circle
                       cx="50"
                       cy="50"
@@ -351,10 +300,10 @@ const ReportsPage = () => {
                       fill="none"
                       stroke="#10b981"
                       strokeWidth="20"
-                      strokeDasharray={`${(statusDistribution.accepted / 100) * 251.2} 251.2`}
+                      strokeDasharray={`${acceptedDash} ${circumference}`}
                       strokeDashoffset="0"
                     />
-                    {/* Rejected segment (29%) */}
+                    {/* Rejected segment */}
                     <circle
                       cx="50"
                       cy="50"
@@ -362,10 +311,10 @@ const ReportsPage = () => {
                       fill="none"
                       stroke="#ef4444"
                       strokeWidth="20"
-                      strokeDasharray={`${(statusDistribution.rejected / 100) * 251.2} 251.2`}
-                      strokeDashoffset={`-${(statusDistribution.accepted / 100) * 251.2}`}
+                      strokeDasharray={`${rejectedDash} ${circumference}`}
+                      strokeDashoffset={`-${acceptedDash}`}
                     />
-                    {/* Reviewing segment (15%) */}
+                    {/* Reviewing segment */}
                     <circle
                       cx="50"
                       cy="50"
@@ -373,8 +322,8 @@ const ReportsPage = () => {
                       fill="none"
                       stroke="#f97316"
                       strokeWidth="20"
-                      strokeDasharray={`${(statusDistribution.reviewing / 100) * 251.2} 251.2`}
-                      strokeDashoffset={`-${((statusDistribution.accepted + statusDistribution.rejected) / 100) * 251.2}`}
+                      strokeDasharray={`${reviewingDash} ${circumference}`}
+                      strokeDashoffset={`-${acceptedDash + rejectedDash}`}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -389,72 +338,23 @@ const ReportsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-green-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Chấp nhận: {statusDistribution.accepted}%</span>
+                    <span className="text-sm text-gray-700">Chấp nhận: {acceptedPercent.toFixed(1)}%</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-red-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Từ chối: {statusDistribution.rejected}%</span>
+                    <span className="text-sm text-gray-700">Từ chối: {rejectedPercent.toFixed(1)}%</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 bg-orange-500 rounded"></span>
-                    <span className="text-sm text-gray-700">Đang xét: {statusDistribution.reviewing}%</span>
+                    <span className="text-sm text-gray-700">Đang xét: {reviewingPercent.toFixed(1)}%</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Activity Log */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-blue-200">
-          <div className="flex items-center gap-3 mb-6">
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <h3 className="text-lg font-semibold text-gray-900">Nhật ký hoạt động</h3>
-          </div>
-          <div className="space-y-0">
-            {auditLogsLoading ? (
-              <div className="py-8 flex justify-center">
-                <CircularProgress size={24} disableShrink />
-              </div>
-            ) : auditLogsError ? (
-              <div className="py-8 text-center">
-                <p className="text-sm text-gray-500">Không thể tải nhật ký hoạt động</p>
-                <p className="text-xs text-gray-400 mt-1">Vui lòng thử lại sau</p>
-              </div>
-            ) : activityLogs.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-sm text-gray-500">Chưa có hoạt động nào</p>
-              </div>
-            ) : (
-              activityLogs.map((log, index) => (
-                <div
-                  key={log.id}
-                  className={`py-4 ${index !== activityLogs.length - 1 ? 'border-b border-gray-200' : ''}`}
-                >
-                  <div className="flex items-start gap-4">
-                    {log.hasIcon && (
-                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    )}
-                    {!log.hasIcon && <div className="w-3 flex-shrink-0"></div>}
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{log.description}</p>
-                      {log.detail && (
-                        <p className="text-xs text-gray-500 mt-1">{log.detail}</p>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500 flex-shrink-0">
-                      {log.timestamp}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </div>

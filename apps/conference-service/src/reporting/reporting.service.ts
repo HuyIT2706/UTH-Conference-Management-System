@@ -7,6 +7,7 @@ import {
   ConferenceMember,
   ConferenceMemberRole,
 } from '../conferences/entities/conference-member.entity';
+import { TrackMember } from '../conferences/entities/track-member.entity';
 import { SubmissionClientService } from '../integrations/submission-client.service';
 
 @Injectable()
@@ -18,6 +19,8 @@ export class ReportingService {
     private trackRepository: Repository<Track>,
     @InjectRepository(ConferenceMember)
     private conferenceMemberRepository: Repository<ConferenceMember>,
+    @InjectRepository(TrackMember)
+    private trackMemberRepository: Repository<TrackMember>,
     private submissionClient: SubmissionClientService,
   ) {}
   // Lấy thống kê tổng quan của hội nghị
@@ -162,5 +165,92 @@ export class ReportingService {
         totalSubmissions: 0,
       };
     }
+  }
+
+  // Lấy thống kê dashboard
+  async getDashboardStats(
+    conferenceId: number,
+    authToken: string,
+  ): Promise<{
+    totalSubmissions: number;
+    acceptanceRate: number;
+    totalAccepted: number;
+    totalRejected: number;
+    totalReviewers: number;
+    submissionsByTrack: Array<{
+      trackId: number;
+      trackName: string;
+      submissions: number;
+      accepted: number;
+      rejected: number;
+    }>;
+    statusDistribution: {
+      accepted: number;
+      rejected: number;
+      reviewing: number;
+    };
+  }> {
+    // Get submission stats
+    const submissionStats = await this.getSubmissionStats(
+      conferenceId,
+      authToken,
+    );
+
+    // Get reviewers count - count distinct users from TrackMember with ACCEPTED status
+    const tracks = await this.trackRepository.find({
+      where: {
+        conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+      select: ['id'],
+    });
+    const trackIds = tracks.map((t) => t.id);
+    
+    // Count distinct userId from TrackMember with ACCEPTED status in all tracks of this conference
+    let totalReviewers = 0;
+    if (trackIds.length > 0) {
+      const allTrackMembers = await this.trackMemberRepository
+        .createQueryBuilder('tm')
+        .where('tm.trackId IN (:...trackIds)', { trackIds })
+        .andWhere('tm.status = :status', { status: 'ACCEPTED' })
+        .getMany();
+      
+      // Use Set to get distinct userId
+      const reviewerUserIds = new Set<number>();
+      allTrackMembers.forEach((tm) => reviewerUserIds.add(tm.userId));
+      totalReviewers = reviewerUserIds.size;
+    }
+
+    // Transform submissionsByTrack: count -> submissions
+    const submissionsByTrack = submissionStats.submissionsByTrack.map(
+      (track) => ({
+        trackId: track.trackId,
+        trackName: track.trackName,
+        submissions: track.count,
+        accepted: track.accepted,
+        rejected: track.rejected,
+      }),
+    );
+
+    // Calculate statusDistribution
+    const statusDistribution = {
+      accepted: submissionStats.totalAccepted,
+      rejected: submissionStats.totalRejected,
+      reviewing:
+        submissionStats.totalSubmissions -
+        submissionStats.totalAccepted -
+        submissionStats.totalRejected,
+    };
+
+    return {
+      totalSubmissions: submissionStats.totalSubmissions,
+      acceptanceRate: submissionStats.acceptanceRate,
+      totalAccepted: submissionStats.totalAccepted,
+      totalRejected: submissionStats.totalRejected,
+      totalReviewers: totalReviewers,
+      submissionsByTrack,
+      statusDistribution,
+    };
   }
 }
