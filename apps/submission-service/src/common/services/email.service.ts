@@ -121,7 +121,7 @@ export class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎉 Chúc mừng!</h1>
+              <h1> Chúc mừng!</h1>
               <p>Bài nộp của bạn đã được chấp nhận</p>
             </div>
             <div class="content">
@@ -145,11 +145,6 @@ export class EmailService {
               </div>
 
               <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).</p>
-              
-              <div style="text-align: center;">
-                <a href="${appUrl}/student/submissions" class="button">Xem bài nộp</a>
-              </div>
-
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
             <div class="footer">
@@ -161,7 +156,7 @@ export class EmailService {
         </html>
       `,
       text: `
-🎉 Chúc mừng! Bài nộp của bạn đã được chấp nhận
+Chúc mừng! Bài nộp của bạn đã được chấp nhận
 
 Xin chào ${authorName},
 
@@ -173,7 +168,6 @@ ${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
 
 Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).
 
-Truy cập: ${appUrl}/student/submissions
 
 Trân trọng,
 Đội ngũ ${appName}
@@ -182,9 +176,8 @@ Trân trọng,
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Submission accepted email sent to ${email}`);
+
     } catch (error) {
-      console.error(`[EmailService] Failed to send submission accepted email to ${email}:`, error);
       throw error;
     }
   }
@@ -311,9 +304,6 @@ Trân trọng,
 
               <p>Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các hội nghị tiếp theo.</p>
               
-              <div style="text-align: center;">
-                <a href="${appUrl}/student/submissions" class="button">Xem bài nộp</a>
-              </div>
 
               <p>Trân trọng,<br>Đội ngũ ${appName}</p>
             </div>
@@ -338,7 +328,6 @@ ${decisionNote ? `\nGhi chú từ ban tổ chức:\n${decisionNote}\n` : ''}
 
 Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các hội nghị tiếp theo.
 
-Truy cập: ${appUrl}/student/submissions
 
 Trân trọng,
 Đội ngũ ${appName}
@@ -347,9 +336,7 @@ Trân trọng,
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`[EmailService] Submission rejected email sent to ${email}`);
     } catch (error) {
-      console.error(`[EmailService] Failed to send submission rejected email to ${email}:`, error);
       throw error;
     }
   }
@@ -360,10 +347,8 @@ Trân trọng,
   async verifyConnection(): Promise<boolean> {
     try {
       await this.transporter.verify();
-      console.log('[EmailService] SMTP connection verified');
       return true;
     } catch (error) {
-      console.error('[EmailService] SMTP connection failed:', error);
       return false;
     }
   }

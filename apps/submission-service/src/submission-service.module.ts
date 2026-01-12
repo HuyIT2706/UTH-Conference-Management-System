@@ -31,7 +31,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
           expiresIn:
-            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 3600,
+            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
         },
       }),
     }),

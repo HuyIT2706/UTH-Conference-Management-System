@@ -31,13 +31,10 @@ export class ReviewClientService {
       if (status === HttpStatus.NOT_FOUND) {
         return [];
       }
-      console.warn(
-        '[ReviewClientService] Lỗi khi lấy anonymized reviews:',
-        error.message || error,
-      );
       return [];
     }
   }
+  // Lấy danh sách assignments của reviewer
   async getReviewerAssignments(
     authToken?: string,
   ): Promise<Array<{ submissionId: string; id: number }>> {
@@ -55,10 +52,6 @@ export class ReviewClientService {
         id: a.id,
       }));
     } catch (error: any) {
-      console.warn(
-        '[ReviewClientService] Lỗi khi lấy assignments cho reviewer:',
-        error.message || error,
-      );
       return [];
     }
   }

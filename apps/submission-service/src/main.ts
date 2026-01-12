@@ -16,22 +16,9 @@ async function bootstrap() {
   const app = await NestFactory.create(SubmissionServiceModule);
   app.setGlobalPrefix('api');
   
-  // Add Express middleware to log all incoming requests
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.use((req: any, res: any, next: any) => {
-    console.log('[Submission-Service] ====== INCOMING REQUEST ======');
-    console.log('[Submission-Service] Method:', req.method);
-    console.log('[Submission-Service] URL:', req.url);
-    console.log('[Submission-Service] Path:', req.path);
-    console.log('[Submission-Service] Headers:', {
-      authorization: req.headers.authorization ? 'present' : 'missing',
-      'content-type': req.headers['content-type'],
-      host: req.headers.host,
-      'user-agent': req.headers['user-agent'],
     });
-    console.log('[Submission-Service] Query:', req.query);
-    console.log('[Submission-Service] =============================');
-    next();
   });
   
   app.useGlobalPipes(

@@ -40,22 +40,7 @@ export class SubmissionsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Tạo submission mới (nộp bài)',
-    description: `Tạo một submission mới với file đính kèm. Chấp nhận các định dạng: PDF, DOCX, ZIP (tối đa 20MB).
-    
-    **Ví dụ request (multipart/form-data):**
-    - \`file\`: File PDF, DOCX hoặc ZIP (bắt buộc)
-    - \`title\`: Tiêu đề bài báo (bắt buộc)
-    - \`abstract\`: Tóm tắt bài báo (bắt buộc)
-    - \`keywords\`: Từ khóa, phân cách bằng dấu phẩy (tùy chọn)
-    - \`trackId\`: ID của track (bắt buộc)
-    - \`conferenceId\`: ID của conference (bắt buộc)
-      
-    **Lưu ý:** Tác giả được lấy từ JWT token (người đăng nhập), không cần gửi coAuthors.
-      
-    **Lưu ý:**
-    - Phải nộp trước submissionDeadline (kiểm tra qua conference-service)
-    - Mỗi lần tạo submission sẽ tự động tạo version 1
-    - Status mặc định: SUBMITTED`
+    description: 'Tạo một submission mới với file đính kèm. Chấp nhận các định dạng: PDF, DOCX, ZIP (tối đa 20MB).'
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -125,21 +110,7 @@ export class SubmissionsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Cập nhật submission (chỉ Author)',
-    description: `Cập nhật thông tin submission. Tất cả các trường đều tùy chọn. Nếu upload file mới, sẽ tự động tạo version mới.
-    
-    **Ví dụ request (multipart/form-data):**
-    - \`file\`: File PDF, DOCX hoặc ZIP mới (tùy chọn)
-    - \`title\`: Tiêu đề mới (tùy chọn)
-    - \`abstract\`: Tóm tắt mới (tùy chọn)
-    - \`keywords\`: Từ khóa mới (tùy chọn)
-    - \`trackId\`: ID track mới (tùy chọn)
-    - \`authorAffiliation\`: Tổ chức của tác giả (tùy chọn)
-    - \`coAuthors\`: JSON string của đồng tác giả (tùy chọn)
-
-    **Lưu ý:**
-    - Chỉ author của submission mới được cập nhật
-    - Chỉ cho phép cập nhật trước submissionDeadline
-    - Mỗi lần cập nhật file sẽ tạo version mới`
+    description: 'Cập nhật thông tin submission. Tất cả các trường đều tùy chọn. Nếu upload file mới, sẽ tự động tạo version mới.'
   })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', description: 'UUID của submission cần cập nhật' })
@@ -192,16 +163,7 @@ export class SubmissionsController {
   @Get()
   @ApiOperation({
     summary: 'Lấy danh sách submissions (có phân trang và filter)',
-    description: `Lấy danh sách submissions với phân trang và filter. RBAC: Author chỉ thấy submissions của mình, Chair/Admin thấy tất cả.
-    
-    **Query parameters (tất cả đều tùy chọn):**
-    - \`page\`: Số trang (mặc định: 1)
-    - \`limit\`: Số lượng mỗi trang (mặc định: 10)
-    - \`trackId\`: Filter theo track ID
-    - \`conferenceId\`: Filter theo conference ID
-    - \`status\`: Filter theo status (SUBMITTED, REVIEWING, ACCEPTED, REJECTED, etc.)
-    - \`authorId\`: Filter theo author ID (chỉ Chair/Admin)
-    - \`search\`: Tìm kiếm theo title/abstract/keywords`
+    description: 'Lấy danh sách submissions với phân trang và filter. RBAC: Author chỉ thấy submissions của mình, Chair/Admin thấy tất cả.'
   })
   @ApiResponse({ status: 200, description: 'Lấy danh sách thành công' })
   @ApiResponse({ status: 401, description: 'Token không hợp lệ' })
@@ -209,103 +171,33 @@ export class SubmissionsController {
     @Query() queryDto: QuerySubmissionsDto,
     @Req() req: Request,
   ) {
-    console.log('[SubmissionsController] ====== FINDALL REQUEST RECEIVED ======');
-    console.log('[SubmissionsController] Request URL:', req.url);
-    console.log('[SubmissionsController] Request method:', req.method);
-    console.log('[SubmissionsController] Request headers:', {
-      authorization: req.headers.authorization ? 'present' : 'missing',
-      'content-type': req.headers['content-type'],
-    });
-    
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
-      console.error('[SubmissionsController] No user in request!');
       throw new UnauthorizedException('Token không hợp lệ');
     }
 
-    // Extract JWT token from Authorization header for service-to-service calls
     const authHeader = req.headers.authorization;
     const authToken = authHeader?.startsWith('Bearer ') 
       ? authHeader.substring(7) 
       : undefined;
 
-    // Debug logging
-    console.log('[SubmissionsController] findAll request:', {
-      userId: user.sub,
-      roles: user.roles,
+    const result = await this.submissionsService.findAll(
       queryDto,
-      hasAuthToken: !!authToken,
-      trackId: queryDto.trackId,
-      trackIdType: typeof queryDto.trackId,
-      status: queryDto.status,
-      conferenceId: queryDto.conferenceId,
-    });
+      user.sub,
+      user.roles || [],
+      authToken,
+    );
 
-    try {
-      const result = await this.submissionsService.findAll(
-        queryDto,
-        user.sub,
-        user.roles || [],
-        authToken,
-      );
-
-      // Debug logging
-      console.log('[SubmissionsController] findAll result:', {
+    return {
+      message: 'Lấy danh sách các bài dự thi thành công',
+      data: result.data,
+      pagination: {
         total: result.total,
-        dataCount: result.data.length,
-        trackId: queryDto.trackId,
-      });
-
-      return {
-        message: 'Lấy danh sách các bài dự thi thành công',
-        data: result.data,
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: Math.ceil(result.total / result.limit),
-        },
-      };
-    } catch (error) {
-      console.error('[SubmissionsController] Error in findAll - DETAILED:', {
-        error: error instanceof Error ? error.message : error,
-        errorStack: error instanceof Error ? error.stack : undefined,
-        errorName: error instanceof Error ? error.name : typeof error,
-        errorType: typeof error,
-        userId: user.sub,
-        queryDto,
-        isHttpException: error instanceof HttpException,
-        httpStatus: error instanceof HttpException ? error.getStatus() : undefined,
-        httpResponse: error instanceof HttpException ? error.getResponse() : undefined,
-      });
-      
-      // If it's already an HttpException, re-throw as is
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      
-      // If it's a regular Error, convert to HttpException with proper status
-      if (error instanceof Error) {
-        throw new HttpException(
-          {
-            message: error.message || 'Lỗi khi lấy danh sách submissions',
-            error: 'Internal Server Error',
-            statusCode: 500,
-          },
-          500,
-        );
-      }
-      
-      // For unknown error types, wrap in HttpException
-      throw new HttpException(
-        {
-          message: 'Lỗi không xác định khi lấy danh sách submissions',
-          error: 'Internal Server Error',
-          statusCode: 500,
-        },
-        500,
-      );
-    }
+        page: result.page,
+        limit: result.limit,
+        totalPages: Math.ceil(result.total / result.limit),
+      },
+    };
   }
 
   @Get('me')
@@ -370,13 +262,7 @@ export class SubmissionsController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Rút submission (Withdraw) - Chỉ Author',
-    description: `Rút bài submission khỏi hội nghị. Chỉ author của submission mới được rút.
-    
-    **Lưu ý:**
-    - Chỉ author của submission mới được rút
-    - Chỉ cho phép rút khi status là SUBMITTED hoặc REVIEWING
-    - Phải rút trước submissionDeadline
-    - Status sau khi rút: WITHDRAWN`
+    description: 'Rút bài submission khỏi hội nghị. Chỉ author của submission mới được rút.'
   })
   @ApiParam({ name: 'id', description: 'UUID của submission cần rút' })
   @ApiResponse({ status: 200, description: 'Rút submission thành công' })
@@ -404,22 +290,7 @@ export class SubmissionsController {
   @Patch(':id/status')
   @ApiOperation({
     summary: 'Cập nhật trạng thái submission (Decision)',
-    description: `Cập nhật trạng thái submission (chấp nhận/từ chối). Chỉ Chair/Admin mới có quyền.
-    
-    **Ví dụ request body:**
-    \`\`\`json
-    {
-      "status": "ACCEPTED",
-      "decisionNote": "Good paper, strong results. Recommended for acceptance."
-    }
-    \`\`\`
-
-    **Các status có thể set:**
-    - \`ACCEPTED\`: Đã chấp nhận
-    - \`REJECTED\`: Đã từ chối
-    - \`REVIEWING\`: Đang được review
-
-    **Lưu ý:** Có state machine để validate chuyển trạng thái hợp lệ.`
+    description: 'Cập nhật trạng thái submission (chấp nhận/từ chối). Chỉ Chair/Admin mới có quyền.'
   })
   @ApiParam({ name: 'id', description: 'UUID của submission' })
   @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành công' })
@@ -460,16 +331,7 @@ export class SubmissionsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Upload camera-ready version',
-    description: `Upload bản cuối cùng (camera-ready) của submission sau khi đã được chấp nhận. Chấp nhận file PDF, DOCX, hoặc ZIP.
-    
-    **Ví dụ request (multipart/form-data):**
-    - \`file\`: File camera-ready (PDF, DOCX, ZIP - bắt buộc)
-
-    **Lưu ý:**
-    - Chỉ author của submission mới được upload
-    - Chỉ khi status hiện tại là ACCEPTED
-    - Phải upload trước cameraReadyDeadline
-    - Status sau khi upload: CAMERA_READY`
+    description: 'Upload bản cuối cùng (camera-ready) của submission sau khi đã được chấp nhận. Chấp nhận file PDF, DOCX, hoặc ZIP.'
   })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', description: 'UUID của submission' })
@@ -519,13 +381,7 @@ export class SubmissionsController {
   @Get(':id/reviews')
   @ApiOperation({
     summary: 'Xem reviews đã ẩn danh',
-    description: `Lấy danh sách reviews đã được ẩn danh để tác giả xem sau khi có quyết định.
-    
-    **Lưu ý:**
-    - Chỉ author của submission mới được xem
-    - Chỉ khi submission đã có status ACCEPTED hoặc REJECTED
-    - Reviews đã được ẩn danh (không tiết lộ reviewer identity)
-    - Chỉ hiển thị các trường: score, commentForAuthor, recommendation, createdAt`
+    description: 'Lấy danh sách reviews đã được ẩn danh để tác giả xem sau khi có quyết định.'
   })
   @ApiParam({ name: 'id', description: 'UUID của submission' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách reviews ẩn danh thành công' })
@@ -552,10 +408,7 @@ export class SubmissionsController {
     };
   }
 
-  /**
-   * Guard Clause Endpoint: Count submissions by authorId (Case 1)
-   * Used by identity-service to check if user can be deleted
-   */
+  // Guard Clause: Đếm submissions theo authorId (Case 1)
   @Get('author/:authorId/count')
   @ApiOperation({ summary: 'Đếm số submissions của author (Guard Clause - Internal)' })
   @ApiResponse({ status: 200, description: 'Đếm thành công' })
@@ -569,10 +422,7 @@ export class SubmissionsController {
     };
   }
 
-  /**
-   * Guard Clause Endpoint: Get submission IDs by trackId (Case 3)
-   * Used by conference-service to check if track member can be removed
-   */
+  // Guard Clause: Lấy submission IDs theo trackId (Case 3)
   @Get('track/:trackId/ids')
   @ApiOperation({ summary: 'Lấy danh sách submission IDs theo track (Guard Clause - Internal)' })
   @ApiResponse({ status: 200, description: 'Lấy thành công' })

@@ -26,21 +26,11 @@ export class IdentityClientService {
       (isDocker
         ? 'http://identity-service:3001/api'
         : 'http://localhost:3001/api');
-
-    console.log('[IdentityClient] Initialized with URL:', this.identityServiceUrl);
   }
 
-  /**
-   * Get user information by ID
-   */
+  // Lấy thông tin user theo ID
   async getUserById(userId: number, authToken: string): Promise<UserInfo | null> {
     try {
-      console.log('[IdentityClient] Getting user info:', {
-        userId,
-        url: `${this.identityServiceUrl}/users/${userId}`,
-        hasAuthToken: !!authToken,
-      });
-
       const response = await firstValueFrom(
         this.httpService.get(`${this.identityServiceUrl}/users/${userId}`, {
           headers: {
@@ -51,80 +41,38 @@ export class IdentityClientService {
       );
 
       const userInfo = response.data?.data || response.data || null;
-      console.log('[IdentityClient] Got user info:', {
-        userId,
-        hasEmail: !!userInfo?.email,
-        hasFullName: !!userInfo?.fullName,
-      });
-      
       return userInfo;
     } catch (error: any) {
       const status = error.response?.status;
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Lỗi khi lấy thông tin user';
 
-      // Log detailed error info
-      console.error('[IdentityClient] Error getting user:', {
-        userId,
-        status,
-        statusText: error.response?.statusText,
-        message,
-        errorMessage: error.message,
-        errorCode: error.code,
-        url: `${this.identityServiceUrl}/users/${userId}`,
-        responseData: error.response?.data,
-      });
-
-      // Log warning for 404 (user not found) or service unavailability
       if (status === HttpStatus.NOT_FOUND) {
-        console.warn('[IdentityClient] User not found:', { userId });
         return null;
       }
 
-      // Check for connection errors (ECONNREFUSED, ETIMEDOUT, etc.)
       const isConnectionError = !status || 
                                 error.code === 'ECONNREFUSED' || 
                                 error.code === 'ETIMEDOUT' ||
                                 error.code === 'ENOTFOUND';
 
       if (isConnectionError || status === HttpStatus.BAD_GATEWAY) {
-        console.warn('[IdentityClient] Identity-service unavailable:', {
-          userId,
-          errorCode: error.code,
-          message: 'Identity-service không khả dụng hoặc chưa chạy. Vui lòng kiểm tra identity-service đã chạy chưa.',
-          suggestedUrl: this.identityServiceUrl,
-        });
         return null;
       }
 
-      // For 401/403, might be permission issue - log but don't throw
       if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
-        console.warn('[IdentityClient] Permission denied:', {
-          userId,
-          status,
-          message: 'Token không có quyền truy cập endpoint này',
-        });
         return null;
       }
 
-      // Return null for other errors too - don't break the main flow
       return null;
     }
   }
 
-  /**
-   * Get user email by ID (simplified method)
-   */
+  // Lấy email của user theo ID
   async getUserEmail(userId: number, authToken: string): Promise<string | null> {
     const userInfo = await this.getUserById(userId, authToken);
     return userInfo?.email || null;
   }
 
-  /**
-   * Get user full name by ID (simplified method)
-   */
+  // Lấy tên đầy đủ của user theo ID
   async getUserFullName(userId: number, authToken: string): Promise<string | null> {
     const userInfo = await this.getUserById(userId, authToken);
     return userInfo?.fullName || null;

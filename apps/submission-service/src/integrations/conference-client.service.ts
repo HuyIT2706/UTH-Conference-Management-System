@@ -53,39 +53,20 @@ export class ConferenceClientService {
     }
 
     try {
-      console.log('[ConferenceClient] Calling validateTrack:', {
-        url: `/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
-        conferenceId,
-        trackId,
-      });
       const response = await firstValueFrom(
         this.httpService.get(
           `/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
         ),
       );
-      console.log('[ConferenceClient] Raw response:', {
-        status: response.status,
-        data: response.data,
-        headers: response.headers,
-      });
       
-      // Handle both direct response and wrapped response
       let result = response.data;
       if (result && result.data && typeof result.data.valid === 'boolean') {
-        console.log('[ConferenceClient] Response wrapped in data field, unwrapping...');
         result = result.data;
       }
       
       if (!result || typeof result.valid !== 'boolean') {
-        console.error('[ConferenceClient] Invalid response structure:', {
-          result,
-          type: typeof result,
-          hasValid: result?.valid !== undefined,
-        });
         return { valid: false };
       }
-      
-      console.log('[ConferenceClient] Track validation result:', result);
       
       if (result.valid) {
         this.trackCache.set(cacheKey, {
@@ -102,17 +83,7 @@ export class ConferenceClientService {
         error.message ||
         'Lỗi khi validate track';
       
-      console.error('[ConferenceClient] validateTrack error:', {
-        status,
-        message,
-        error: error.response?.data || error.message,
-        conferenceId,
-        trackId,
-      });
-      
-      // Nếu là 401/403, có thể endpoint cần auth
       if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
-        console.warn('[ConferenceClient] Validation endpoint requires auth, returning invalid');
         return { valid: false };
       }
       
@@ -125,9 +96,7 @@ export class ConferenceClientService {
         return result;
       }
       
-      // Nếu là 400 Bad Request, có thể track không hợp lệ
       if (status === HttpStatus.BAD_REQUEST) {
-        console.warn('[ConferenceClient] Bad request from validation endpoint, track may be invalid');
         return { valid: false };
       }
       
@@ -195,10 +164,7 @@ export class ConferenceClientService {
     }
   }
 
-  /**
-   * Get conference name by ID
-   * Used for email notifications
-   */
+  // Lấy tên hội nghị theo ID (dùng cho email notifications)
   async getConferenceName(conferenceId: number): Promise<string> {
     try {
       const response = await firstValueFrom(
@@ -210,23 +176,13 @@ export class ConferenceClientService {
         return conference.name;
       }
       
-      // Fallback to placeholder if conference not found or name missing
       return `Hội nghị #${conferenceId}`;
     } catch (error: any) {
-      console.error('[ConferenceClient] Error getting conference name:', {
-        conferenceId,
-        status: error.response?.status,
-        message: error.message,
-      });
-      // Fallback to placeholder on error
       return `Hội nghị #${conferenceId}`;
     }
   }
 
-  /**
-   * Check if reviewer has accepted track assignment for a specific track
-   * Get all track assignments and check locally
-   */
+  // Kiểm tra reviewer có chấp nhận track assignment cho track cụ thể không
   async checkReviewerTrackAssignment(
     reviewerId: number,
     trackId: number,
@@ -238,10 +194,7 @@ export class ConferenceClientService {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      // Use the correct endpoint: /conferences/reviewer/my-track-assignments
       const url = '/conferences/reviewer/my-track-assignments';
-      console.log('[ConferenceClient] Getting track assignments:', url, { reviewerId, trackId });
-      
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers,
@@ -249,40 +202,14 @@ export class ConferenceClientService {
       );
       
       const assignments = response.data?.data || [];
-      console.log('[ConferenceClient] Got track assignments:', {
-        count: assignments.length,
-        assignments: assignments.map((a: any) => ({
-          id: a.id,
-          trackId: a.trackId,
-          status: a.status,
-        })),
-      });
-      
-      // Check if any assignment matches trackId and has status ACCEPTED
       const hasAccepted = assignments.some(
         (assignment: any) => 
           assignment.trackId === trackId && 
           assignment.status === 'ACCEPTED'
       );
       
-      console.log('[ConferenceClient] Track assignment check result:', {
-        trackId,
-        hasAccepted,
-      });
-      
       return { hasAccepted };
     } catch (error: any) {
-      console.error(
-        '[ConferenceClient] Error checking reviewer track assignment:',
-        {
-          message: error.message || error,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          reviewerId,
-          trackId,
-        },
-      );
       return { hasAccepted: false };
     }
   }
