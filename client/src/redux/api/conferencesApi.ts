@@ -61,7 +61,7 @@ export const conferencesApi = apiSlice.injectEndpoints({
       { conferenceId: number; type: 'submission' | 'review' | 'notification' | 'camera-ready' }
     >({
       query: ({ conferenceId, type }) => ({
-        url: `/conferences/${conferenceId}/cfp/check-deadline`,
+        url: `/public/conferences/${conferenceId}/cfp/check-deadline`,
         params: { type },
       }),
     }),
@@ -247,9 +247,9 @@ export const conferencesApi = apiSlice.injectEndpoints({
         url: `/conferences/tracks/${trackId}/accept`,
         method: 'POST',
       }),
-      invalidatesTags: [
+      invalidatesTags: (_result, _error, trackId) => [
         { type: 'TrackMember', id: 'MY_ASSIGNMENTS' },
-        (_result, _error, trackId) => ({ type: 'TrackMember', id: `track-${trackId}` }),
+        { type: 'TrackMember', id: `track-${trackId}` },
       ],
     }),
     // Reject track assignment
@@ -261,9 +261,9 @@ export const conferencesApi = apiSlice.injectEndpoints({
         url: `/conferences/tracks/${trackId}/reject`,
         method: 'POST',
       }),
-      invalidatesTags: [
+      invalidatesTags: (_result, _error, trackId) => [
         { type: 'TrackMember', id: 'MY_ASSIGNMENTS' },
-        (_result, _error, trackId) => ({ type: 'TrackMember', id: `track-${trackId}` }),
+        { type: 'TrackMember', id: `track-${trackId}` },
       ],
     }),
     // Get dashboard statistics

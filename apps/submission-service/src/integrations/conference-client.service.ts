@@ -24,8 +24,8 @@ export class ConferenceClientService {
       this.configService.get<string>('CONFERENCE_SERVICE_URL') ||
       'http://localhost:3002/api';
 
-    this.httpService.axiosRef.defaults.baseURL = this.conferenceServiceUrl;
-    this.httpService.axiosRef.defaults.timeout = 10000;
+    // Don't set defaults.baseURL - it's shared across all HttpService instances
+    // Instead, we'll use full URL in each request
     setInterval(() => this.cleanupCache(), 10 * 60 * 1000);
   }
 
@@ -55,7 +55,7 @@ export class ConferenceClientService {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          `/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
+          `${this.conferenceServiceUrl}/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
         ),
       );
       
@@ -120,15 +120,39 @@ export class ConferenceClientService {
     }
 
     try {
+      const url = `${this.conferenceServiceUrl}/public/conferences/${conferenceId}/cfp/check-deadline`;
+      console.log(`[ConferenceClient] Checking deadline: ${url}?type=${type}`);
+      
       const response = await firstValueFrom(
-        this.httpService.get(
-          `/public/conferences/${conferenceId}/cfp/check-deadline`,
-          {
-            params: { type },
-          },
-        ),
+        this.httpService.get(url, {
+          params: { type },
+        }),
       );
-      const result = response.data;
+      
+      console.log(`[ConferenceClient] Response status: ${response.status}`);
+      console.log(`[ConferenceClient] Response data:`, JSON.stringify(response.data));
+      
+      let result = response.data;
+      
+      // Handle nested response format if needed
+      if (result && result.data && typeof result.data.valid === 'boolean') {
+        result = result.data;
+      }
+      
+      // Ensure result has required fields
+      if (!result || typeof result.valid !== 'boolean') {
+        console.error(`[ConferenceClient] Invalid response format:`, result);
+        throw new HttpException(
+          'Invalid response format from conference service',
+          HttpStatus.BAD_GATEWAY,
+        );
+      }
+      
+      // Convert deadline string to Date if needed
+      if (result.deadline && typeof result.deadline === 'string') {
+        result.deadline = new Date(result.deadline);
+      }
+      
       this.deadlineCache.set(cacheKey, {
         data: result,
         expiresAt: Date.now() + this.DEADLINE_CACHE_TTL,
@@ -136,11 +160,15 @@ export class ConferenceClientService {
 
       return result;
     } catch (error: any) {
+      console.error(`[ConferenceClient] Error checking deadline:`, error);
       const status = error.response?.status;
       const message =
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi kiểm tra deadline';
+        
+      console.error(`[ConferenceClient] Error status: ${status}, message: ${message}`);
+      
       if (status === HttpStatus.NOT_FOUND || status === HttpStatus.BAD_REQUEST) {
         throw new HttpException(
           `Không thể kiểm tra deadline: ${message}`,
@@ -168,7 +196,7 @@ export class ConferenceClientService {
   async getConferenceName(conferenceId: number): Promise<string> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`/public/conferences/${conferenceId}/cfp`),
+        this.httpService.get(`${this.conferenceServiceUrl}/public/conferences/${conferenceId}/cfp`),
       );
       
       const conference = response.data?.data?.conference;
@@ -194,7 +222,7 @@ export class ConferenceClientService {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
       
-      const url = '/conferences/reviewer/my-track-assignments';
+      const url = `${this.conferenceServiceUrl}/conferences/reviewer/my-track-assignments`;
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers,

@@ -81,6 +81,7 @@ export const apiSlice = createApi({
     'User',
     'Conference',
     'Track',
+    'TrackMember',
     'Submission',
     'Review',
     'Assignment',
