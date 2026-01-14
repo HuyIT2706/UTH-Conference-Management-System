@@ -114,7 +114,7 @@ const SubmissionCard = ({
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">{submission.title}</h3>
+          <h3 className=" text-ms md:text-lg font-semibold text-gray-800 mb-2">{submission.title}</h3>
           <div className="space-y-1 text-sm text-gray-600">
             <div>
               <span className="font-medium">Hội nghị:</span> {conferenceName}
@@ -157,31 +157,7 @@ const SubmissionCard = ({
               Xem file
             </a>
           )}
-          {canUploadCameraReady && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <button
-                onClick={handleCameraReadyClick}
-                disabled={isUploading}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center gap-2"
-              >
-                {isUploading ? (
-                  <>
-                    <CircularProgress size={16} disableShrink className="text-white" />
-                    Đang tải...
-                  </>
-                ) : (
-                  'Nộp bản cuối cùng'
-                )}
-              </button>
-            </>
-          )}
+          
         </div>
       </div>
       {(canEdit || canDelete || canViewReviews) && (
@@ -206,10 +182,35 @@ const SubmissionCard = ({
             <button
               onClick={() => onDelete(submission)}
               disabled={isWithdrawing}
-              className="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="md:px-4 md:py-2 p-1 text-sm  text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
             >
               {submission.status === 'DRAFT' ? 'Xóa' : 'Rút bài'}
             </button>
+          )}
+          {canUploadCameraReady && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={handleCameraReadyClick}
+                disabled={isUploading}
+                className="md:px-4 md:py-2 p-1 text-sm  text-teal-600 border border-teal-300 rounded-lg hover:bg-green-300 hover:text-white hover:font-medium hover:cursor-pointer transition-colors"
+              >
+                {isUploading ? (
+                  <>
+                    <CircularProgress size={16} disableShrink className="text-white" />
+                    Đang tải...
+                  </>
+                ) : (
+                  'Nộp bản cuối cùng'
+                )}
+              </button>
+            </>
           )}
         </div>
       )}

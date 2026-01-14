@@ -27,20 +27,15 @@ const StudentSubmissionsList = () => {
   const submissions: Submission[] = submissionsData?.data || [];
   const conferences = conferencesData?.data || [];
 
-  // Get unique conference IDs
   const conferenceIds = useMemo(
     () => Array.from(new Set(submissions.map((s) => s.conferenceId).filter(Boolean))) as number[],
     [submissions],
   );
-
-  // Fetch tracks for the first conference (to avoid too many API calls)
-  // For other conferences, we'll show trackId
   const firstConferenceId = conferenceIds[0];
   const { data: firstConferenceTracksData } = useGetPublicTracksQuery(firstConferenceId || 0, {
     skip: !firstConferenceId,
   });
 
-  // Build tracks map for the first conference
   const tracksMap = useMemo(() => {
     const map = new Map<number, string>();
     if (firstConferenceId && firstConferenceTracksData?.data) {
@@ -51,7 +46,6 @@ const StudentSubmissionsList = () => {
     return map;
   }, [firstConferenceId, firstConferenceTracksData]);
 
-  // Group submissions by status - only show submitted (non-draft, non-withdrawn)
   const submittedSubmissions = submissions.filter(
     (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN',
   );
@@ -62,7 +56,6 @@ const StudentSubmissionsList = () => {
   };
 
   const getTrackName = (conferenceId: number, trackId: number): string => {
-    // Only show track name for the first conference (to avoid too many API calls)
     if (conferenceId === firstConferenceId) {
       return tracksMap.get(trackId) || `Track #${trackId}`;
     }

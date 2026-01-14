@@ -282,7 +282,7 @@ const StudentSubmitForm = () => {
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {isEditMode ? 'Chỉnh sửa bài nộp' : 'Nộp Bài'}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 pr-3 max-w-[380px] md:max-w-full md:text-lg">
                 {isEditMode
                   ? 'Chỉnh sửa thông tin bài nghiên cứu của bạn'
                   : 'Vui lòng điền đầy đủ thông tin bên dưới để nộp bài nghiên cứu của bạn'}

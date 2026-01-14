@@ -11,7 +11,6 @@ const StudentSubmissionLanding = () => {
   const conferences: Conference[] = data?.data || [];
   const [expandedConference, setExpandedConference] = useState<number | null>(null);
 
-  // Check if conference is open for submission
   const isConferenceOpenForSubmission = (c: Conference): boolean => {
     const now = new Date();
     const submissionDeadline = c.cfpSetting?.submissionDeadline || c.submissionDeadline;

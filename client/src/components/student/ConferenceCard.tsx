@@ -45,7 +45,7 @@ const ConferenceCard = ({
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
       <div className="flex items-center justify-between p-4">
         <div className="flex-1">
-          <h2 className="font-semibold text-lg text-gray-800">{conference.name}</h2>
+          <h2 className="font-semibold text-sm md:text-lg text-gray-800">{conference.name}</h2>
           {conference.submissionDeadline && (
             <p className="text-sm text-gray-500 mt-1">
               Hạn nộp:{' '}
@@ -58,7 +58,7 @@ const ConferenceCard = ({
           <button
             onClick={onToggle}
             disabled={!isOpen}
-            className={`px-4 py-2 text-teal-600 border border-teal-600 rounded-lg transition-colors ${
+            className={`px-4 py-2 ml-2 text-teal-600 border border-teal-600 rounded-lg transition-colors ${
               isOpen
                 ? 'hover:bg-teal-50 cursor-pointer'
                 : 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-300 text-gray-500'
@@ -93,11 +93,11 @@ const ConferenceCard = ({
                     key={track.id}
                     className="flex items-center justify-between bg-white p-3 rounded border border-gray-200 hover:border-teal-300 transition-colors"
                   >
-                    <span className="text-sm text-gray-800">{track.name}</span>
+                    <span className="text-sm max-w[120px] md:max-w-full text-gray-800">{track.name}</span>
                     <button
                       onClick={() => onSubmit(conference.id, track.id)}
                       disabled={!isOpen}
-                      className={`p-3 text-xs rounded transition-colors ${
+                      className={`py-2 px-3 md:p-3 m-2 text-xs rounded transition-colors ${
                         isOpen
                           ? 'bg-teal-600 text-white hover:bg-teal-700 cursor-pointer'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-50'
