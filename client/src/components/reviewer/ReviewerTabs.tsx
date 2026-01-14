@@ -19,7 +19,7 @@ const ReviewerTabs = memo(({
     <div className="flex border-b border-gray-200 mb-6">
       <button
         onClick={() => onTabChange('assignment')}
-        className={`px-6 py-3 font-medium transition-colors ${
+        className={`p-3 md:px-6 md:py-3 font-medium transition-colors ${
           activeTab === 'assignment'
             ? 'border-b-2 border-teal-600 text-teal-600'
             : 'text-gray-600 hover:text-gray-800'
@@ -29,7 +29,7 @@ const ReviewerTabs = memo(({
       </button>
       <button
         onClick={() => canAccessEvaluate && onTabChange('evaluate')}
-        className={`px-6 py-3 font-medium transition-colors ${
+        className={`p-3 md:px-6 md:py-3 font-medium transition-colors ${
           activeTab === 'evaluate'
             ? 'border-b-2 border-teal-600 text-teal-600'
             : 'text-gray-600 hover:text-gray-800'
@@ -39,7 +39,7 @@ const ReviewerTabs = memo(({
       </button>
       <button
         onClick={() => canAccessRebuttal && onTabChange('rebuttal')}
-        className={`px-6 py-3 font-medium transition-colors ${
+        className={`p-3 md:px-6 md:py-3 font-medium transition-colors ${
           activeTab === 'rebuttal'
             ? 'border-b-2 border-teal-600 text-teal-600'
             : 'text-gray-600 hover:text-gray-800'

@@ -88,12 +88,6 @@ const ReviewerDashboard = () => {
   return (
     <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Phân Công Phản Biện</h1>
-          <p className="text-gray-600">Phân công phản biện viên cho các bài nộp</p>
-        </div>
-
         {/* Tabs */}
         <ReviewerTabs
           activeTab={activeTab}
@@ -131,7 +125,6 @@ const ReviewerDashboard = () => {
                 </h2>
                 <TrackAssignmentList
                   onAcceptTrack={(trackId, conferenceId) => {
-                    // Handle track acceptance - will refresh track assignments
                   }}
                 />
               </div>

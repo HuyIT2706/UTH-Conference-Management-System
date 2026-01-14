@@ -25,7 +25,7 @@ const TrackHeader = memo(({ trackAssignment, isExpanded, onToggle }: TrackHeader
       </div>
       <button
         onClick={onToggle}
-        className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+        className="px-4 py-2 ml-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
       >
         {isExpanded ? 'Ẩn bài nộp' : 'Xem các bài nộp'}
       </button>
