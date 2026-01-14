@@ -16,7 +16,13 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
   const isLogoutRequest = typeof args === 'object' && args.url === '/auth/logout';
   const isPublicRequest = typeof args === 'object' && 
-    (args.url?.startsWith('/public/') || args.url?.startsWith('/auth/verify-email') || args.url?.startsWith('/auth/get-verification-token'));
+    (args.url?.startsWith('/public/') || 
+     args.url?.startsWith('/auth/verify-email') || 
+     args.url?.startsWith('/auth/get-verification-token') ||
+     args.url?.startsWith('/users/forgot-password') ||
+     args.url?.startsWith('/users/verify-reset-code') ||
+     args.url?.startsWith('/users/reset-password') ||
+     args.url?.startsWith('/users/get-reset-code'));
   if (!isLoginRequest && !isLogoutRequest && !isPublicRequest) {
     const token = localStorage.getItem('accessToken');
     if (!token) {

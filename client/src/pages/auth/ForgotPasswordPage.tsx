@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
 import {
   useForgotPasswordMutation,
-  useGetResetCodeQuery,
   useVerifyResetCodeMutation,
 } from '../../redux/api/usersApi';
 import { formatApiError } from '../../utils/api-helpers';
@@ -19,9 +18,6 @@ const ForgotPasswordPage = () => {
   const [forgotPassword, { isLoading: isSending }] =
     useForgotPasswordMutation();
   const [verifyResetCode] = useVerifyResetCodeMutation();
-
-  const { data: resetCodeData, refetch: refetchResetCode } =
-    useGetResetCodeQuery({ email }, { skip: !isSubmitted || !email });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,7 +156,6 @@ const ForgotPasswordPage = () => {
                   setError(null);
                   try {
                     await forgotPassword({ email }).unwrap();
-                    await refetchResetCode();
                   } catch (err: unknown) {
                     setError(formatApiError(err));
                   }

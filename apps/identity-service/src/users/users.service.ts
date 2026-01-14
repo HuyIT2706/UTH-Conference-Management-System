@@ -264,7 +264,6 @@ export class UsersService {
 
     return {
       email: user.email,
-      code: token.token,
       expiresAt: token.expiresAt,
       createdAt: token.createdAt,
     };

@@ -86,7 +86,7 @@ export class UsersController {
   async getResetCode(@Query('email') email: string) {
     const result = await this.usersService.getResetCodeByEmail(email);
     return {
-      message: 'Lấy reset code thành công (chỉ dùng trong development)',
+      message: 'Lấy reset code thành công',
       data: result,
     };
   }
