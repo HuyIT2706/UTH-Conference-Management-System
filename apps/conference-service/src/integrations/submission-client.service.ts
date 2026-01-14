@@ -129,7 +129,8 @@ export class SubmissionClientService {
         const trackStat = submissionsByTrackMap.get(submission.trackId)!;
         trackStat.count += 1;
 
-        if (submission.status === 'ACCEPTED') {
+        // Consider both ACCEPTED and CAMERA_READY as accepted submissions
+        if (submission.status === 'ACCEPTED' || submission.status === 'CAMERA_READY') {
           trackStat.accepted += 1;
           totalAccepted += 1;
         } else if (submission.status === 'REJECTED') {

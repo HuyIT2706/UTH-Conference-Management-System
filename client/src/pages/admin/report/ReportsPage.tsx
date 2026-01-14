@@ -17,10 +17,13 @@ const ReportsPage = () => {
   const { data: tracksData } = useGetTracksQuery(selectedConferenceId!, {
     skip: !selectedConferenceId,
   });
-  const { data: dashboardData, isLoading: dashboardLoading } =
-    useGetDashboardStatsQuery(selectedConferenceId!, {
-      skip: !selectedConferenceId,
-    });
+  const { 
+    data: dashboardData, 
+    isLoading: dashboardLoading,
+    error: dashboardError,
+  } = useGetDashboardStatsQuery(selectedConferenceId!, {
+    skip: !selectedConferenceId,
+  });
 
   const conferences = useMemo(() => {
     return conferencesData?.data && Array.isArray(conferencesData.data)
@@ -49,6 +52,13 @@ const ReportsPage = () => {
     totalRejected: 0,
     totalReviewers: 0,
   };
+
+  // Debug logging
+  if (selectedConferenceId) {
+    console.log('[ReportsPage] Dashboard data:', dashboardData);
+    console.log('[ReportsPage] Stats:', stats);
+    console.log('[ReportsPage] Dashboard error:', dashboardError);
+  }
 
   const trackStats = useMemo(() => {
     if (!dashboardData?.data?.submissionsByTrack) return [];
@@ -84,6 +94,34 @@ const ReportsPage = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <CircularProgress disableShrink />
+      </div>
+    );
+  }
+
+  // Show error if dashboard stats failed to load
+  if (dashboardError && selectedConferenceId) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
+        <div className="p-8">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Báo cáo và Phân tích
+            </h1>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">
+              Lỗi khi tải dữ liệu thống kê
+            </h2>
+            <p className="text-red-600">
+              {dashboardError && 'data' in dashboardError 
+                ? (dashboardError.data as any)?.message || 'Không thể tải dữ liệu thống kê'
+                : 'Không thể tải dữ liệu thống kê'}
+            </p>
+            <p className="text-sm text-red-500 mt-2">
+              Vui lòng thử lại sau hoặc liên hệ quản trị viên.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -140,7 +178,17 @@ const ReportsPage = () => {
           </div>
         </div>
 
+        {/* Show message if no conference selected */}
+        {!selectedConferenceId && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+            <p className="text-yellow-800">
+              Vui lòng chọn hội nghị để xem thống kê
+            </p>
+          </div>
+        )}
+
         {/* Summary Cards */}
+        {selectedConferenceId && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           {/* Total Submissions Card */}
           <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
@@ -202,7 +250,9 @@ const ReportsPage = () => {
             <div className="mb-2">
               <p className="text-sm text-gray-600 mb-1">Tỷ lệ chấp nhận</p>
               <p className="text-3xl font-bold text-gray-900">
-                {stats.acceptanceRate.toFixed(1)}%
+                {stats.totalSubmissions > 0 
+                  ? stats.acceptanceRate.toFixed(1) 
+                  : '0.0'}%
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -250,8 +300,10 @@ const ReportsPage = () => {
             </div>
           </div>
         </div>
+        )}
 
         {/* Charts Section */}
+        {selectedConferenceId && (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border-2 border-blue-200">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Bar Chart */}
@@ -361,7 +413,9 @@ const ReportsPage = () => {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900">
-                        {stats.acceptanceRate.toFixed(1)}%
+                        {stats.totalSubmissions > 0 
+                          ? stats.acceptanceRate.toFixed(1) 
+                          : '0.0'}%
                       </p>
                       <p className="text-xs text-gray-500">Chấp nhận</p>
                     </div>
@@ -397,6 +451,7 @@ const ReportsPage = () => {
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
