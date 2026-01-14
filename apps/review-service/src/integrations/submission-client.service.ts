@@ -67,12 +67,6 @@ export class SubmissionClientService {
       if (status && status.length > 0) {
         const beforeFilter = submissions.length;
         submissions = submissions.filter((s) => status.includes(s.status));
-        console.log('[SubmissionClient] After status filter:', {
-          before: beforeFilter,
-          after: submissions.length,
-          filterStatus: status,
-          filteredOut: beforeFilter - submissions.length,
-        });
       }
       return submissions;
     } catch (error: any) {
@@ -178,14 +172,6 @@ export class SubmissionClientService {
   ): Promise<Submission> {
     try {
       const fullUrl = `${this.submissionServiceUrl}/submissions/${submissionId}/status`;
-      console.log('[SubmissionClient] Updating submission status:', {
-        fullUrl,
-        submissionId,
-        status,
-        hasAuthToken: !!authToken,
-        authTokenLength: authToken.length,
-      });
-
       const response = await firstValueFrom(
         this.httpService.patch(
           fullUrl,

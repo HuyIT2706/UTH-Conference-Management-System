@@ -591,10 +591,6 @@ export class ConferencesService {
     reviewerId: number,
     trackId: number,
   ): Promise<{ hasAccepted: boolean }> {
-    console.log('[ConferencesService] checkReviewerTrackAssignment:', {
-      reviewerId,
-      trackId,
-    });
     const member = await this.trackMemberRepository.findOne({
       where: {
         userId: reviewerId,

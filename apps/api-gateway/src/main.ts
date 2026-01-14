@@ -66,30 +66,16 @@ async function bootstrap() {
       ...proxyOptions,
     }),
   );
-  // Public endpoints (no auth required) - must be before /api/conferences
   expressApp.use(
     '/api/public/conferences',
     createProxyMiddleware({
       target: conferenceServiceUrl,
       pathRewrite: (path, req) => {
-        // Log for debugging
-        console.log('[API Gateway] Full request URL:', req.url);
-        console.log('[API Gateway] PathRewrite received path:', path);
-        console.log('[API Gateway] Target URL:', conferenceServiceUrl);
-        
-        // http-proxy-middleware receives the path after Express route matching
-        // If Express matched '/api/public/conferences', the remaining path is what we get
-        // So if req.url is '/api/public/conferences/1/cfp/check-deadline?type=camera-ready'
-        // and Express matched '/api/public/conferences', then path should be '/1/cfp/check-deadline'
-        // But we need to send '/api/public/conferences/1/cfp/check-deadline?type=camera-ready' to backend
-        
-        // Use req.url which contains the full path including query string
         const fullPath = req.url || path;
         const newPath = fullPath.startsWith('/api/public/conferences') 
           ? fullPath 
           : '/api/public/conferences' + (path.startsWith('/') ? path : '/' + path);
         
-        console.log('[API Gateway] Final rewritten path:', newPath);
         return newPath;
       },
       ...proxyOptions,

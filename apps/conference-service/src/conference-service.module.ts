@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
-import { TemplatesController } from './template/templates.controller';
 import { TemplatesService } from './template/templates.service';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
@@ -99,7 +98,6 @@ import { EmailService } from './common/services/email.service';
   ],
   controllers: [
     ConferencesController,
-    TemplatesController,
     NotificationsController,
     PublicController,
     ReportingController,

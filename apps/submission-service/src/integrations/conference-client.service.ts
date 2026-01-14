@@ -121,16 +121,11 @@ export class ConferenceClientService {
 
     try {
       const url = `${this.conferenceServiceUrl}/public/conferences/${conferenceId}/cfp/check-deadline`;
-      console.log(`[ConferenceClient] Checking deadline: ${url}?type=${type}`);
-      
       const response = await firstValueFrom(
         this.httpService.get(url, {
           params: { type },
         }),
       );
-      
-      console.log(`[ConferenceClient] Response status: ${response.status}`);
-      console.log(`[ConferenceClient] Response data:`, JSON.stringify(response.data));
       
       let result = response.data;
       

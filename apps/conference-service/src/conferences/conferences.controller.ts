@@ -71,20 +71,7 @@ export class ConferencesController {
   @ApiOperation({ summary: 'Lấy danh sách chủ đề được phân công cho reviewer hiện tại' })
   @ApiResponse({ status: 200, description: 'Lấy danh sách phân công thành công' })
   async getMyTrackAssignments(@CurrentUser() user: JwtPayload) {
-    console.log('[ConferencesController] getMyTrackAssignments called:', {
-      userId: user.sub,
-      roles: user.roles,
-    });
     const assignments = await this.conferencesService.getMyTrackAssignments(user.sub);
-    console.log('[ConferencesController] getMyTrackAssignments result:', {
-      count: assignments.length,
-      assignments: assignments.map(a => ({
-        id: a.id,
-        trackId: a.trackId,
-        status: a.status,
-        trackName: a.track?.name,
-      })),
-    });
     return { message: 'Lấy danh sách phân công thành công', data: assignments };
   }
   // Lấy chi tiết một cuộc thi

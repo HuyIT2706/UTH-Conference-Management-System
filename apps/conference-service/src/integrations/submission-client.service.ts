@@ -35,6 +35,7 @@ export class SubmissionClientService {
         ? 'http://submission-service:3003/api' 
         : 'http://localhost:3003/api');
   }
+  
   // Lấy danh sách submissions theo conferenceId 
   async getSubmissionsByConference(
     conferenceId: number,

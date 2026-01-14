@@ -23,18 +23,11 @@ const TrackAssignmentList = ({ onAcceptTrack }: TrackAssignmentListProps) => {
 
   const assignments: TrackMember[] = assignmentsData?.data || [];
   
-  // Chỉ hiển thị PENDING assignments ở đây (có buttons chấp nhận/từ chối)
-  // ACCEPTED assignments sẽ hiển thị ở phần "Các chủ đề đã chấp nhận" bên dưới
-  // Nếu status không có hoặc undefined/null, coi như là PENDING (cho tương thích với dữ liệu cũ)
   const pendingAssignments = assignments.filter((a) => {
     const status = a.status || 'PENDING';
     return status === 'PENDING';
   });
   
-  // Debug: log để kiểm tra data
-  console.log('TrackAssignmentList - All assignments:', assignments);
-  console.log('TrackAssignmentList - Pending assignments:', pendingAssignments);
-
   const handleAccept = async (trackId: number, conferenceId: number) => {
     try {
       await acceptTrackAssignment(trackId).unwrap();

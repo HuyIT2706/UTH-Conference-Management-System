@@ -45,21 +45,10 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT ?? 3003;
-  console.log(`[Submission-Service] Starting server on port ${port}...`);
-  console.log(`[Submission-Service] Listening on 0.0.0.0:${port}`);
-  
   await app.listen(port, '0.0.0.0');
-  
-  console.log(`[Submission-Service] ====== SERVER STARTED SUCCESSFULLY ======`);
-  console.log(`[Submission-Service] Application is running on: http://localhost:${port}/api`);
-  console.log(`[Submission-Service] Swagger documentation: http://localhost:${port}/api/docs`);
-  console.log(`[Submission-Service] Docker network URL: http://submission-service:3003/api`);
-  console.log(`[Submission-Service] Ready to accept requests!`);
 }
 
 bootstrap().catch((error) => {
-  console.error('[Submission-Service] ====== FATAL ERROR DURING STARTUP ======');
-  console.error('[Submission-Service] Error:', error);
   console.error('[Submission-Service] Stack:', error.stack);
   process.exit(1);
 });

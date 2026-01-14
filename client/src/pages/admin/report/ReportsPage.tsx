@@ -53,13 +53,6 @@ const ReportsPage = () => {
     totalReviewers: 0,
   };
 
-  // Debug logging
-  if (selectedConferenceId) {
-    console.log('[ReportsPage] Dashboard data:', dashboardData);
-    console.log('[ReportsPage] Stats:', stats);
-    console.log('[ReportsPage] Dashboard error:', dashboardError);
-  }
-
   const trackStats = useMemo(() => {
     if (!dashboardData?.data?.submissionsByTrack) return [];
     return dashboardData.data.submissionsByTrack.map((track) => ({
