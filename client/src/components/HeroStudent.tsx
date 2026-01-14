@@ -4,13 +4,13 @@ const HeroStudent = () => {
   return (
     <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center">
+        <div className="flex-row gap-5 justify-between items-center md:flex">
           <div className="space-y-8 w-[660px]">
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-3xl max-w-[380px] md:max-w-full md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 UTH Scientific Conference Paper Management System
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
+              <p className="text-lg max-w-[380px] md:max-w-full md:text-xl text-gray-600 leading-relaxed">
                 Hệ thống quản lý giấy tờ Hội nghị Nghiên cứu khoa học dành cho
                 Trường Đại Học UTH
               </p>
@@ -20,7 +20,7 @@ const HeroStudent = () => {
             </div>
           </div>
           <figure>
-            <img src={HeorUth} alt="Hero" className="rounded-lg shadow-lg" />
+            <img src={HeorUth} alt="Hero" className="rounded-lg shadow-lg mt-10 md:mt-0" />
           </figure>
         </div>
 

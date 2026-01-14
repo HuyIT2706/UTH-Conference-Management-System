@@ -18,7 +18,7 @@ const ContactStudent = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
               UTH-ConfMS
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-md max-w-[380px] md:max-w-full md:text-lg text-gray-600 leading-relaxed">
               Hệ thống UTH-ConfMS cung cấp một quy trình khép kín cho một hội nghị khoa học: từ lúc Nộp bài,Phản biện, Chỉnh sửa đến khi Công bố kết quả, giúp thay thế hoàn toàn việc quản lý thủ công bằng file Excel hay Email rời rạc.
             </p>
           </div>

@@ -18,21 +18,15 @@ const Competition = () => {
     const notificationDate = c.cfpSetting?.notificationDate || c.notificationDate;
     const cameraReadyDeadline = c.cfpSetting?.cameraReadyDeadline || c.cameraReadyDeadline;
     const conferenceStartDate = new Date(c.startDate);
-
-    // Kiểm tra thời gian nhận bài nộp
     if (submissionDeadline) {
       const submissionDate = new Date(submissionDeadline);
-      // Nếu chưa đến thời gian diễn ra hội nghị → Chưa mở
       if (now < conferenceStartDate) {
         return { text: 'Chưa mở', color: 'border-3 border-gray-400' };
       }
-      // Nếu đã đến thời gian diễn ra hội nghị và chưa hết hạn nộp bài → Đang nhận bài nộp
       if (now >= conferenceStartDate && now < submissionDate) {
         return { text: 'Đang nhận bài nộp', color: 'border-3 border-green-500' };
       }
     }
-
-    // Kiểm tra các giai đoạn sau khi hết hạn nộp bài
     if (submissionDeadline && notificationDate) {
       const submissionDate = new Date(submissionDeadline);
       const notificationDateObj = new Date(notificationDate);
@@ -48,7 +42,6 @@ const Competition = () => {
       }
     }
     
-    // Nếu không có deadline nào hoặc đã qua tất cả các deadline
     if (!submissionDeadline && !notificationDate && !cameraReadyDeadline) {
       return { text: 'Đã đóng', color: 'border-3 border-red-300' };
     }
@@ -104,7 +97,7 @@ const Competition = () => {
               className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-start justify-between"
             >
               <div className="flex-1 pr-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6 ">
+                <h2 className="text-md md:text-xl font-semibold text-gray-800 mb-6 ">
                   {c.name}
                 </h2>
                 <div className="flex items-center gap-3 text-sm text-gray-500">
