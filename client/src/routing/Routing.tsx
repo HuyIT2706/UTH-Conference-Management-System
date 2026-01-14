@@ -24,6 +24,7 @@ import StudentSubmitForm from '../pages/student/StudentSubmitForm';
 import StudentSubmissionDetail from '../pages/student/StudentSubmissionDetail';
 import ReviewerDashboard from '../pages/reviewer/ReviewerDashboard';
 import RoleProtectedRoute from '../components/RoleProtectedRoute';
+import RejectedPage from '../pages/admin/rejected/RejectedPage';
 
 const appRouter = createBrowserRouter([
   {
@@ -77,6 +78,10 @@ const appRouter = createBrowserRouter([
       {
         path: 'assignments',
         element: <AssignmentsPage />,
+      },
+      {
+        path: 'rejected-submissions',
+        element: <RejectedPage />,
       },
       {
         path: 'camera-ready',

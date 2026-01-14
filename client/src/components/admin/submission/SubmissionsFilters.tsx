@@ -84,11 +84,13 @@ const SubmissionsFilters = memo(({
             onChange={(e) => {
               onStatusChange(e.target.value as SubmissionStatus | '');
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            disabled={selectedStatus === 'REJECTED'}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">Tất cả trạng thái</option>
             <option value="SUBMITTED">Đã nộp</option>
             <option value="WITHDRAWN">Đã rút</option>
+            <option value="REJECTED">Bị từ chối</option>
           </select>
         </div>
 

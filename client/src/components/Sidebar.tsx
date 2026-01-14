@@ -31,6 +31,10 @@ const Sidebar = () => {
       to: '/assignments',
     },
     {
+      name: 'Bài từ chối thí sinh',
+      to: '/rejected-submissions',
+    },
+    {
       name: 'Bài hoàn thiện Thí sinh',
       to: '/camera-ready',
     },
