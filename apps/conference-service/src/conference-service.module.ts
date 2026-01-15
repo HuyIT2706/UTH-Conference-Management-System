@@ -29,6 +29,7 @@ import { SubmissionClientService } from './integrations/submission-client.servic
 import { IdentityClientService } from './integrations/identity-client.service';
 import { ReviewClientService } from './integrations/review-client.service';
 import { EmailService } from './common/services/email.service';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { EmailService } from './common/services/email.service';
     }),
   ],
   controllers: [
+    HealthController,
     ConferencesController,
     NotificationsController,
     PublicController,

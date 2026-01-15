@@ -16,6 +16,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ConferenceClientService } from './integrations/conference-client.service';
 import { SubmissionClientService } from './integrations/submission-client.service';
 import { IdentityClientService } from './integrations/identity-client.service';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -78,7 +79,7 @@ import { IdentityClientService } from './integrations/identity-client.service';
       Rebuttal,
     ]),
   ],
-  controllers: [ReviewsController],
+  controllers: [HealthController, ReviewsController],
   providers: [
     ReviewsService,
     JwtStrategy,

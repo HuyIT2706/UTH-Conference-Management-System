@@ -16,6 +16,7 @@ import { ReviewClientService } from './integrations/review-client.service';
 import { IdentityClientService } from './integrations/identity-client.service';
 import { EmailService } from './common/services/email.service';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -68,7 +69,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
       },
     }),
   ],
-  controllers: [SubmissionsController],
+  controllers: [HealthController, SubmissionsController],
   providers: [
     SubmissionsService,
     SupabaseService,

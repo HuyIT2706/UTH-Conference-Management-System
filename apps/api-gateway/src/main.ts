@@ -29,6 +29,8 @@ async function bootstrap() {
 
   const proxyOptions = {
     changeOrigin: true,
+    timeout: 30000, // 30 seconds timeout
+    proxyTimeout: 30000,
     onProxyReq: (proxyReq: any, req: any, res: any) => {
       if (req.headers.origin) {
         proxyReq.setHeader('Origin', req.headers.origin);
@@ -42,7 +44,13 @@ async function bootstrap() {
     },
     onError: (err: any, req: any, res: any) => {
       console.error('Proxy error:', err);
-      res.status(500).json({ message: 'Proxy error', error: err.message });
+      if (!res.headersSent) {
+        if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+          res.status(502).json({ message: 'Service unavailable', error: err.message });
+        } else {
+          res.status(500).json({ message: 'Proxy error', error: err.message });
+        }
+      }
     },
   };
 
@@ -112,7 +120,42 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000); 
-  console.log('Gateway is running on http://localhost:3000');
+  // Health check endpoint for gateway
+  expressApp.get('/health', (req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'api-gateway',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Health check proxy endpoints for monitoring services
+  expressApp.get('/health/identity', createProxyMiddleware({
+    target: identityServiceUrl,
+    pathRewrite: { '^/health/identity': '/api/health' },
+    ...proxyOptions,
+  }));
+
+  expressApp.get('/health/conference', createProxyMiddleware({
+    target: conferenceServiceUrl,
+    pathRewrite: { '^/health/conference': '/api/health' },
+    ...proxyOptions,
+  }));
+
+  expressApp.get('/health/submission', createProxyMiddleware({
+    target: submissionServiceUrl,
+    pathRewrite: { '^/health/submission': '/api/health' },
+    ...proxyOptions,
+  }));
+
+  expressApp.get('/health/review', createProxyMiddleware({
+    target: reviewServiceUrl,
+    pathRewrite: { '^/health/review': '/api/health' },
+    ...proxyOptions,
+  }));
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0'); 
+  console.log(`Gateway is running on http://0.0.0.0:${port}`);
 }
 bootstrap();
