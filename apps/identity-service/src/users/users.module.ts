@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { UsersService } from './users.service';
@@ -19,7 +19,7 @@ import { AuthModule } from '../auth/auth.module';
       timeout: 10000,
       maxRedirects: 5,
     }),
-    AuthModule,
+    forwardRef(() => AuthModule),
   ],
   controllers: [UsersController],
   providers: [
