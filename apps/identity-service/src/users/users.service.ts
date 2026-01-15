@@ -217,11 +217,16 @@ export class UsersService {
   }
 // Quên mật khẩu - gửi email đặt lại mật khẩu
   async forgotPassword(email: string): Promise<void> {
+    console.log(`[UsersService] Processing forgot password for email: ${email}`);
     const user = await this.findByEmail(email);
     if (!user) {
+      console.log(`[UsersService] User not found for email: ${email}`);
       return;
     }
+    console.log(`[UsersService] User found: ${user.id} - ${user.email}`);
+    
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(`[UsersService] Generated reset code: ${code}`);
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
 
@@ -232,11 +237,16 @@ export class UsersService {
       used: false,
     });
     await this.passwordResetTokenRepository.save(resetToken);
+    console.log(`[UsersService] Reset token saved to database for user: ${user.id}`);
 
     try {
+      console.log(`[UsersService] Attempting to send password reset email to: ${user.email}`);
       await this.emailService.sendPasswordResetCode(user.email, code);
-    } catch (error) {
-      throw new BadRequestException('Không thể gửi email đặt lại mật khẩu');
+      console.log(`[UsersService] Password reset email sent successfully to: ${user.email}`);
+    } catch (error: any) {
+      console.error(`[UsersService] Failed to send password reset email to ${user.email}:`, error);
+      console.error(`[UsersService] Error details:`, error.message, error.stack);
+      throw new BadRequestException('Không thể gửi email đặt lại mật khẩu: ' + (error.message || 'Unknown error'));
     }
   }
 // Lấy mã đặt lại mật khẩu theo email

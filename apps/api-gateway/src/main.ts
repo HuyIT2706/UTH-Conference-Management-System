@@ -43,10 +43,17 @@ async function bootstrap() {
       proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With';
     },
     onError: (err: any, req: any, res: any) => {
-      console.error('Proxy error:', err);
+      console.error(`[API Gateway] Proxy error for ${req.method} ${req.url}:`, err);
+      console.error(`[API Gateway] Error code:`, err.code);
+      console.error(`[API Gateway] Error message:`, err.message);
       if (!res.headersSent) {
-        if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
-          res.status(502).json({ message: 'Service unavailable', error: err.message });
+        if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET') {
+          console.error(`[API Gateway] Service unavailable - likely cold start. Returning 502`);
+          res.status(502).json({ 
+            message: 'Service đang khởi động, vui lòng thử lại sau vài giây', 
+            error: err.message,
+            code: err.code 
+          });
         } else {
           res.status(500).json({ message: 'Proxy error', error: err.message });
         }

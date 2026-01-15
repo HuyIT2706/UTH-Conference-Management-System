@@ -71,8 +71,16 @@ export class UsersController {
   @ApiOperation({ summary: 'Gửi mã reset mật khẩu qua email' })
   @ApiResponse({ status: 200, description: 'Đã gửi mã reset mật khẩu (luôn trả về 200 để bảo mật)' })
   async forgotPassword(@Body('email') email: string) {
-    await this.usersService.forgotPassword(email);
-    return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
+    console.log(`[UsersController] Forgot password request received for email: ${email}`);
+    try {
+      await this.usersService.forgotPassword(email);
+      console.log(`[UsersController] Forgot password processed successfully for email: ${email}`);
+      return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
+    } catch (error: any) {
+      console.error(`[UsersController] Error in forgotPassword for email ${email}:`, error);
+      // Vẫn trả về 200 để bảo mật (không tiết lộ email có tồn tại hay không)
+      return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
+    }
   }
 
   @Get('get-reset-code')

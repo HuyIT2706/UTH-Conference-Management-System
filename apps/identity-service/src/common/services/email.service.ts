@@ -28,13 +28,18 @@ export class EmailService {
    * Gửi email reset password code
    */
   async sendPasswordResetCode(email: string, code: string): Promise<void> {
+    console.log(`[EmailService] Preparing to send password reset code to: ${email}`);
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
     const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
-    const mailOptions = {
-      from: this.configService.get<string>('SMTP_FROM') || 
+    const smtpFrom = this.configService.get<string>('SMTP_FROM') || 
             this.configService.get<string>('SMTP_USER') || 
-            this.configService.get<string>('EMAIL_USER'),
+            this.configService.get<string>('EMAIL_USER');
+    
+    console.log(`[EmailService] SMTP Config - From: ${smtpFrom}, Host: ${this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com'}`);
+
+    const mailOptions = {
+      from: smtpFrom,
       to: email,
       subject: `[${appName}] Mã xác nhận đặt lại mật khẩu`,
       html: `
@@ -152,9 +157,17 @@ Trân trọng,
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
-    } catch (error) {
-      throw new Error(`Failed to send password reset email to ${email}`);
+      console.log(`[EmailService] Sending password reset email to: ${email}`);
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log(`[EmailService] Password reset email sent successfully! MessageId: ${result.messageId}`);
+      console.log(`[EmailService] Email response:`, result.response);
+    } catch (error: any) {
+      console.error(`[EmailService] Failed to send password reset email to ${email}:`, error);
+      console.error(`[EmailService] Error code:`, error.code);
+      console.error(`[EmailService] Error command:`, error.command);
+      console.error(`[EmailService] Error response:`, error.response);
+      console.error(`[EmailService] Error stack:`, error.stack);
+      throw new Error(`Failed to send password reset email to ${email}: ${error.message || 'Unknown error'}`);
     }
   }
 
