@@ -505,8 +505,10 @@ export class EmailService {
   async verifyConnection(): Promise<boolean> {
     try {
       await this.transporter.verify();
+      console.log('Email connection verified successfully.');
       return true;
     } catch (error) {
+      console.error('Email connection verification failed:', error);
       return false;
     }
   }
