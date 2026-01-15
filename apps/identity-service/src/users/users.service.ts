@@ -239,15 +239,21 @@ export class UsersService {
     await this.passwordResetTokenRepository.save(resetToken);
     console.log(`[UsersService] Reset token saved to database for user: ${user.id}`);
 
-    try {
-      console.log(`[UsersService] Attempting to send password reset email to: ${user.email}`);
-      await this.emailService.sendPasswordResetCode(user.email, code);
-      console.log(`[UsersService] Password reset email sent successfully to: ${user.email}`);
-    } catch (error: any) {
-      console.error(`[UsersService] Failed to send password reset email to ${user.email}:`, error);
-      console.error(`[UsersService] Error details:`, error.message, error.stack);
-      throw new BadRequestException('Không thể gửi email đặt lại mật khẩu: ' + (error.message || 'Unknown error'));
-    }
+    // Gửi email async (không await) để không block response
+    // Response sẽ được trả về ngay sau khi lưu token vào DB
+    this.emailService.sendPasswordResetCode(user.email, code)
+      .then(() => {
+        console.log(`[UsersService] Password reset email sent successfully to: ${user.email}`);
+      })
+      .catch((error: any) => {
+        console.error(`[UsersService] Failed to send password reset email to ${user.email}:`, error);
+        console.error(`[UsersService] Error details:`, error.message, error.stack);
+        // Không throw error để không ảnh hưởng đến response
+        // Email sẽ được retry hoặc user có thể request lại
+      });
+    
+    // Return ngay sau khi lưu token, không đợi email
+    console.log(`[UsersService] Forgot password request processed, email sending in background`);
   }
 // Lấy mã đặt lại mật khẩu theo email
   async getResetCodeByEmail(email: string) {

@@ -73,6 +73,7 @@ export class UsersController {
   async forgotPassword(@Body('email') email: string) {
     console.log(`[UsersController] Forgot password request received for email: ${email}`);
     try {
+      // Service sẽ return ngay sau khi lưu token, email gửi ở background
       await this.usersService.forgotPassword(email);
       console.log(`[UsersController] Forgot password processed successfully for email: ${email}`);
       return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };

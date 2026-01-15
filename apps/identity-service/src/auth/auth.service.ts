@@ -76,7 +76,7 @@ export class AuthService {
 // Api 2: Xác tài khoản qua email với mã 6 số
   private async createAndSendEmailVerificationToken(user: User) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     const entity = this.emailVerificationTokenRepository.create({
       token: code,
@@ -86,11 +86,15 @@ export class AuthService {
     });
     await this.emailVerificationTokenRepository.save(entity);
     
-    try {
-      await this.emailService.sendVerificationEmail(user.email, code, user.fullName);
-    } catch (error) {
-      throw new BadRequestException('Không thể gửi email xác minh');
-    }
+    // Gửi email async (không await) để không block response
+    this.emailService.sendVerificationEmail(user.email, code, user.fullName)
+      .then(() => {
+        console.log(`[AuthService] Verification email sent successfully to: ${user.email}`);
+      })
+      .catch((error: any) => {
+        console.error(`[AuthService] Failed to send verification email to ${user.email}:`, error);
+        // Không throw error để không ảnh hưởng đến response
+      });
   }
 // Api 3: Đăng nhập
   async login(dto: LoginDto) {
