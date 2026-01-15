@@ -168,10 +168,10 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'Tạo user thành công' })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async createUser(@Body() dto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    // Truyền password gốc để service có thể gửi trong email, service sẽ tự hash
     const user = await this.usersService.createUserWithRole({
       email: dto.email,
-      password: hashedPassword,
+      password: dto.password,
       fullName: dto.fullName,
       roleName: dto.role,
     });
@@ -183,7 +183,7 @@ export class UsersController {
 
     const { password, roles, ...userWithoutPassword } = userWithRoles;
     return {
-      message: 'Tạo tài khoản thành công',
+      message: 'Tạo tài khoản thành công. Email thông báo đã được gửi đến người dùng.',
       data: {
         ...userWithoutPassword,
         roles: roles?.map((role) => role.name) || [],

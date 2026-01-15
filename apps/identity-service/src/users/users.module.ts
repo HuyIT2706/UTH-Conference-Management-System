@@ -6,6 +6,7 @@ import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailVerificationToken } from '../auth/entities/email-verification-token.entity';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { EmailService } from '../common/services/email.service';
 import { SubmissionClientService } from '../integrations/submission-client.service';
@@ -13,7 +14,7 @@ import { ReviewClientService } from '../integrations/review-client.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, PasswordResetToken]),
+    TypeOrmModule.forFeature([User, Role, PasswordResetToken, EmailVerificationToken]),
     HttpModule.register({
       timeout: 10000,
       maxRedirects: 5,

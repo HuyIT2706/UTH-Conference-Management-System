@@ -11,6 +11,7 @@ import { User } from './entities/user.entity';
 import { Role, RoleName } from './entities/role.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { EmailVerificationToken } from '../auth/entities/email-verification-token.entity';
 import { EmailService } from '../common/services/email.service';
 import { SubmissionClientService } from '../integrations/submission-client.service';
 import { ReviewClientService } from '../integrations/review-client.service';
@@ -24,6 +25,8 @@ export class UsersService {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(PasswordResetToken)
     private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
+    @InjectRepository(EmailVerificationToken)
+    private readonly emailVerificationTokenRepository: Repository<EmailVerificationToken>,
     private readonly dataSource: DataSource,
     private readonly emailService: EmailService,
     private readonly submissionClient: SubmissionClientService,
@@ -147,7 +150,7 @@ export class UsersService {
 // Tạo user với vai trò cụ thể
   async createUserWithRole(params: {
     email: string;
-    password: string;
+    password: string; // Password gốc (chưa hash)
     fullName: string;
     roleName: string;
   }): Promise<User> {
@@ -161,15 +164,32 @@ export class UsersService {
       throw new BadRequestException(`Role ${params.roleName} not found`);
     }
 
+    // Hash password trước khi lưu
+    const hashedPassword = await bcrypt.hash(params.password, 10);
+
     const user = this.usersRepository.create({
       email: params.email,
-      password: params.password,
+      password: hashedPassword,
       fullName: params.fullName,
       isVerified: false,
       roles: [role],
     });
 
-    return this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+    
+    // Gửi email thông báo tài khoản đã được tạo (không gửi code verification)
+    // Gửi password gốc để người dùng biết thông tin đăng nhập
+    try {
+      await this.emailService.sendAccountCreatedNotification(
+        savedUser.email,
+        savedUser.fullName,
+        params.password, // Password gốc để gửi trong email
+      );
+    } catch (error) {
+      throw new BadRequestException('Không thể gửi email thông báo tài khoản');
+    }
+
+    return savedUser;
   }
 // Cập nhật vai trò cho user
   async updateUserRoles(userId: number, roleName: string): Promise<User> {

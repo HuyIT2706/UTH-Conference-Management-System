@@ -101,7 +101,7 @@ export class AuthService {
 
     if (!user.isVerified) {
       throw new UnauthorizedException(
-        'Tài khoản chưa được xác minh email. Vui lòng kiểm tra email.',
+        'Tài khoản chưa được xác minh email. Vui lòng kích hoạt tài khoản.',
       );
     }
 
