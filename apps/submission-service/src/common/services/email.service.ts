@@ -8,7 +8,8 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     const smtpHost = this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
-    const smtpPort = Number(this.configService.get<string>('SMTP_PORT')) || 587;
+    // Port 465 (SSL/TLS) is preferred over 587 (STARTTLS) for better reliability on Render/cloud
+    const smtpPort = Number(this.configService.get<string>('SMTP_PORT')) || 465;
     const smtpUser = this.configService.get<string>('SMTP_USER') || this.configService.get<string>('EMAIL_USER');
     const smtpPassword = this.configService.get<string>('SMTP_PASSWORD') || this.configService.get<string>('EMAIL_PASS');
     const smtpFrom = this.configService.get<string>('SMTP_FROM') || smtpUser;
@@ -16,12 +17,17 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
-      secure: smtpPort === 465,
+      secure: smtpPort === 465, // SSL/TLS from start for port 465
       auth: smtpUser && smtpPassword ? {
         user: smtpUser,
         pass: smtpPassword,
       } : undefined,
+      connectionTimeout: 10000, // 10 seconds connection timeout
+      greetingTimeout: 10000, // 10 seconds greeting timeout
+      socketTimeout: 10000, // 10 seconds socket timeout
     });
+    
+    console.log(`[EmailService] SMTP transporter initialized - Host: ${smtpHost}, Port: ${smtpPort}, Secure: ${smtpPort === 465}`);
   }
 
   /**

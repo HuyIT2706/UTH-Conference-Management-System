@@ -56,7 +56,7 @@ services:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres
       - identity-service
@@ -111,7 +111,7 @@ services:
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
       - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres
       - conference-service
