@@ -74,7 +74,7 @@ export class AuthService {
     };
   }
 // Api 2: Xác tài khoản qua email với mã 6 số
-  private async createAndSendEmailVerificationToken(user: User) {
+  async createAndSendEmailVerificationToken(user: User) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 

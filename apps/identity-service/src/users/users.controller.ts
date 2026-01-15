@@ -11,11 +11,15 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { RoleName } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
+import { AuthService } from '../auth/auth.service';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -184,6 +188,9 @@ export class UsersController {
       fullName: dto.fullName,
       roleName: dto.role,
     });
+
+    // Sau khi tạo user, tạo mã xác minh và gửi email kích hoạt tài khoản
+    await this.authService.createAndSendEmailVerificationToken(user);
 
     const userWithRoles = await this.usersService.findById(user.id);
     if (!userWithRoles) {

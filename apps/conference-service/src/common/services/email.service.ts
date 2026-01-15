@@ -1,44 +1,72 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import axios from 'axios';
+
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private readonly resendApiKey: string;
+  private readonly fromEmail: string;
 
   constructor(private configService: ConfigService) {
-    const smtpHost =
-      this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com';
-    // Port 465 (SSL/TLS) is preferred over 587 (STARTTLS) for better reliability on Render/cloud
-    const smtpPort = Number(this.configService.get<string>('SMTP_PORT')) || 465;
-    const smtpUser =
-      this.configService.get<string>('SMTP_USER') ||
-      this.configService.get<string>('EMAIL_USER');
-    const smtpPassword =
-      this.configService.get<string>('SMTP_PASSWORD') ||
-      this.configService.get<string>('EMAIL_PASS');
-    const smtpFrom = this.configService.get<string>('SMTP_FROM') || smtpUser;
+    this.resendApiKey = this.configService.get<string>('RESEND_API_KEY') || '';
+    this.fromEmail =
+      this.configService.get<string>('EMAIL_FROM') ||
+      'UTH ConfMS <noreply@example.com>';
 
-    this.transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465, // SSL/TLS from start for port 465
-      auth:
-        smtpUser && smtpPassword
-          ? {
-              user: smtpUser,
-              pass: smtpPassword,
-            }
-          : undefined,
-      // QUAN TRỌNG: Bỏ qua lỗi chứng chỉ (nếu có)
-      tls: {
-        rejectUnauthorized: false,
-      },
-      // QUAN TRỌNG: Ép dùng IPv4 (tránh lỗi IPv6 của Docker/Render)
-      family: 4,
-    } as any);
-    
-    console.log(`[EmailService] SMTP transporter initialized - Host: ${smtpHost}, Port: ${smtpPort}, Secure: ${smtpPort === 465}, IPv4: true`);
+    if (!this.resendApiKey) {
+      console.warn(
+        '[EmailService] RESEND_API_KEY is not set. Emails will NOT be sent.',
+      );
+    } else {
+      console.log(
+        `[EmailService] Using Resend HTTP API. From: ${this.fromEmail}`,
+      );
+    }
+  }
+
+  private async sendEmail(params: SendEmailParams): Promise<void> {
+    if (!this.resendApiKey) {
+      console.error('[EmailService] Missing RESEND_API_KEY, skip sending');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'https://api.resend.com/emails',
+        {
+          from: this.fromEmail,
+          to: params.to,
+          subject: params.subject,
+          html: params.html,
+          text: params.text,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000,
+        },
+      );
+
+      console.log(
+        `[EmailService] Email sent to ${params.to}. Id: ${response.data?.id}`,
+      );
+    } catch (error: any) {
+      console.error('[EmailService] Failed to send email via Resend:', {
+        to: params.to,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      // KHÔNG throw để không làm hỏng flow chính
+    }
   }
 
   /**
@@ -54,14 +82,8 @@ export class EmailService {
     const appUrl =
       this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
-    const mailOptions = {
-      from:
-        this.configService.get<string>('SMTP_FROM') ||
-        this.configService.get<string>('SMTP_USER') ||
-        this.configService.get<string>('EMAIL_USER'),
-      to: email,
-      subject: `[${appName}] Bạn đã được phân công phản biện cho chủ đề "${trackName}"`,
-      html: `
+    const subject = `[${appName}] Bạn đã được phân công phản biện cho chủ đề "${trackName}"`;
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -156,31 +178,24 @@ export class EmailService {
           </div>
         </body>
         </html>
-      `,
-      text: `
-              ${appName} - Thông báo phân công phản biện
+      `;
+    const text = `
+${appName} - Thông báo phân công phản biện
 
-              Xin chào ${reviewerName},
+Xin chào ${reviewerName},
 
-              Bạn đã được phân công làm phản biện cho một chủ đề trong Cuộc thi. Thông tin chi tiết:
+Bạn đã được phân công làm phản biện cho một chủ đề trong Cuộc thi. Thông tin chi tiết:
 
-              Cuộc thi: ${conferenceName}
-        
-              Chủ đề: ${trackName}
-        
-              Vui lòng đăng nhập vào hệ thống để xem chi tiết và chấp nhận/từ chối phân công này.
-        
-        
-              Trân trọng,
-              Đội ngũ ${appName}
-                    `,
-    };
+Cuộc thi: ${conferenceName}
+Chủ đề: ${trackName}
 
-    try {
-      await this.transporter.sendMail(mailOptions);
-    } catch (error) {
-      throw error;
-    }
+Vui lòng đăng nhập vào hệ thống để xem chi tiết và chấp nhận/từ chối phân công này.
+
+Trân trọng,
+Đội ngũ ${appName}
+      `;
+
+    await this.sendEmail({ to: email, subject, html, text });
   }
 
   /**
@@ -197,14 +212,8 @@ export class EmailService {
     const appUrl =
       this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
-    const mailOptions = {
-      from:
-        this.configService.get<string>('SMTP_FROM') ||
-        this.configService.get<string>('SMTP_USER') ||
-        this.configService.get<string>('EMAIL_USER'),
-      to: email,
-      subject: `[${appName}] Bài nộp của bạn đã được chấp nhận`,
-      html: `
+    const subject = `[${appName}] Bài nộp của bạn đã được chấp nhận`;
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -318,8 +327,8 @@ export class EmailService {
           </div>
         </body>
         </html>
-      `,
-      text: `
+      `;
+    const text = `
               Chúc mừng! Bài nộp của bạn đã được chấp nhận
 
               Xin chào ${authorName},
@@ -336,15 +345,10 @@ export class EmailService {
               Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).
               Trân trọng,
               Đội ngũ ${appName}
-                    `,
-                  };
-                
-                  try {
-                    await this.transporter.sendMail(mailOptions);
-                  } catch (error) {
-                    throw error;
-                  }
-                }
+                    `;
+
+    await this.sendEmail({ to: email, subject, html, text });
+  }
 
   /**
    * Gửi email thông báo khi bài nộp bị từ chối
@@ -360,14 +364,8 @@ export class EmailService {
     const appUrl =
       this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
-    const mailOptions = {
-      from:
-        this.configService.get<string>('SMTP_FROM') ||
-        this.configService.get<string>('SMTP_USER') ||
-        this.configService.get<string>('EMAIL_USER'),
-      to: email,
-      subject: `[${appName}] Thông báo về bài nộp của bạn`,
-      html: `
+    const subject = `[${appName}] Thông báo về bài nộp của bạn`;
+    const html = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -482,8 +480,8 @@ export class EmailService {
           </div>
         </body>
         </html>
-      `,
-      text: `
+      `;
+    const text = `
               Thông báo về bài nộp - Kết quả đánh giá
 
               Xin chào ${authorName},
@@ -499,25 +497,25 @@ export class EmailService {
 
               Trân trọng,
               Đội ngũ ${appName}
-                    `,
-                  };
-                
-                  try {
-                    await this.transporter.sendMail(mailOptions);
-                  } catch (error) {
-                    throw error;
-                  }
-        }
+                    `;
+
+    await this.sendEmail({ to: email, subject, html, text });
+  }
+
   /**
-   * Test email connection
+   * Test kết nối
    */
   async verifyConnection(): Promise<boolean> {
+    if (!this.resendApiKey) return false;
     try {
-      await this.transporter.verify();
-      console.log('Email connection verified successfully.');
+      await axios.get('https://api.resend.com', {
+        headers: { Authorization: `Bearer ${this.resendApiKey}` },
+        timeout: 5000,
+      });
+      console.log('[EmailService] Resend API reachable.');
       return true;
     } catch (error) {
-      console.error('Email connection verification failed:', error);
+      console.error('[EmailService] Resend API NOT reachable:', error);
       return false;
     }
   }
