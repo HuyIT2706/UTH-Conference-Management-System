@@ -30,12 +30,15 @@ export class EmailService {
               pass: smtpPassword,
             }
           : undefined,
-      connectionTimeout: 10000, // 10 seconds connection timeout
-      greetingTimeout: 10000, // 10 seconds greeting timeout
-      socketTimeout: 10000, // 10 seconds socket timeout
-    });
+      // QUAN TRỌNG: Bỏ qua lỗi chứng chỉ (nếu có)
+      tls: {
+        rejectUnauthorized: false,
+      },
+      // QUAN TRỌNG: Ép dùng IPv4 (tránh lỗi IPv6 của Docker/Render)
+      family: 4,
+    } as any);
     
-    console.log(`[EmailService] SMTP transporter initialized - Host: ${smtpHost}, Port: ${smtpPort}, Secure: ${smtpPort === 465}`);
+    console.log(`[EmailService] SMTP transporter initialized - Host: ${smtpHost}, Port: ${smtpPort}, Secure: ${smtpPort === 465}, IPv4: true`);
   }
 
   /**
