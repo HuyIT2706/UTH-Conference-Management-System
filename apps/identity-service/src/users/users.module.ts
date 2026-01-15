@@ -10,6 +10,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { EmailService } from '../common/services/email.service';
 import { SubmissionClientService } from '../integrations/submission-client.service';
 import { ReviewClientService } from '../integrations/review-client.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -18,11 +19,12 @@ import { ReviewClientService } from '../integrations/review-client.service';
       timeout: 10000,
       maxRedirects: 5,
     }),
+    AuthModule,
   ],
   controllers: [UsersController],
   providers: [
-    UsersService, 
-    RolesGuard, 
+    UsersService,
+    RolesGuard,
     EmailService,
     SubmissionClientService,
     ReviewClientService,
