@@ -12,6 +12,7 @@ import { RoleName } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { AuthService } from '../auth/auth.service';
+import { EmailService } from '../common/services/email.service';
 
 @ApiTags('Users')
 @Controller('users')
@@ -19,6 +20,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -181,6 +183,8 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'Tạo user thành công' })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async createUser(@Body() dto: CreateUserDto) {
+    // Lưu password gốc trước khi hash để gửi email
+    const plainPassword = dto.password;
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.usersService.createUserWithRole({
       email: dto.email,
@@ -189,8 +193,12 @@ export class UsersController {
       roleName: dto.role,
     });
 
-    // Sau khi tạo user, tạo mã xác minh và gửi email kích hoạt tài khoản
-    await this.authService.createAndSendEmailVerificationToken(user);
+    // Gửi email thông báo tài khoản đã được tạo với username và password
+    await this.emailService.sendAccountCreatedNotification(
+      dto.email,
+      plainPassword,
+      dto.fullName,
+    );
 
     const userWithRoles = await this.usersService.findById(user.id);
     if (!userWithRoles) {

@@ -322,6 +322,152 @@ export class EmailService {
   }
 
   /**
+   * Gửi email thông báo tài khoản đã được tạo (Admin tạo tài khoản)
+   */
+  async sendAccountCreatedNotification(
+    email: string,
+    password: string,
+    fullName?: string,
+  ): Promise<void> {
+    const appName =
+      this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') ||
+      'http://localhost:5173';
+
+    const subject = `[${appName}] Tài khoản của bạn đã được tạo`;
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+              border-radius: 10px 10px 0 0;
+            }
+            .content {
+              background: #f9fafb;
+              padding: 30px;
+              border-radius: 0 0 10px 10px;
+            }
+            .info-box {
+              background: white;
+              border: 2px solid #10b981;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .credential-item {
+              margin: 15px 0;
+              padding: 15px;
+              background: #f0fdf4;
+              border-left: 4px solid #10b981;
+              border-radius: 4px;
+            }
+            .credential-label {
+              font-weight: bold;
+              color: #059669;
+              margin-bottom: 5px;
+            }
+            .credential-value {
+              font-family: 'Courier New', monospace;
+              font-size: 16px;
+              color: #065f46;
+              background: white;
+              padding: 10px;
+              border-radius: 4px;
+              border: 1px solid #d1fae5;
+            }
+            .info-item {
+              margin: 10px 0;
+              padding: 10px;
+              background: #ecfdf5;
+              border-left: 4px solid #10b981;
+              border-radius: 4px;
+            }
+            .info-label {
+              font-weight: bold;
+              color: #059669;
+            }
+            .button {
+              display: inline-block;
+              background: #10b981;
+              color: white;
+              padding: 12px 24px;
+              text-decoration: none;
+              border-radius: 6px;
+              margin: 20px 0;
+              font-weight: bold;
+            }
+            .footer {
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+              font-size: 12px;
+              color: #6b7280;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${appName}</h1>
+              <p>Tài khoản của bạn đã được tạo</p>
+            </div>
+            <div class="content">
+              <p>Xin chào <strong>${fullName || 'bạn'}</strong>,</p>
+              <p>Tài khoản của bạn đã được tạo thành công bởi quản trị viên. Dưới đây là thông tin đăng nhập của bạn:</p>
+              
+              <div class="info-box">
+                <div class="credential-item">
+                  <div class="credential-label">📧 Tên đăng nhập (Email):</div>
+                  <div class="credential-value">${email}</div>
+                </div>
+                <div class="credential-item">
+                  <div class="credential-label">🔑 Mật khẩu:</div>
+                  <div class="credential-value">${password}</div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">⚠️ Lưu ý quan trọng:</span> Vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu để bảo mật tài khoản của bạn.
+              </div>
+
+              <p style="text-align: center; margin: 30px 0;">
+                <a href="${appUrl}/login" class="button">Đăng nhập ngay</a>
+              </p>
+
+              <p>Trân trọng,<br>Đội ngũ ${appName}</p>
+            </div>
+            <div class="footer">
+              <p>Email này được gửi tự động, vui lòng không trả lời email này.</p>
+              <p>© ${new Date().getFullYear()} ${appName}. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    const text = `${appName} - Tài khoản của bạn đã được tạo\n\nTên đăng nhập: ${email}\nMật khẩu: ${password}\n\nVui lòng đăng nhập tại: ${appUrl}/login`;
+
+    await this.sendEmail({ to: email, subject, html, text });
+  }
+
+  /**
    * Test kết nối (gọi từ đâu đó nếu cần)
    */
   async verifyConnection(): Promise<boolean> {
