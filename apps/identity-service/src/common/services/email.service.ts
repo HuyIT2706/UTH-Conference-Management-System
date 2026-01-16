@@ -435,11 +435,11 @@ export class EmailService {
               
               <div class="info-box">
                 <div class="credential-item">
-                  <div class="credential-label">📧 Tên đăng nhập (Email):</div>
+                  <div class="credential-label"> Tên đăng nhập (Email):</div>
                   <div class="credential-value">${email}</div>
                 </div>
                 <div class="credential-item">
-                  <div class="credential-label">🔑 Mật khẩu:</div>
+                  <div class="credential-label"> Mật khẩu:</div>
                   <div class="credential-value">${password}</div>
                 </div>
               </div>

@@ -221,12 +221,23 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Cập nhật role cho user (Admin thực hiện)' })
   @ApiResponse({ status: 200, description: 'Cập nhật role thành công' })
+  @ApiResponse({ status: 400, description: 'Không thể cập nhật vai trò (có submissions/reviews)' })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async updateUserRoles(
     @Param('id', ParseIntPipe) userId: number,
     @Body() dto: UpdateUserRolesDto,
+    @Req() req: Request,
   ) {
-    const user = await this.usersService.updateUserRoles(userId, dto.role);
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : undefined;
+
+    const user = await this.usersService.updateUserRoles(
+      userId,
+      dto.role,
+      authToken,
+    );
     const { password, roles, ...userWithoutPassword } = user;
     return {
       message: 'Cập nhật vai trò người dùng thành công',

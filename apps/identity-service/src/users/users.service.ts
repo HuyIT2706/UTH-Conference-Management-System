@@ -218,10 +218,61 @@ export class UsersService {
     }
   }
 // Cập nhật vai trò cho user
-  async updateUserRoles(userId: number, roleName: string): Promise<User> {
+  async updateUserRoles(
+    userId: number,
+    roleName: string,
+    authToken?: string,
+  ): Promise<User> {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // Check nếu user có submissions hoặc reviews thì không cho phép cập nhật vai trò
+    if (!authToken) {
+      throw new BadRequestException({
+        code: 'MISSING_AUTH_TOKEN',
+        message: 'Không thể kiểm tra guard clauses vì thiếu auth token. Vui lòng cung cấp token để xác minh người dùng không có submissions/reviews trước khi cập nhật vai trò.',
+        detail: {
+          userId,
+          reason: 'Auth token required for cross-service guard clause checks',
+        },
+      });
+    }
+
+    // Check submissions
+    const submissionCount = await this.submissionClient.countSubmissionsByAuthorId(
+      userId,
+      authToken,
+    );
+
+    if (submissionCount > 0) {
+      throw new BadRequestException({
+        code: 'USER_HAS_SUBMISSIONS',
+        message: 'Người dùng này đã nộp bài, không được cập nhật vai trò',
+        detail: {
+          userId,
+          submissionCount,
+        },
+      });
+    }
+
+    // Check reviews
+    const reviewerStats = await this.reviewClient.getReviewerActivityStats(
+      userId,
+      authToken,
+    );
+
+    if (reviewerStats.assignmentCount > 0 || reviewerStats.reviewCount > 0) {
+      throw new BadRequestException({
+        code: 'USER_IS_REVIEWER',
+        message: 'Người dùng này đang tham gia hội đồng chấm, không được cập nhật vai trò',
+        detail: {
+          userId,
+          assignmentCount: reviewerStats.assignmentCount,
+          reviewCount: reviewerStats.reviewCount,
+        },
+      });
     }
 
     const role = await this.findRoleByName(roleName);
