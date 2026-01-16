@@ -147,29 +147,75 @@ export class UsersService {
 // Tạo user với vai trò cụ thể
   async createUserWithRole(params: {
     email: string;
-    password: string;
+    password: string; // Password đã được hash
     fullName: string;
     roleName: string;
   }): Promise<User> {
+    // Check user chưa bị xóa
     const existing = await this.findByEmail(params.email);
     if (existing) {
-      throw new BadRequestException('Email already exists');
+      throw new BadRequestException('Email đã tồn tại');
     }
 
+    // Check user đã bị soft delete - nếu có thì restore
+    const deletedUser = await this.findByEmailIncludingDeleted(params.email);
+    if (deletedUser && deletedUser.deletedAt !== null) {
+      // Restore user đã bị xóa
+      const role = await this.findRoleByName(params.roleName);
+      if (!role) {
+        throw new BadRequestException(`Role ${params.roleName} not found`);
+      }
+
+      deletedUser.deletedAt = null;
+      deletedUser.password = params.password; // Password đã được hash ở controller
+      deletedUser.fullName = params.fullName;
+      deletedUser.isVerified = false;
+      deletedUser.roles = [role];
+      deletedUser.isActive = true;
+
+      return this.usersRepository.save(deletedUser);
+    }
+
+    // Tạo user mới
     const role = await this.findRoleByName(params.roleName);
     if (!role) {
       throw new BadRequestException(`Role ${params.roleName} not found`);
     }
 
-    const user = this.usersRepository.create({
-      email: params.email,
-      password: params.password,
-      fullName: params.fullName,
-      isVerified: false,
-      roles: [role],
-    });
+    try {
+      const user = this.usersRepository.create({
+        email: params.email,
+        password: params.password, // Password đã được hash ở controller
+        fullName: params.fullName,
+        isVerified: false,
+        roles: [role],
+      });
 
-    return this.usersRepository.save(user);
+      return await this.usersRepository.save(user);
+    } catch (error: any) {
+      // Handle unique constraint violation (nếu database vẫn enforce unique cho deleted users)
+      if (error.code === '23505' || error.message?.includes('unique constraint')) {
+        // Thử restore user đã bị xóa
+        const deletedUser = await this.findByEmailIncludingDeleted(params.email);
+        if (deletedUser && deletedUser.deletedAt !== null) {
+          const role = await this.findRoleByName(params.roleName);
+          if (!role) {
+            throw new BadRequestException(`Role ${params.roleName} not found`);
+          }
+
+          deletedUser.deletedAt = null;
+          deletedUser.password = params.password;
+          deletedUser.fullName = params.fullName;
+          deletedUser.isVerified = false;
+          deletedUser.roles = [role];
+          deletedUser.isActive = true;
+
+          return this.usersRepository.save(deletedUser);
+        }
+        throw new BadRequestException('Email đã tồn tại');
+      }
+      throw error;
+    }
   }
 // Cập nhật vai trò cho user
   async updateUserRoles(userId: number, roleName: string): Promise<User> {

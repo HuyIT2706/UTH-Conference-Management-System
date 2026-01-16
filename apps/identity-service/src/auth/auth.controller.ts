@@ -51,8 +51,6 @@ export class AuthController {
     const result = await this.authService.refreshToken(dto);
     return {
       message: 'Làm mới access token thành công',
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
       user: result.user,
     };
   }
