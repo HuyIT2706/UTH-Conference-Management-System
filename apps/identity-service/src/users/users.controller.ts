@@ -9,7 +9,6 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleName } from './entities/role.entity';
-import * as bcrypt from 'bcrypt';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 
 @ApiTags('Users')
