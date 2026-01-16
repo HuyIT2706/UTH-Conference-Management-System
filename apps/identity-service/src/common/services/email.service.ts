@@ -81,13 +81,114 @@ export class EmailService {
 
     const subject = `[${appName}] Mã xác nhận đặt lại mật khẩu`;
     const html = `
-      <p>Xin chào,</p>
-      <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình.</p>
-      <p>Mã xác nhận của bạn là: <strong>${code}</strong></p>
-      <p>Mã có hiệu lực trong <strong>15 phút</strong>. Không chia sẻ mã này với bất kỳ ai.</p>
-      <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-      <p>Trân trọng,<br/>Đội ngũ ${appName}</p>
-    `;
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+              border-radius: 10px 10px 0 0;
+            }
+            .content {
+              background: #f9fafb;
+              padding: 30px;
+              border-radius: 0 0 10px 10px;
+            }
+            .info-box {
+              background: white;
+              border: 2px solid #f59e0b;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+              text-align: center;
+            }
+            .code-box {
+              display: inline-block;
+              background: #fef3c7;
+              border: 2px solid #f59e0b;
+              border-radius: 8px;
+              padding: 20px 40px;
+              margin: 20px 0;
+              font-size: 32px;
+              font-weight: bold;
+              color: #d97706;
+              letter-spacing: 8px;
+            }
+            .info-item {
+              margin: 10px 0;
+              padding: 10px;
+              background: #fffbeb;
+              border-left: 4px solid #f59e0b;
+              border-radius: 4px;
+            }
+            .info-label {
+              font-weight: bold;
+              color: #d97706;
+            }
+            .button {
+              display: inline-block;
+              background: #f59e0b;
+              color: white;
+              padding: 12px 24px;
+              text-decoration: none;
+              border-radius: 6px;
+              margin: 20px 0;
+              font-weight: bold;
+            }
+            .footer {
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+              font-size: 12px;
+              color: #6b7280;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${appName}</h1>
+              <p>Đặt lại mật khẩu</p>
+            </div>
+            <div class="content">
+              <p>Xin chào,</p>
+              <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình.</p>
+              
+              <div class="info-box">
+                <p style="margin: 0 0 10px 0; color: #d97706; font-weight: bold;">Mã xác nhận của bạn:</p>
+                <div class="code-box">${code}</div>
+                <p style="margin: 10px 0 0 0; font-size: 14px; color: #6b7280;">Mã có hiệu lực trong <strong>15 phút</strong></p>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">⚠️ Lưu ý:</span> Không chia sẻ mã này với bất kỳ ai. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+              </div>
+
+              <p>Trân trọng,<br>Đội ngũ ${appName}</p>
+            </div>
+            <div class="footer">
+              <p>Email này được gửi tự động, vui lòng không trả lời email này.</p>
+              <p>© ${new Date().getFullYear()} ${appName}. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
     const text = `${appName} - Đặt lại mật khẩu\n\nMã xác nhận: ${code}\nMã có hiệu lực trong 15 phút.`;
 
     await this.sendEmail({ to: email, subject, html, text });
@@ -106,12 +207,115 @@ export class EmailService {
 
     const subject = `[${appName}] Mã xác minh email của bạn`;
     const html = `
-      <p>Xin chào ${fullName || 'bạn'},</p>
-      <p>Cảm ơn bạn đã đăng ký tài khoản tại ${appName}.</p>
-      <p>Mã xác minh của bạn là: <strong>${code}</strong></p>
-      <p>Mã có hiệu lực trong <strong>15 phút</strong>. Không chia sẻ mã này với bất kỳ ai.</p>
-      <p>Trân trọng,<br/>Đội ngũ ${appName}</p>
-    `;
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+              border-radius: 10px 10px 0 0;
+            }
+            .content {
+              background: #f9fafb;
+              padding: 30px;
+              border-radius: 0 0 10px 10px;
+            }
+            .info-box {
+              background: white;
+              border: 2px solid #3b82f6;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+              text-align: center;
+            }
+            .code-box {
+              display: inline-block;
+              background: #dbeafe;
+              border: 2px solid #3b82f6;
+              border-radius: 8px;
+              padding: 20px 40px;
+              margin: 20px 0;
+              font-size: 32px;
+              font-weight: bold;
+              color: #2563eb;
+              letter-spacing: 8px;
+            }
+            .info-item {
+              margin: 10px 0;
+              padding: 10px;
+              background: #eff6ff;
+              border-left: 4px solid #3b82f6;
+              border-radius: 4px;
+            }
+            .info-label {
+              font-weight: bold;
+              color: #2563eb;
+            }
+            .button {
+              display: inline-block;
+              background: #3b82f6;
+              color: white;
+              padding: 12px 24px;
+              text-decoration: none;
+              border-radius: 6px;
+              margin: 20px 0;
+              font-weight: bold;
+            }
+            .footer {
+              margin-top: 20px;
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+              font-size: 12px;
+              color: #6b7280;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${appName}</h1>
+              <p>Xác minh email</p>
+            </div>
+            <div class="content">
+              <p>Xin chào <strong>${fullName || 'bạn'}</strong>,</p>
+              <p>Cảm ơn bạn đã đăng ký tài khoản tại ${appName}.</p>
+              
+              <div class="info-box">
+                <p style="margin: 0 0 10px 0; color: #2563eb; font-weight: bold;">Mã xác minh của bạn:</p>
+                <div class="code-box">${code}</div>
+                <p style="margin: 10px 0 0 0; font-size: 14px; color: #6b7280;">Mã có hiệu lực trong <strong>15 phút</strong></p>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">🔒 Bảo mật:</span> Không chia sẻ mã này với bất kỳ ai. Đội ngũ ${appName} sẽ không bao giờ yêu cầu bạn cung cấp mã này.
+              </div>
+
+              <p>Vui lòng nhập mã này vào trang xác minh để hoàn tất đăng ký tài khoản.</p>
+              <p>Trân trọng,<br>Đội ngũ ${appName}</p>
+            </div>
+            <div class="footer">
+              <p>Email này được gửi tự động, vui lòng không trả lời email này.</p>
+              <p>© ${new Date().getFullYear()} ${appName}. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
     const text = `${appName} - Xác minh email\n\nMã xác minh: ${code}\nMã có hiệu lực trong 15 phút.`;
 
     await this.sendEmail({ to: email, subject, html, text });

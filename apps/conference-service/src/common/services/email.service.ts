@@ -129,6 +129,15 @@ export class EmailService {
               font-weight: bold;
               color: #0d9488;
             }
+            .badge {
+              display: inline-block;
+              background: #14b8a6;
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-weight: bold;
+              margin: 10px 0;
+            }
             .button {
               display: inline-block;
               background: #14b8a6;
@@ -260,6 +269,15 @@ Trân trọng,
               color: #059669;
             }
             .success-badge {
+              display: inline-block;
+              background: #10b981;
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-weight: bold;
+              margin: 10px 0;
+            }
+            .badge {
               display: inline-block;
               background: #10b981;
               color: white;
@@ -412,6 +430,15 @@ Trân trọng,
               color: #dc2626;
             }
             .rejected-badge {
+              display: inline-block;
+              background: #ef4444;
+              color: white;
+              padding: 8px 16px;
+              border-radius: 20px;
+              font-weight: bold;
+              margin: 10px 0;
+            }
+            .badge {
               display: inline-block;
               background: #ef4444;
               color: white;
