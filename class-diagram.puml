@@ -1,0 +1,147 @@
+@startuml Badminton Court Management System
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+
+class User {
+  + UserID: String
+  + UserName: String
+  + Password: String
+  + Email: String
+  + Phonenumber: int
+  --
+  + Đăng ký tài khoản()
+  + Đăng nhập()
+}
+
+class Customer {
+  + CustomerID: string
+  + Thongtintaikhoan: user
+  --
+  + Đặt lịch chơi cố định()
+  + Đặt lịch chơi ngày()
+  + Đặt lịch chơi linh hoạt()
+  + Checkin()
+  + Xem lịch sân()
+  + Thanh toán()
+}
+
+class Guest {
+  --
+  + Tìm Sân()
+}
+
+class CourtStaff {
+  + StaffID: string
+  + Thongtintaikhoan: user
+  --
+  + Check in cho khách hàng()
+  + Tình trạng sân()
+}
+
+class SystemAdmin {
+  + AdminID: string
+  + Thongtintaikhoan: user
+  --
+  + Quản lý tài khoản()
+  + Quản lý sân cầu lông()
+  + Đăng ký sân mới()
+}
+
+class CourtManager {
+  + ManagerID: string
+  + Thongtintaikhoan: user
+  --
+  + Đăng ký sân()
+  + Quản lý sân()
+  + Quản lý lịch()
+}
+
+class BadmintonHall {
+  + BadmintonHallID: string
+  + DiaChi: string
+  --
+  + Thêm sân mới()
+  + Xóa sân()
+}
+
+class Court {
+  + CourtID: string
+  + BadmintonHallID: string
+  + Vị trí: string
+  + Giờ hoạt động: string
+  + Khung giờ có sản: list <slot>
+  --
+  + Cập nhật tình trạng sân()
+}
+
+class Slot {
+  + SlotID: string
+  + KhungGio: string
+  + GiaMoiKhungGio: float
+  + CourtID: string
+  --
+  + Kiểm tra tình trạng trống()
+  + Đặt chỗ()
+}
+
+class Booking {
+  + BookingID: string
+  + CustomerID: string
+  + CourtID: string
+  + SlotID: string
+  + ThoiGianBatDau: Datetime
+  + ThoiGianKetThuc: Datetime
+  + LoaiLich: string
+  + TrangThai: boolean
+  --
+  + Tạo đặt sân()
+  - Hủy đặt sân()
+  - Sửa đặt sân()
+  - Xác nhận đặt sân()
+  - Xác nhận thanh toán()
+}
+
+class Payment {
+  + PaymentID: string
+  + BookingID: string
+  + CustomerID: string
+  + Tien: float
+  + TrangThai: String
+  --
+  + Xử lý thanh toán()
+  + Xuất hóa đơn()
+}
+
+class Revenue {
+  + RevenueID: string
+  + CourtID: string
+  + TongDoanhThu: double
+  + Thang: double
+  + Quy: double
+  + Nam: double
+  --
+  + Cập nhật doanh thu()
+}
+
+' Inheritance relationships
+User <|-- Customer
+User <|-- Guest
+User <|-- CourtStaff
+User <|-- SystemAdmin
+User <|-- CourtManager
+
+' Association relationships
+Customer "1" -- "1" Booking
+Customer "1" -- "1..*" Payment
+Booking "1" -- "1" Slot
+Booking "1" -- "1..*" Payment
+Booking "1" -- "1" Court
+BadmintonHall "1" -- "1..*" Court
+Court "1" -- "1..*" Slot
+Court "1" -- "1" Revenue
+SystemAdmin "1" -- "1" BadmintonHall
+CourtStaff "1" -- "1" BadmintonHall
+CourtManager "1" -- "1..*" Court
+
+@enduml
