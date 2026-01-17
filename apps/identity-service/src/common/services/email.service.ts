@@ -445,7 +445,7 @@ export class EmailService {
               </div>
 
               <div class="info-item">
-                <span class="info-label">⚠️ Lưu ý quan trọng:</span> Vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu để bảo mật tài khoản của bạn.
+                <span class="info-label"> Lưu ý quan trọng:</span> Vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu để bảo mật tài khoản của bạn.
               </div>
 
               <p style="text-align: center; margin: 30px 0;">
