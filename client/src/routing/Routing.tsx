@@ -54,7 +54,7 @@ const appRouter = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute adminOnly>
         <LayoutApp />
       </ProtectedRoute>
     ),
