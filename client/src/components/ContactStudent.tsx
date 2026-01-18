@@ -14,7 +14,7 @@ const ContactStudent = () => {
             />
           </div>
 
-          <div className=" w-[500px] text-xl order-1 lg:order-2 space-y-6 ml-0 lg:ml-12">
+          <div className="w-full lg:w-[500px] text-xl order-1 lg:order-2 space-y-6 ml-0 lg:ml-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
               UTH-ConfMS
             </h2>

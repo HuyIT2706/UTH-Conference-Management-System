@@ -5,7 +5,7 @@ const HeroStudent = () => {
     <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex-row gap-5 justify-between items-center md:flex">
-          <div className="space-y-8 w-[660px]">
+          <div className="space-y-8 w-full md:w-[660px]">
             <div className="space-y-4">
               <h1 className="text-3xl max-w-[380px] md:max-w-full md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 UTH Scientific Conference Paper Management System

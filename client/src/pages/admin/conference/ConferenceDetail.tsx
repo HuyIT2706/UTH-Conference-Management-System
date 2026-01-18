@@ -130,7 +130,6 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
 
       showToast.success('Cập nhật thời gian thành công');
     } catch (err: unknown) {
-      console.error('Error updating CFP:', err);
       const error = err as { data?: { message?: string } };
       const errorMessage = error?.data?.message || 'Có lỗi xảy ra khi cập nhật CFP';
       showToast.error(errorMessage);

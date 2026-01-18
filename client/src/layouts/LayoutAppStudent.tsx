@@ -9,13 +9,13 @@ const LayoutAppStudent = () => {
     const hideHeroFeature = location.pathname.startsWith('/student') || location.pathname.startsWith('/reviewer');
 
     return (
-        <>
+        <div className="overflow-x-hidden">
             <HeaderStudent/>
             {!hideHeroFeature && <HeroStudent/>}
             {!hideHeroFeature && <FeatureStudent/>}
             <Outlet />
             <Footer/>
-        </>
+        </div>
     );
 }
 
