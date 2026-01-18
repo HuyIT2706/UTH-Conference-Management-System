@@ -47,7 +47,7 @@ const ReviewerDashboard = () => {
 
   if (trackAssignmentsLoading) {
     return (
-      <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-center items-center py-8">
             <CircularProgress disableShrink />
@@ -59,7 +59,7 @@ const ReviewerDashboard = () => {
 
   if (trackAssignmentsError) {
     return (
-      <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center py-8">
             <div className="text-red-600">Lỗi tải dữ liệu phân công</div>
@@ -86,7 +86,7 @@ const ReviewerDashboard = () => {
   };
 
   return (
-    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+    <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
       <div className="max-w-7xl mx-auto px-4">
         {/* Tabs */}
         <ReviewerTabs

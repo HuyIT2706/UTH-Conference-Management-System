@@ -101,7 +101,7 @@ const StudentSubmissionDetail = () => {
 
   if (submissionLoading) {
     return (
-      <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-center items-center py-16">
             <CircularProgress disableShrink />
@@ -113,7 +113,7 @@ const StudentSubmissionDetail = () => {
 
   if (submissionError || !submission) {
     return (
-      <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+      <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
         <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <p className="text-red-600 text-center">
@@ -129,7 +129,7 @@ const StudentSubmissionDetail = () => {
   const statusLabel = getStatusBadgeLabel(submission.status);
 
   return (
-    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+    <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
       <div className="max-w-7xl mx-auto px-4">
         <h1 className="text-2xl font-semibold mb-6">Bài đã nộp</h1>
 

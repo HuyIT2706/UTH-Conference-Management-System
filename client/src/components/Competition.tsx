@@ -74,7 +74,7 @@ const Competition = () => {
     return (
       <div
         id="conferences"
-        className="bg-white max-w-custom w-[1360px] ml-auto mr-auto"
+        className="bg-white max-w-[1360px] w-full ml-auto mr-auto px-4"
       >
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600">Chưa có hội nghị nào để hiển thị.</p>

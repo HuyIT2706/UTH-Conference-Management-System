@@ -6,7 +6,7 @@ const CompetitionWithTabs = () => {
   const [activeTab, setActiveTab] = useState<'competitions' | 'my-submissions'>('competitions');
 
   return (
-    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-8">
+    <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-8 px-4">
       <div className="max-w-7xl mx-auto px-4">
         {/* Tabs */}
         <div className="flex justify-center mb-8 border-b border-gray-200">

@@ -33,7 +33,7 @@ const FeatureStudent = () => {
   ];
 
   return (
-    <div className="bg-white max-w-custom w-[1360px] ml-auto mr-auto py-16">
+    <div className="bg-white max-w-[1360px] w-full ml-auto mr-auto py-16 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
