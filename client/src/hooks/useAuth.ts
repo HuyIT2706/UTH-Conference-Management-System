@@ -3,16 +3,17 @@ import { tokenUtils } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { apiSlice } from '../redux/api/apiSlice';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { showToast } from '../utils/toast';
 
-const SESSION_CHECK_INTERVAL = 30000; // Check every 30 seconds
+const SESSION_CHECK_INTERVAL = 10000; 
 
 export const useAuth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [hasToken, setHasToken] = useState(() => tokenUtils.hasToken());
   const isLoggingOut = useRef(false);
+  const hasCheckedSession = useRef(false);
   
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
     skip: !hasToken, 
@@ -23,6 +24,7 @@ export const useAuth = () => {
       const currentHasToken = tokenUtils.hasToken();
       if (currentHasToken !== hasToken) {
         setHasToken(currentHasToken);
+        hasCheckedSession.current = false; 
       }
     };
     checkToken();
@@ -34,7 +36,7 @@ export const useAuth = () => {
   const [logoutMutation] = useLogoutMutation();
   const [checkSessionMutation] = useCheckSessionMutation();
 
-  const forceLogout = useCallback((message?: string) => {
+  const forceLogout = (message?: string) => {
     if (isLoggingOut.current) return;
     isLoggingOut.current = true;
     
@@ -50,28 +52,38 @@ export const useAuth = () => {
     setTimeout(() => {
       isLoggingOut.current = false;
     }, 1000);
-  }, [dispatch, navigate]);
+  };
 
   useEffect(() => {
     if (!hasToken) return;
-
+    let isMounted = true;
     const checkSession = async () => {
       const refreshToken = tokenUtils.getRefreshToken();
-      if (!refreshToken || isLoggingOut.current) return;
+      if (!refreshToken || isLoggingOut.current || !isMounted) return;
 
       try {
         await checkSessionMutation({ refreshToken }).unwrap();
       } catch {
-        forceLogout('Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị khác');
+        if (isMounted) {
+          forceLogout('Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị khác');
+        }
       }
     };
-
-    checkSession();
+    const initialTimeout = setTimeout(() => {
+      if (isMounted && !hasCheckedSession.current) {
+        hasCheckedSession.current = true;
+        checkSession();
+      }
+    }, 100);
 
     const interval = setInterval(checkSession, SESSION_CHECK_INTERVAL);
 
-    return () => clearInterval(interval);
-  }, [hasToken, checkSessionMutation, forceLogout]);
+    return () => {
+      isMounted = false;
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [hasToken]);
 
   const logout = async () => {
     const refreshToken = tokenUtils.getRefreshToken();
