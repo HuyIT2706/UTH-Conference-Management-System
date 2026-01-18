@@ -14,7 +14,6 @@ const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) =>
   const navigate = useNavigate();
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  // Listen for auth:logout event to navigate without reload
   useEffect(() => {
     const handleLogout = () => {
       navigate('/login', { replace: true });

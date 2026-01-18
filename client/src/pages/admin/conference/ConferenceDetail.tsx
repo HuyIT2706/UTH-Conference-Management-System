@@ -129,9 +129,11 @@ const ConferenceDetail = ({ conferenceId }: ConferenceDetailProps) => {
       }).unwrap();
 
       showToast.success('Cập nhật thời gian thành công');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating CFP:', err);
-      showToast.error('Có lỗi xảy ra khi cập nhật CFP');
+      const error = err as { data?: { message?: string } };
+      const errorMessage = error?.data?.message || 'Có lỗi xảy ra khi cập nhật CFP';
+      showToast.error(errorMessage);
     }
   };
 

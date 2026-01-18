@@ -10,7 +10,7 @@ const HeroStudent = () => {
               <h1 className="text-3xl max-w-[380px] md:max-w-full md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 UTH Scientific Conference Paper Management System
               </h1>
-              <p className="text-lg max-w-[380px] md:max-w-full md:text-xl text-gray-600 leading-relaxed">
+              <p className="text-sm max-w-[380px] md:max-w-full md:text-xl text-gray-600 leading-relaxed">
                 Hệ thống quản lý giấy tờ Hội nghị Nghiên cứu khoa học dành cho
                 Trường Đại Học UTH
               </p>

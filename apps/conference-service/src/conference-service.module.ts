@@ -12,8 +12,6 @@ import { NotificationsService } from './notifications/notifications.service';
 import { PublicController } from './public/public.controller';
 import { ReportingController } from './reporting/reporting.controller';
 import { ReportingService } from './reporting/reporting.service';
-import { AuditController } from './audit/audit.controller';
-import { AuditService } from './audit/audit.service';
 import { ValidationController } from './validation/validation.controller';
 import { Conference } from './conferences/entities/conference.entity';
 import { Track } from './conferences/entities/track.entity';
@@ -23,7 +21,6 @@ import { CfpSetting } from './cfp/entities/cfp-setting.entity';
 import { EmailTemplate } from './template/entities/email-template.entity';
 import { FormTemplate } from './template/entities/form-template.entity';
 import { CfpTemplate } from './template/entities/cfp-template.entity';
-import { AuditLog } from './audit/entities/audit-log.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { SubmissionClientService } from './integrations/submission-client.service';
 import { IdentityClientService } from './integrations/identity-client.service';
@@ -67,7 +64,6 @@ import { HealthController } from './health/health.controller';
             EmailTemplate,
             FormTemplate,
             CfpTemplate,
-            AuditLog,
           ],
           synchronize: true,
         };
@@ -82,7 +78,6 @@ import { HealthController } from './health/health.controller';
       EmailTemplate,
       FormTemplate,
       CfpTemplate,
-      AuditLog,
     ]),
     PassportModule,
     HttpModule,
@@ -103,7 +98,6 @@ import { HealthController } from './health/health.controller';
     NotificationsController,
     PublicController,
     ReportingController,
-    AuditController,
     ValidationController,
   ],
   providers: [
@@ -111,7 +105,6 @@ import { HealthController } from './health/health.controller';
     TemplatesService,
     NotificationsService,
     ReportingService,
-    AuditService,
     JwtStrategy,
     SubmissionClientService,
     IdentityClientService,

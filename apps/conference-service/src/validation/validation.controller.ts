@@ -14,7 +14,6 @@ export class ValidationController {
   constructor(
     private readonly conferencesService: ConferencesService,
   ) {}
-// Lây tất cả deadlines của conference
   @Get('cfp/deadlines')
   @ApiOperation({
     summary: 'Lấy tất cả deadlines của conference',

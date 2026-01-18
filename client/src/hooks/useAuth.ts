@@ -28,28 +28,19 @@ export const useAuth = () => {
   const [logoutMutation] = useLogoutMutation();
 
   const logout = async () => {
-    try {
-      const refreshToken = tokenUtils.getRefreshToken();
-      dispatch(apiSlice.util.resetApiState());
-      setHasToken(false);
-      if (refreshToken) {
-        try {
-          await Promise.race([
-            logoutMutation({ refreshToken }).unwrap(),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Logout timeout')), 1000)
-            )
-          ]);
-        } catch (error) {
-        }
-      }
-      tokenUtils.clearTokens();
-      navigate('/login', { replace: true });
-    } catch (error) {
-      tokenUtils.clearTokens();
-      dispatch(apiSlice.util.resetApiState());
-      setHasToken(false);
-      navigate('/login', { replace: true });
+    const refreshToken = tokenUtils.getRefreshToken();
+    
+    // Clear tokens first to prevent any API calls
+    tokenUtils.clearTokens();
+    setHasToken(false);
+    dispatch(apiSlice.util.resetApiState());
+    
+    // Navigate immediately
+    navigate('/login', { replace: true });
+    
+    // Call logout API in background (don't wait)
+    if (refreshToken) {
+      logoutMutation({ refreshToken }).catch(() => {});
     }
   };
 

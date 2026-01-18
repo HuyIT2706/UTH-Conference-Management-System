@@ -14,7 +14,6 @@ const RoleProtectedRoute = ({ children, allowedRoles }: RoleProtectedRouteProps)
   const { user, isLoading, isAuthenticated } = useAuth();
   const [hasShownToast, setHasShownToast] = useState(false);
 
-  // Check if user has required role
   const hasRequiredRole = user && allowedRoles.some(role => user.roles?.includes(role));
 
   useEffect(() => {

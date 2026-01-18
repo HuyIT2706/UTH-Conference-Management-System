@@ -6,7 +6,7 @@ interface ReviewedSubmissionCardProps {
   submission: Submission;
   reviewCount: number;
   averageScore?: number;
-  onViewDetails?: (submissionId: string) => void; // Made optional since we're using expandable
+  onViewDetails?: (submissionId: string) => void; 
 }
 
 const ReviewedSubmissionCard = memo(
