@@ -146,6 +146,14 @@ export class AuthService {
     await this.refreshTokenRepository.delete({ token: dto.refreshToken });
     return { message: 'Đã đăng xuất' };
   }
+
+// Api: Check session validity
+  async checkSession(userId: number, refreshToken: string): Promise<boolean> {
+    const stored = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken, userId },
+    });
+    return !!stored && stored.expiryDate.getTime() > Date.now();
+  }
 // Api 6: Xác thực tk bằng token từ gmail
   async verifyEmail(code: string) {
     const record = await this.emailVerificationTokenRepository.findOne({
@@ -157,10 +165,8 @@ export class AuthService {
       throw new UnauthorizedException('Mã xác minh không hợp lệ');
     }
 
-    // Check if user is already verified before processing
     const user = await this.usersService.findById(record.userId);
     if (user?.isVerified) {
-      // Mark token as used even though user is already verified
       record.used = true;
       await this.emailVerificationTokenRepository.save(record);
       
@@ -170,12 +176,13 @@ export class AuthService {
     if (record.expiresAt.getTime() < Date.now()) {
       throw new UnauthorizedException('Mã xác minh đã hết hạn');
     }
-
-    const verifiedUser = await this.usersService.markEmailVerified(record.userId);
-
     record.used = true;
     await this.emailVerificationTokenRepository.save(record);
-
+    
+    if (user) {
+    user.isVerified = true; 
+    await this.usersRepository.save(user); 
+  }
     return { 
       message: 'Xác minh email thành công',
       isVerified: true,
@@ -207,8 +214,6 @@ export class AuthService {
 
     return {
       email: user.email,
-      code: token.token, 
-      expiresAt: token.expiresAt,
       createdAt: token.createdAt,
       isVerified: false,
     };
@@ -242,6 +247,9 @@ export class AuthService {
     const expiryDate = new Date(
       Date.now() + this.parseExpiryToMs(this.refreshExpiresIn),
     );
+
+    // Delete all existing refresh tokens for this user (single session)
+    await this.refreshTokenRepository.delete({ userId: user.id });
 
     const entity = this.refreshTokenRepository.create({
       token: refreshToken,

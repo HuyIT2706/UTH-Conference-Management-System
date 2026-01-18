@@ -95,6 +95,24 @@ export class AuthController {
     };
   }
 
+// Check session validity (for single session enforcement)
+  @UseGuards(JwtAuthGuard)
+  @Post('check-session')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Kiểm tra session có hợp lệ không' })
+  @ApiResponse({ status: 200, description: 'Session hợp lệ' })
+  @ApiResponse({ status: 401, description: 'Session không hợp lệ' })
+  async checkSession(
+    @CurrentUser('sub') userId: number,
+    @Body() dto: RefreshTokenDto,
+  ) {
+    const isValid = await this.authService.checkSession(userId, dto.refreshToken);
+    if (!isValid) {
+      throw new UnauthorizedException('Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị khác');
+    }
+    return { valid: true };
+  }
+
   // Endpoint /me as alias for /users/profile
   @UseGuards(JwtAuthGuard)
   @Get('me')

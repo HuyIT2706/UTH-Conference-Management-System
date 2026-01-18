@@ -4,9 +4,11 @@ import { useChangePasswordMutation } from '../../redux/api/usersApi';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 import bgUth from '../../assets/bg_uth.svg';
+import { useAuth } from '../../hooks/useAuth';
 
 const ChangePasswordPage = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const [formData, setFormData] = useState({
@@ -71,13 +73,11 @@ const ChangePasswordPage = () => {
         newPassword: formData.newPassword,
       }).unwrap();
 
-      showToast.success('Đổi mật khẩu thành công!');
-      setFormData({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-      navigate('/profile');
+      showToast.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+      
+      setTimeout(() => {
+        logout();
+      }, 1000);
     } catch (err: any) {
       const errorMessage =
         err?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu';

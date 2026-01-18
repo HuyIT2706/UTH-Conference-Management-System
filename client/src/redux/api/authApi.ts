@@ -77,6 +77,16 @@ export const authApi = apiSlice.injectEndpoints({
         params: { email },
       }),
     }),
+    checkSession: builder.mutation<
+      { valid: boolean },
+      { refreshToken: string }
+    >({
+      query: (body) => ({
+        url: '/auth/check-session',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -88,5 +98,6 @@ export const {
   useLogoutMutation,
   useVerifyEmailMutation,
   useGetVerificationTokenQuery,
+  useCheckSessionMutation,
 } = authApi;
 
