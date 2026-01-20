@@ -180,9 +180,37 @@ export class ConferencesService {
   async deleteConference(
     id: number,
     user: { id: number; roles: string[] },
+    authToken?: string,
   ): Promise<void> {
     await this.ensureCanManageConference(id, user);
     const conference = await this.getConferenceOrThrow(id);
+
+    // Kiểm tra xem hội nghị có submissions hay không
+    if (authToken) {
+      try {
+        const submissions = await this.submissionClient.getSubmissionsByConference(
+          id,
+          authToken,
+        );
+
+        if (submissions && submissions.length > 0) {
+          throw new BadRequestException(
+            `Không thể xóa hội nghị này vì đã có ${submissions.length} bài nộp. Vui lòng xóa các bài nộp trước khi xóa hội nghị.`,
+          );
+        }
+      } catch (error: any) {
+        // Nếu là BadRequestException từ việc có submissions, throw lại
+        if (error instanceof BadRequestException) {
+          throw error;
+        }
+        // Nếu là lỗi service unavailable, cho phép xóa (fallback)
+        // Nhưng log warning để admin biết
+        console.warn(
+          `[ConferencesService] Cannot verify submissions for conference ${id}: ${error.message}`,
+        );
+      }
+    }
+
     conference.deletedAt = new Date();
     conference.isActive = false;
     await this.conferenceRepository.save(conference);

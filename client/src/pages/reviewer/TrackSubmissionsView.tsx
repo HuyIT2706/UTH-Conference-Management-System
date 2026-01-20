@@ -105,7 +105,7 @@ const TrackSubmissionsView = ({ trackAssignment, onEvaluate }: TrackSubmissionsV
         conferenceId: track.conferenceId,
       }).unwrap();
       refetchAssignments();
-      showToast.success('Đã tự phân công bài này');
+      showToast.success('Đã nhận chấm bài này');
     } catch (error) {
       showToast.error(formatApiError(error));
       throw error;

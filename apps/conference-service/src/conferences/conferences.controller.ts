@@ -188,16 +188,27 @@ export class ConferencesController {
   @ApiOperation({ summary: 'Xóa hội nghị' })
   @ApiParam({ name: 'id', description: 'ID của hội nghị' })
   @ApiResponse({ status: 200, description: 'Xóa hội nghị thành công' })
+  @ApiResponse({ status: 400, description: 'Không thể xóa hội nghị vì đã có bài nộp' })
   @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async deleteConference(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: JwtPayload,
+    @Req() req: Request,
   ) {
-    await this.conferencesService.deleteConference(id, {
-      id: user.sub,
-      roles: user.roles ?? [],
-    });
+    const authHeader = req.headers.authorization;
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : '';
+
+    await this.conferencesService.deleteConference(
+      id,
+      {
+        id: user.sub,
+        roles: user.roles ?? [],
+      },
+      authToken,
+    );
     return {
       message: 'Xóa hội nghị thành công',
     };

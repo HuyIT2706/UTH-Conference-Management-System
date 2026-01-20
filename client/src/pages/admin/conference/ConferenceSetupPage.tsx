@@ -81,9 +81,11 @@ const ConferenceSetupPage = () => {
       if (selectedConferenceId === conferenceId) {
         handleBackToList();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting conference:', err);
-      showToast.error('Có lỗi xảy ra khi xóa hội nghị');
+      const error = err as { data?: { message?: string } };
+      const errorMessage = error?.data?.message || 'Có lỗi xảy ra khi xóa hội nghị';
+      showToast.error(errorMessage);
     }
   };
 
