@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
-import { TemplatesService } from './template/templates.service';
 import { NotificationsController } from './notifications/notifications.controller';
 import { NotificationsService } from './notifications/notifications.service';
 import { PublicController } from './public/public.controller';
@@ -18,9 +17,6 @@ import { Track } from './conferences/entities/track.entity';
 import { ConferenceMember } from './conferences/entities/conference-member.entity';
 import { TrackMember } from './conferences/entities/track-member.entity';
 import { CfpSetting } from './cfp/entities/cfp-setting.entity';
-import { EmailTemplate } from './template/entities/email-template.entity';
-import { FormTemplate } from './template/entities/form-template.entity';
-import { CfpTemplate } from './template/entities/cfp-template.entity';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { SubmissionClientService } from './integrations/submission-client.service';
 import { IdentityClientService } from './integrations/identity-client.service';
@@ -61,9 +57,6 @@ import { HealthController } from './health/health.controller';
             ConferenceMember,
             TrackMember,
             CfpSetting,
-            EmailTemplate,
-            FormTemplate,
-            CfpTemplate,
           ],
           synchronize: true,
         };
@@ -75,9 +68,6 @@ import { HealthController } from './health/health.controller';
       ConferenceMember,
       TrackMember,
       CfpSetting,
-      EmailTemplate,
-      FormTemplate,
-      CfpTemplate,
     ]),
     PassportModule,
     HttpModule,
@@ -102,7 +92,6 @@ import { HealthController } from './health/health.controller';
   ],
   providers: [
     ConferencesService,
-    TemplatesService,
     NotificationsService,
     ReportingService,
     JwtStrategy,

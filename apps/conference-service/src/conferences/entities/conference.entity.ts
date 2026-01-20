@@ -2,9 +2,6 @@ import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typ
 import { Track } from './track.entity';
 import { ConferenceMember } from './conference-member.entity';
 import { CfpSetting } from '../../cfp/entities/cfp-setting.entity';
-import { EmailTemplate } from '../../template/entities/email-template.entity';
-import { FormTemplate } from '../../template/entities/form-template.entity';
-import { CfpTemplate } from '../../template/entities/cfp-template.entity';
 
 @Entity({ name: 'conferences' })
 export class Conference {
@@ -52,14 +49,4 @@ export class Conference {
 
   @OneToOne(() => CfpSetting, (cfp) => cfp.conference)
   cfpSetting: CfpSetting | null;
-
-  @OneToMany(() => EmailTemplate, (template) => template.conference)
-  emailTemplates: EmailTemplate[];
-
-  @OneToMany(() => FormTemplate, (template) => template.conference)
-  formTemplates: FormTemplate[];
-
-  @OneToOne(() => CfpTemplate, (template) => template.conference)
-  cfpTemplate: CfpTemplate | null;
-
 }

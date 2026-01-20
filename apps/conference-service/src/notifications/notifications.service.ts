@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BulkNotificationDto, RecipientType } from './dto/bulk-notification.dto';
-import { EmailTemplate } from '../template/entities/email-template.entity';
 import {
   ConferenceMember,
   ConferenceMemberRole,
@@ -12,8 +11,6 @@ import { Conference } from '../conferences/entities/conference.entity';
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectRepository(EmailTemplate)
-    private emailTemplateRepository: Repository<EmailTemplate>,
     @InjectRepository(ConferenceMember)
     private conferenceMemberRepository: Repository<ConferenceMember>,
     @InjectRepository(Conference)
@@ -75,21 +72,10 @@ export class NotificationsService {
     if (!conference) {
       throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
     }
-    let template: EmailTemplate | null = null;
-    if (dto.templateId) {
-      template = await this.emailTemplateRepository.findOne({
-        where: { id: dto.templateId, conferenceId },
-      });
 
-      if (!template) {
-        throw new NotFoundException(
-          `Email template với ID ${dto.templateId} không tồn tại`,
-        );
-      }
-    }
     const recipients = await this.getRecipients(conferenceId, dto.recipientType);
-    const subject = dto.subject || template?.subject || 'Notification';
-    const body = dto.body || template?.body || '';
+    const subject = dto.subject || 'Notification';
+    const body = dto.body || '';
     const variables = {
       conferenceName: conference.name,
       conferenceVenue: conference.venue,
@@ -123,21 +109,8 @@ export class NotificationsService {
       throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
     }
 
-    let template: EmailTemplate | null = null;
-    if (dto.templateId) {
-      template = await this.emailTemplateRepository.findOne({
-        where: { id: dto.templateId, conferenceId },
-      });
-
-      if (!template) {
-        throw new NotFoundException(
-          `Email template với ID ${dto.templateId} không tồn tại`,
-        );
-      }
-    }
-
-    const subject = dto.subject || template?.subject || 'Notification';
-    const body = dto.body || template?.body || '';
+    const subject = dto.subject || 'Notification';
+    const body = dto.body || '';
 
     const variables = {
       conferenceName: conference.name,
@@ -153,4 +126,3 @@ export class NotificationsService {
     };
   }
 }
-

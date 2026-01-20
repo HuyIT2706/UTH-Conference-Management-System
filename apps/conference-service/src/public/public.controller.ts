@@ -1,12 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ConferencesService } from '../conferences/conferences.service';
-import { TemplatesService } from '../template/templates.service';
 
 @Controller('public/conferences')
 export class PublicController {
   constructor(
     private readonly conferencesService: ConferencesService,
-    private readonly templatesService: TemplatesService,
   ) {}
 //  Lấy thông tin deadline CFP công khai
   @Get(':conferenceId/cfp/check-deadline')
@@ -81,7 +79,6 @@ export class PublicController {
     const conference = await this.conferencesService.findOne(conferenceId);
     const tracks = await this.conferencesService.findAllTracks(conferenceId);
     const cfpSetting = await this.conferencesService.getCfpSetting(conferenceId);
-    const cfpTemplate = await this.templatesService.getCfpTemplate(conferenceId);
 
     return {
       message: 'Lấy thông tin CFP công khai thành công',
@@ -108,12 +105,6 @@ export class PublicController {
               cameraReadyDeadline: cfpSetting.cameraReadyDeadline,
             }
           : null,
-        template: cfpTemplate
-          ? {
-              htmlContent: cfpTemplate.htmlContent,
-              customStyles: cfpTemplate.customStyles,
-            }
-          : null,
       },
     };
   }
@@ -131,9 +122,3 @@ export class PublicController {
     };
   }
 }
-
-
-
-
-
-

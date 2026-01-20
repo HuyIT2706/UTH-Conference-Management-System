@@ -83,7 +83,7 @@ const PCManagementPage = () => {
               </svg>
             </button>
             <h1 className="text-3xl font-bold text-gray-800">
-              Phân ban bản biện
+              Phân ban phản biện
             </h1>
           </div>
         </div>
@@ -95,7 +95,7 @@ const PCManagementPage = () => {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Phân ban bản biện</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Phân ban phản biện</h1>
         <div className="relative flex items-center space-x-2">
           <input
             type="text"

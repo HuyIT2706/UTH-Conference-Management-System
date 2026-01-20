@@ -172,7 +172,15 @@ const SubmissionCard = ({
           )}
           {canEdit && (
             <button
-              onClick={() => onEdit(submission)}
+              onClick={() => {
+                onEdit(submission);
+                setTimeout(() => {
+                  const element = document.getElementById('update');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
               className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Sửa

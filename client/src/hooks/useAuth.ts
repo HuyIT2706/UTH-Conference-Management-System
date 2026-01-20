@@ -6,14 +6,16 @@ import { apiSlice } from '../redux/api/apiSlice';
 import { useState, useEffect, useRef } from 'react';
 import { showToast } from '../utils/toast';
 
-const SESSION_CHECK_INTERVAL = 10000; 
+const SESSION_CHECK_INTERVAL = 10000;
+
+
+let isCheckingSession = false;
 
 export const useAuth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [hasToken, setHasToken] = useState(() => tokenUtils.hasToken());
   const isLoggingOut = useRef(false);
-  const hasCheckedSession = useRef(false);
   
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
     skip: !hasToken, 
@@ -24,7 +26,6 @@ export const useAuth = () => {
       const currentHasToken = tokenUtils.hasToken();
       if (currentHasToken !== hasToken) {
         setHasToken(currentHasToken);
-        hasCheckedSession.current = false; 
       }
     };
     checkToken();
@@ -56,25 +57,26 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (!hasToken) return;
+
     let isMounted = true;
+
     const checkSession = async () => {
       const refreshToken = tokenUtils.getRefreshToken();
-      if (!refreshToken || isLoggingOut.current || !isMounted) return;
+      if (!refreshToken || isLoggingOut.current || !isMounted || isCheckingSession) return;
 
+      isCheckingSession = true;
       try {
         await checkSessionMutation({ refreshToken }).unwrap();
       } catch {
         if (isMounted) {
           forceLogout('Phiên đăng nhập đã hết hạn hoặc bạn đã đăng nhập ở thiết bị khác');
         }
+      } finally {
+        isCheckingSession = false;
       }
     };
-    const initialTimeout = setTimeout(() => {
-      if (isMounted && !hasCheckedSession.current) {
-        hasCheckedSession.current = true;
-        checkSession();
-      }
-    }, 100);
+
+    const initialTimeout = setTimeout(checkSession, 500);
 
     const interval = setInterval(checkSession, SESSION_CHECK_INTERVAL);
 
