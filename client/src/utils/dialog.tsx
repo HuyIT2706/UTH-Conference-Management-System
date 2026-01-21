@@ -122,8 +122,6 @@ export const showDialog = {
       );
     });
   },
-
-  // Shorthand for delete confirmation
   confirmDelete: (itemName?: string): Promise<boolean> => {
     return showDialog.confirm({
       title: 'Xác nhận xóa',
@@ -136,7 +134,6 @@ export const showDialog = {
     });
   },
 
-  // Shorthand for withdraw confirmation (rút bài)
   confirmWithdraw: (itemName?: string): Promise<boolean> => {
     return showDialog.confirm({
       title: 'Xác nhận rút bài',

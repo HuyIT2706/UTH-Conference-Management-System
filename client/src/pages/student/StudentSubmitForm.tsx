@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../../hooks/useAuth';
 import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
@@ -18,7 +18,9 @@ interface CoAuthor {
 const StudentSubmitForm = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+  const formHeaderRef = useRef<HTMLDivElement>(null);
   const conferenceId = parseInt(searchParams.get('conferenceId') || '0');
   const trackIdParam = searchParams.get('trackId');
   const trackId = trackIdParam ? parseInt(trackIdParam) : undefined;
@@ -59,6 +61,15 @@ const StudentSubmitForm = () => {
       navigate('/student');
     }
   }, [conferenceId, navigate]);
+
+  // Scroll to form header when navigating with #update hash
+  useEffect(() => {
+    if (location.hash === '#update' && formHeaderRef.current) {
+      setTimeout(() => {
+        formHeaderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
+  }, [location.hash]);
 
   // Load submission data when editing
   useEffect(() => {
@@ -276,7 +287,7 @@ const StudentSubmitForm = () => {
         <StudentSubmissionsList />
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div ref={formHeaderRef} id="update" className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">

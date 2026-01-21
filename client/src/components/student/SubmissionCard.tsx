@@ -4,7 +4,7 @@ import { useGetAnonymizedReviewsForSubmissionQuery } from '../../redux/api/revie
 import { useUploadCameraReadyMutation } from '../../redux/api/submissionsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
-import type { Submission} from '../../types/api.types';
+import type { Submission } from '../../types/api.types';
 import ReviewsTable from './ReviewsTable';
 
 interface SubmissionCardProps {
@@ -29,7 +29,8 @@ const SubmissionCard = ({
   isWithdrawing,
 }: SubmissionCardProps) => {
   const [showReviews, setShowReviews] = useState(false);
-  const [uploadCameraReady, { isLoading: isUploading }] = useUploadCameraReadyMutation();
+  const [uploadCameraReady, { isLoading: isUploading }] =
+    useUploadCameraReadyMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if submission has reviews (only query for non-draft submissions)
@@ -82,7 +83,9 @@ const SubmissionCard = ({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -114,7 +117,9 @@ const SubmissionCard = ({
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
-          <h3 className=" text-ms md:text-lg font-semibold text-gray-800 mb-2">{submission.title}</h3>
+          <h3 className=" text-ms md:text-lg font-semibold text-gray-800 mb-2">
+            {submission.title}
+          </h3>
           <div className="space-y-1 text-sm text-gray-600">
             <div>
               <span className="font-medium">Hội nghị:</span> {conferenceName}
@@ -130,21 +135,22 @@ const SubmissionCard = ({
             </div>
             <div>
               <span className="font-medium">Ngày nộp:</span>{' '}
-              {new Date(submission.submittedAt || submission.createdAt).toLocaleDateString(
-                'vi-VN',
-                {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                },
-              )}
+              {new Date(
+                submission.submittedAt || submission.createdAt,
+              ).toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </div>
           </div>
         </div>
         <div className="ml-4 flex flex-col items-end gap-4">
-          <span className={`p-3 rounded-full text-xs font-medium ${statusColor}`}>
+          <span
+            className={`p-3 rounded-full text-xs font-medium ${statusColor}`}
+          >
             {statusLabel}
           </span>
           {submission.fileUrl && (
@@ -157,7 +163,6 @@ const SubmissionCard = ({
               Xem file
             </a>
           )}
-          
         </div>
       </div>
       {(canEdit || canDelete || canViewReviews) && (
@@ -172,15 +177,7 @@ const SubmissionCard = ({
           )}
           {canEdit && (
             <button
-              onClick={() => {
-                onEdit(submission);
-                setTimeout(() => {
-                  const element = document.getElementById('update');
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }, 100);
-              }}
+              onClick={() => onEdit(submission)}
               className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Sửa
@@ -211,7 +208,11 @@ const SubmissionCard = ({
               >
                 {isUploading ? (
                   <>
-                    <CircularProgress size={16} disableShrink className="text-white" />
+                    <CircularProgress
+                      size={16}
+                      disableShrink
+                      className="text-white"
+                    />
                     Đang tải...
                   </>
                 ) : (
@@ -225,11 +226,13 @@ const SubmissionCard = ({
 
       {/* Reviews Table - Expandable */}
       {showReviews && canViewReviews && (
-        <ReviewsTable submissionId={submission.id} isLoading={isLoadingReviews} />
+        <ReviewsTable
+          submissionId={submission.id}
+          isLoading={isLoadingReviews}
+        />
       )}
     </div>
   );
 };
 
 export default SubmissionCard;
-

@@ -65,7 +65,7 @@ const StudentSubmissionsList = () => {
 
   const handleEdit = (submission: Submission) => {
     navigate(
-      `/student/submit?conferenceId=${submission.conferenceId}&trackId=${submission.trackId}&submissionId=${submission.id}`,
+      `/student/submit?conferenceId=${submission.conferenceId}&trackId=${submission.trackId}&submissionId=${submission.id}#update`,
     );
   };
 
