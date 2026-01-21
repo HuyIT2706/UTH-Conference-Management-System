@@ -7,6 +7,7 @@ import {
 import { useGetUsersQuery } from '../../../redux/api/usersApi';
 import type { TrackMember, User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { showDialog } from '../../../utils/dialog';
 import { formatApiError } from '../../../utils/api-helpers';
 import PCMemberList from './PCMemberList';
 import CreatePCMemberForm from './CreatePCMemberForm';
@@ -39,7 +40,8 @@ const PCMemberDetail = ({
   });
 
   const handleDelete = async (userId: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi chủ đề không?')) {
+    const confirmed = await showDialog.confirmDelete('thành viên này khỏi chủ đề');
+    if (!confirmed) {
       return;
     }
 

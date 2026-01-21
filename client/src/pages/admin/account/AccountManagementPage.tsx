@@ -6,6 +6,7 @@ import {
 } from '../../../redux/api/usersApi';
 import type { User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { showDialog } from '../../../utils/dialog';
 import { formatApiError } from '../../../utils/api-helpers';
 import CreateAccountForm from './CreateAccountForm';
 import AccountList from './AccountList';
@@ -73,7 +74,8 @@ const AccountManagementPage = () => {
   };
 
   const handleDelete = async (userId: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')) {
+    const confirmed = await showDialog.confirmDelete('tài khoản này');
+    if (!confirmed) {
       return;
     }
 

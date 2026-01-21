@@ -6,6 +6,7 @@ import {
 } from '../../../redux/api/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { showDialog } from '../../../utils/dialog';
 import CreateConferenceForm from './CreateConferenceForm';
 import ConferenceList from './ConferenceList';
 import ConferenceDetail from './ConferenceDetail';
@@ -70,7 +71,8 @@ const ConferenceSetupPage = () => {
   };
 
   const handleDelete = async (conferenceId: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa hội nghị này không?')) {
+    const confirmed = await showDialog.confirmDelete('hội nghị này');
+    if (!confirmed) {
       return;
     }
 

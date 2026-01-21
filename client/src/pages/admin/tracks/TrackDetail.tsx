@@ -7,6 +7,7 @@ import {
 } from '../../../redux/api/conferencesApi';
 import type { Track } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
+import { showDialog } from '../../../utils/dialog';
 import { formatApiError } from '../../../utils/api-helpers';
 import TrackList from './TrackList';
 import CreateTrackForm from './CreateTrackForm';
@@ -62,7 +63,8 @@ const TrackDetail = ({ conferenceId, onBack }: TrackDetailProps) => {
   };
 
   const handleDelete = async (trackId: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa chủ đề này không?')) {
+    const confirmed = await showDialog.confirmDelete('chủ đề này');
+    if (!confirmed) {
       return;
     }
 

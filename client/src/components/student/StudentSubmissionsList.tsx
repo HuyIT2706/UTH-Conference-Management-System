@@ -8,6 +8,7 @@ import {
 import { useGetConferencesQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
+import { showDialog } from '../../utils/dialog';
 import { tokenUtils } from '../../utils/token';
 import SubmissionCard from './SubmissionCard';
 import { getStatusLabel, getStatusColor } from '../../utils/submissionListUtils';
@@ -69,13 +70,17 @@ const StudentSubmissionsList = () => {
   };
 
   const handleDelete = async (submission: Submission) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa/rút bài này không?')) {
+    const isDraft = submission.status === 'DRAFT';
+    const confirmed = isDraft 
+      ? await showDialog.confirmDelete('bài nộp này')
+      : await showDialog.confirmWithdraw('bài nộp này');
+    if (!confirmed) {
       return;
     }
 
     try {
       await withdrawSubmission(submission.id).unwrap();
-      showToast.success('Đã xóa/rút bài thành công');
+      showToast.success(isDraft ? 'Đã xóa bài thành công' : 'Đã rút bài thành công');
     } catch (error) {
       showToast.error(formatApiError(error));
     }

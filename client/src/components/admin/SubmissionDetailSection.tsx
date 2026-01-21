@@ -8,6 +8,7 @@ import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
 import { useGetUsersQuery } from '../../redux/api/usersApi';
 import { useAuth } from '../../hooks/useAuth';
 import { showToast } from '../../utils/toast';
+import { showDialog } from '../../utils/dialog';
 import { formatApiError } from '../../utils/api-helpers';
 import { useIsInLayoutApp } from '../../utils/layout-helpers';
 import type { Review } from '../../types/api.types';
@@ -82,7 +83,14 @@ const SubmissionDetailSection = memo(
     const handleAccept = async () => {
       if (!submission) return;
 
-      if (!window.confirm('Bạn có chắc chắn muốn chấp nhận bài nộp này?')) {
+      const confirmed = await showDialog.confirm({
+        title: 'Xác nhận chấp nhận',
+        message: 'Bạn có chắc chắn muốn chấp nhận bài nộp này?',
+        confirmText: 'Chấp nhận',
+        cancelText: 'Hủy',
+        confirmColor: 'success',
+      });
+      if (!confirmed) {
         return;
       }
 
@@ -100,7 +108,14 @@ const SubmissionDetailSection = memo(
     const handleReject = async () => {
       if (!submission) return;
 
-      if (!window.confirm('Bạn có chắc chắn muốn từ chối bài nộp này?')) {
+      const confirmed = await showDialog.confirm({
+        title: 'Xác nhận từ chối',
+        message: 'Bạn có chắc chắn muốn từ chối bài nộp này?',
+        confirmText: 'Từ chối',
+        cancelText: 'Hủy',
+        confirmColor: 'error',
+      });
+      if (!confirmed) {
         return;
       }
 
