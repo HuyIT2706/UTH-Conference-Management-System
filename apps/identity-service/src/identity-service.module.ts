@@ -16,7 +16,7 @@ import { HealthController } from './health/health.controller';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [
-        'apps/identity-service/.env.local', 
+        'apps/identity-service/.env.local',
         'apps/identity-service/.env',
         '.env',
       ],
@@ -38,8 +38,14 @@ import { HealthController } from './health/health.controller';
           username,
           password,
           database,
-          entities: [User, Role, RefreshToken, PasswordResetToken, EmailVerificationToken],
-          synchronize: true, 
+          entities: [
+            User,
+            Role,
+            RefreshToken,
+            PasswordResetToken,
+            EmailVerificationToken,
+          ],
+          synchronize: true,
         };
       },
     }),

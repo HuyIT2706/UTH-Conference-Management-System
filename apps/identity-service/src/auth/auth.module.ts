@@ -24,8 +24,7 @@ import { EmailService } from '../common/services/email.service';
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
-          expiresIn:
-            Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
+          expiresIn: Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
         },
       }),
     }),
@@ -35,4 +34,3 @@ import { EmailService } from '../common/services/email.service';
   exports: [AuthService],
 })
 export class AuthModule {}
-

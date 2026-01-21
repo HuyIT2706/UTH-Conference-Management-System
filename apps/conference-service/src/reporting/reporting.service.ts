@@ -206,7 +206,7 @@ export class ReportingService {
       select: ['id'],
     });
     const trackIds = tracks.map((t) => t.id);
-    
+
     // Count distinct userId from TrackMember with ACCEPTED status in all tracks of this conference
     let totalReviewers = 0;
     if (trackIds.length > 0) {
@@ -215,7 +215,7 @@ export class ReportingService {
         .where('tm.trackId IN (:...trackIds)', { trackIds })
         .andWhere('tm.status = :status', { status: 'ACCEPTED' })
         .getMany();
-      
+
       // Use Set to get distinct userId
       const reviewerUserIds = new Set<number>();
       allTrackMembers.forEach((tm) => reviewerUserIds.add(tm.userId));

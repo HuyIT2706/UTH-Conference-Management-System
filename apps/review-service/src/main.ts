@@ -17,7 +17,9 @@ async function bootstrap() {
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('UTH-ConfMS Review Service')
-    .setDescription('Hệ thống quản lý bài báo hội nghị nghiên cứu khoa học cho Đại học UTH (UTH-ConfMS) - Review Service: Quản lý Đánh giá, Phân công, Bidding, Quyết định & Phản biện')
+    .setDescription(
+      'Hệ thống quản lý bài báo hội nghị nghiên cứu khoa học cho Đại học UTH (UTH-ConfMS) - Review Service: Quản lý Đánh giá, Phân công, Bidding, Quyết định & Phản biện',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -37,6 +39,8 @@ async function bootstrap() {
   const port = process.env.PORT || process.env.port || 3004;
   await app.listen(port, '0.0.0.0');
   console.log(`[Review-Service] Running on http://0.0.0.0:${port}`);
-  console.log(`[Review-Service] Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(
+    `[Review-Service] Swagger documentation: http://localhost:${port}/api/docs`,
+  );
 }
 bootstrap();

@@ -18,19 +18,20 @@ export class ReviewClientService {
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
-    const isDocker = process.env.DOCKER_ENV === 'true' || 
-                     process.env.REVIEW_SERVICE_URL?.includes('review-service');
-    
+    const isDocker =
+      process.env.DOCKER_ENV === 'true' ||
+      process.env.REVIEW_SERVICE_URL?.includes('review-service');
+
     this.reviewServiceUrl =
       this.configService.get<string>('REVIEW_SERVICE_URL') ||
-      (isDocker 
-        ? 'http://review-service:3004/api' 
+      (isDocker
+        ? 'http://review-service:3004/api'
         : 'http://localhost:3004/api');
   }
   // Lấy thống kê hoạt động của reviewer từ review-service
   async getReviewerActivityStats(
-    reviewerId: number, 
-    authToken?: string
+    reviewerId: number,
+    authToken?: string,
   ): Promise<ReviewerActivityStats> {
     try {
       const headers: Record<string, string> = {};
@@ -55,18 +56,20 @@ export class ReviewClientService {
       };
     } catch (error: any) {
       const status = error.response?.status;
-      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Unknown error';
       if (!status || status >= 500) {
         throw new HttpException(
           {
-            message: 'Không thể xác minh người dùng có đang chấm bài hay không. Review-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
+            message:
+              'Không thể xác minh người dùng có đang chấm bài hay không. Review-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               reviewerId,
               service: 'review-service',
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
@@ -87,7 +90,9 @@ export class ReviewClientService {
             service: 'review-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
+        status && status >= 400 && status < 600
+          ? status
+          : HttpStatus.BAD_GATEWAY,
       );
     }
   }

@@ -11,13 +11,14 @@ export class ReviewClientService {
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
-    const isDocker = process.env.DOCKER_ENV === 'true' || 
-                     process.env.REVIEW_SERVICE_URL?.includes('review-service');
-    
+    const isDocker =
+      process.env.DOCKER_ENV === 'true' ||
+      process.env.REVIEW_SERVICE_URL?.includes('review-service');
+
     this.reviewServiceUrl =
       this.configService.get<string>('REVIEW_SERVICE_URL') ||
-      (isDocker 
-        ? 'http://review-service:3004/api' 
+      (isDocker
+        ? 'http://review-service:3004/api'
         : 'http://localhost:3004/api');
   }
   // Kiểm tra user đã review submissions trong track chưa
@@ -31,22 +32,27 @@ export class ReviewClientService {
         return false;
       }
       const response = await firstValueFrom(
-        this.httpService.get(`${this.reviewServiceUrl}/reviews/reviewer/${reviewerId}/stats`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
+        this.httpService.get(
+          `${this.reviewServiceUrl}/reviews/reviewer/${reviewerId}/stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+            timeout: 10000,
           },
-          timeout: 10000,
-        }),
+        ),
       );
       const stats = response.data?.data || response.data || {};
       return (stats.assignmentCount || 0) > 0 || (stats.reviewCount || 0) > 0;
     } catch (error: any) {
       const status = error.response?.status;
-      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Unknown error';
       if (!status || status >= 500) {
         throw new HttpException(
           {
-            message: 'Không thể xác minh người dùng có đã review submissions trong track này hay không. ',
+            message:
+              'Không thể xác minh người dùng có đã review submissions trong track này hay không. ',
             detail: {
               reviewerId,
               submissionIdsCount: submissionIds?.length || 0,
@@ -54,7 +60,7 @@ export class ReviewClientService {
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE, 
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
       if (status === HttpStatus.NOT_FOUND) {
@@ -70,7 +76,9 @@ export class ReviewClientService {
             service: 'review-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
+        status && status >= 400 && status < 600
+          ? status
+          : HttpStatus.BAD_GATEWAY,
       );
     }
   }

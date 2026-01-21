@@ -18,8 +18,9 @@ export class IdentityClientService {
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
-    const isDocker = process.env.DOCKER_ENV === 'true' ||
-                     process.env.IDENTITY_SERVICE_URL?.includes('identity-service');
+    const isDocker =
+      process.env.DOCKER_ENV === 'true' ||
+      process.env.IDENTITY_SERVICE_URL?.includes('identity-service');
 
     this.identityServiceUrl =
       this.configService.get<string>('IDENTITY_SERVICE_URL') ||
@@ -29,7 +30,10 @@ export class IdentityClientService {
   }
 
   // Lấy thông tin user theo ID
-  async getUserById(userId: number, authToken: string): Promise<UserInfo | null> {
+  async getUserById(
+    userId: number,
+    authToken: string,
+  ): Promise<UserInfo | null> {
     try {
       const response = await firstValueFrom(
         this.httpService.get(`${this.identityServiceUrl}/users/${userId}`, {
@@ -49,16 +53,20 @@ export class IdentityClientService {
         return null;
       }
 
-      const isConnectionError = !status || 
-                                error.code === 'ECONNREFUSED' || 
-                                error.code === 'ETIMEDOUT' ||
-                                error.code === 'ENOTFOUND';
+      const isConnectionError =
+        !status ||
+        error.code === 'ECONNREFUSED' ||
+        error.code === 'ETIMEDOUT' ||
+        error.code === 'ENOTFOUND';
 
       if (isConnectionError || status === HttpStatus.BAD_GATEWAY) {
         return null;
       }
 
-      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+      if (
+        status === HttpStatus.UNAUTHORIZED ||
+        status === HttpStatus.FORBIDDEN
+      ) {
         return null;
       }
 
@@ -67,13 +75,19 @@ export class IdentityClientService {
   }
 
   // Lấy email của user theo ID
-  async getUserEmail(userId: number, authToken: string): Promise<string | null> {
+  async getUserEmail(
+    userId: number,
+    authToken: string,
+  ): Promise<string | null> {
     const userInfo = await this.getUserById(userId, authToken);
     return userInfo?.email || null;
   }
 
   // Lấy tên đầy đủ của user theo ID
-  async getUserFullName(userId: number, authToken: string): Promise<string | null> {
+  async getUserFullName(
+    userId: number,
+    authToken: string,
+  ): Promise<string | null> {
     const userInfo = await this.getUserById(userId, authToken);
     return userInfo?.fullName || null;
   }

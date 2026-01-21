@@ -6,21 +6,27 @@ async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
 
   app.enableCors({
-    origin: true, 
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     exposedHeaders: ['Content-Length', 'Content-Type'],
   });
 
-  const isDocker = process.env.DOCKER_ENV === 'true' || process.env.IDENTITY_SERVICE_URL?.includes('identity-service');
-  const identityServiceUrl = process.env.IDENTITY_SERVICE_URL || 
+  const isDocker =
+    process.env.DOCKER_ENV === 'true' ||
+    process.env.IDENTITY_SERVICE_URL?.includes('identity-service');
+  const identityServiceUrl =
+    process.env.IDENTITY_SERVICE_URL ||
     (isDocker ? 'http://identity-service:3001' : 'http://localhost:3001');
-  const conferenceServiceUrl = process.env.CONFERENCE_SERVICE_URL || 
+  const conferenceServiceUrl =
+    process.env.CONFERENCE_SERVICE_URL ||
     (isDocker ? 'http://conference-service:3002' : 'http://localhost:3002');
-  const submissionServiceUrl = process.env.SUBMISSION_SERVICE_URL || 
+  const submissionServiceUrl =
+    process.env.SUBMISSION_SERVICE_URL ||
     (isDocker ? 'http://submission-service:3003' : 'http://localhost:3003');
-  const reviewServiceUrl = process.env.REVIEW_SERVICE_URL || 
+  const reviewServiceUrl =
+    process.env.REVIEW_SERVICE_URL ||
     (isDocker ? 'http://review-service:3004' : 'http://localhost:3004');
 
   // Get Express instance from NestJS
@@ -37,22 +43,34 @@ async function bootstrap() {
       }
     },
     onProxyRes: (proxyRes: any, req: any, res: any) => {
-      proxyRes.headers['Access-Control-Allow-Origin'] = req.headers.origin || '*';
+      proxyRes.headers['Access-Control-Allow-Origin'] =
+        req.headers.origin || '*';
       proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
-      proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
-      proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With';
+      proxyRes.headers['Access-Control-Allow-Methods'] =
+        'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+      proxyRes.headers['Access-Control-Allow-Headers'] =
+        'Content-Type, Authorization, X-Requested-With';
     },
     onError: (err: any, req: any, res: any) => {
-      console.error(`[API Gateway] Proxy error for ${req.method} ${req.url}:`, err);
+      console.error(
+        `[API Gateway] Proxy error for ${req.method} ${req.url}:`,
+        err,
+      );
       console.error(`[API Gateway] Error code:`, err.code);
       console.error(`[API Gateway] Error message:`, err.message);
       if (!res.headersSent) {
-        if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET') {
-          console.error(`[API Gateway] Service unavailable - likely cold start. Returning 502`);
-          res.status(502).json({ 
-            message: 'Service đang khởi động, vui lòng thử lại sau vài giây', 
+        if (
+          err.code === 'ECONNREFUSED' ||
+          err.code === 'ETIMEDOUT' ||
+          err.code === 'ECONNRESET'
+        ) {
+          console.error(
+            `[API Gateway] Service unavailable - likely cold start. Returning 502`,
+          );
+          res.status(502).json({
+            message: 'Service đang khởi động, vui lòng thử lại sau vài giây',
             error: err.message,
-            code: err.code 
+            code: err.code,
           });
         } else {
           res.status(500).json({ message: 'Proxy error', error: err.message });
@@ -87,10 +105,11 @@ async function bootstrap() {
       target: conferenceServiceUrl,
       pathRewrite: (path, req) => {
         const fullPath = req.url || path;
-        const newPath = fullPath.startsWith('/api/public/conferences') 
-          ? fullPath 
-          : '/api/public/conferences' + (path.startsWith('/') ? path : '/' + path);
-        
+        const newPath = fullPath.startsWith('/api/public/conferences')
+          ? fullPath
+          : '/api/public/conferences' +
+            (path.startsWith('/') ? path : '/' + path);
+
         return newPath;
       },
       ...proxyOptions,
@@ -137,32 +156,44 @@ async function bootstrap() {
   });
 
   // Health check proxy endpoints for monitoring services
-  expressApp.get('/health/identity', createProxyMiddleware({
-    target: identityServiceUrl,
-    pathRewrite: { '^/health/identity': '/api/health' },
-    ...proxyOptions,
-  }));
+  expressApp.get(
+    '/health/identity',
+    createProxyMiddleware({
+      target: identityServiceUrl,
+      pathRewrite: { '^/health/identity': '/api/health' },
+      ...proxyOptions,
+    }),
+  );
 
-  expressApp.get('/health/conference', createProxyMiddleware({
-    target: conferenceServiceUrl,
-    pathRewrite: { '^/health/conference': '/api/health' },
-    ...proxyOptions,
-  }));
+  expressApp.get(
+    '/health/conference',
+    createProxyMiddleware({
+      target: conferenceServiceUrl,
+      pathRewrite: { '^/health/conference': '/api/health' },
+      ...proxyOptions,
+    }),
+  );
 
-  expressApp.get('/health/submission', createProxyMiddleware({
-    target: submissionServiceUrl,
-    pathRewrite: { '^/health/submission': '/api/health' },
-    ...proxyOptions,
-  }));
+  expressApp.get(
+    '/health/submission',
+    createProxyMiddleware({
+      target: submissionServiceUrl,
+      pathRewrite: { '^/health/submission': '/api/health' },
+      ...proxyOptions,
+    }),
+  );
 
-  expressApp.get('/health/review', createProxyMiddleware({
-    target: reviewServiceUrl,
-    pathRewrite: { '^/health/review': '/api/health' },
-    ...proxyOptions,
-  }));
+  expressApp.get(
+    '/health/review',
+    createProxyMiddleware({
+      target: reviewServiceUrl,
+      pathRewrite: { '^/health/review': '/api/health' },
+      ...proxyOptions,
+    }),
+  );
 
   const port = process.env.PORT || 3000;
-  await app.listen(port, '0.0.0.0'); 
+  await app.listen(port, '0.0.0.0');
   console.log(`Gateway is running on http://0.0.0.0:${port}`);
 }
 bootstrap();

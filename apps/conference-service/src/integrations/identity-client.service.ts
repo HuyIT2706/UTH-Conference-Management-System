@@ -57,7 +57,7 @@ export class IdentityClientService {
       );
     }
   }
-  // Lấy email user theo ID 
+  // Lấy email user theo ID
   async getUserEmail(
     userId: number,
     authToken: string,

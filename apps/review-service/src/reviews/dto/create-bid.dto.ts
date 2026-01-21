@@ -28,17 +28,3 @@ export class CreateBidDto {
   @IsNotEmpty()
   preference: PreferenceType;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

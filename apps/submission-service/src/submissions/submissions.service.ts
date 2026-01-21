@@ -33,7 +33,7 @@ export class SubmissionsService {
     private identityClient: IdentityClientService,
     private emailService: EmailService,
   ) {}
-// Upload file lên Supabase
+  // Upload file lên Supabase
   async uploadFile(file: Express.Multer.File | undefined): Promise<string> {
     if (!file) {
       throw new BadRequestException('File không được để trống');
@@ -41,21 +41,23 @@ export class SubmissionsService {
 
     const allowedMimeTypes = [
       'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/zip',
     ];
 
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        'Chỉ chấp nhận file PDF, DOCX hoặc ZIP',
-      );
+      throw new BadRequestException('Chỉ chấp nhận file PDF, DOCX hoặc ZIP');
     }
 
     const getFileExtension = (mimetype: string): string => {
       if (mimetype === 'application/pdf') return '.pdf';
-      if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return '.docx';
+      if (
+        mimetype ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      )
+        return '.docx';
       if (mimetype === 'application/zip') return '.zip';
-      return '.pdf'; 
+      return '.pdf';
     };
 
     const supabase = this.supabaseService.getClient();
@@ -88,7 +90,7 @@ export class SubmissionsService {
       throw new BadRequestException(`Lỗi khi upload file: ${error.message}`);
     }
   }
-// Validate trạng thái chuyển đổi
+  // Validate trạng thái chuyển đổi
   private validateStatusTransition(
     currentStatus: SubmissionStatus,
     newStatus: SubmissionStatus,
@@ -111,7 +113,7 @@ export class SubmissionsService {
 
     return allowedTransitions[currentStatus]?.includes(newStatus) ?? false;
   }
-// Tạo submission mới
+  // Tạo submission mới
   async create(
     createDto: CreateSubmissionDto,
     file: Express.Multer.File,
@@ -145,12 +147,15 @@ export class SubmissionsService {
 
     try {
       const fileUrl = await this.uploadFile(file);
-      let parsedCoAuthors: Array<{ name: string; email: string; affiliation?: string }> | null = null;
+      let parsedCoAuthors: Array<{
+        name: string;
+        email: string;
+        affiliation?: string;
+      }> | null = null;
       if (createDto.coAuthors) {
         try {
           parsedCoAuthors = JSON.parse(createDto.coAuthors);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
       const submission = this.submissionRepository.create({
         title: createDto.title,
@@ -180,7 +185,7 @@ export class SubmissionsService {
       await queryRunner.commitTransaction();
 
       const result = await this.submissionRepository.findOne({
-        where: { 
+        where: {
           id: savedSubmission.id,
           deletedAt: null as any,
           isActive: true,
@@ -200,7 +205,7 @@ export class SubmissionsService {
       await queryRunner.release();
     }
   }
-// cập nhật submission
+  // cập nhật submission
   async update(
     id: string,
     updateDto: UpdateSubmissionDto,
@@ -213,7 +218,7 @@ export class SubmissionsService {
 
     try {
       const submission = await queryRunner.manager.findOne(Submission, {
-        where: { 
+        where: {
           id,
           deletedAt: null as any,
           isActive: true,
@@ -277,13 +282,16 @@ export class SubmissionsService {
         newFileUrl = await this.uploadFile(file);
       }
 
-      let parsedCoAuthors: Array<{ name: string; email: string; affiliation?: string }> | null = submission.coAuthors;
+      let parsedCoAuthors: Array<{
+        name: string;
+        email: string;
+        affiliation?: string;
+      }> | null = submission.coAuthors;
       if (updateDto.coAuthors !== undefined) {
         if (updateDto.coAuthors) {
           try {
             parsedCoAuthors = JSON.parse(updateDto.coAuthors);
-          } catch (e) {
-          }
+          } catch (e) {}
         } else {
           parsedCoAuthors = null;
         }
@@ -295,16 +303,19 @@ export class SubmissionsService {
         keywords: updateDto.keywords ?? submission.keywords,
         trackId: updateDto.trackId ?? submission.trackId,
         fileUrl: newFileUrl,
-        authorAffiliation: updateDto.authorAffiliation !== undefined ? updateDto.authorAffiliation : submission.authorAffiliation,
+        authorAffiliation:
+          updateDto.authorAffiliation !== undefined
+            ? updateDto.authorAffiliation
+            : submission.authorAffiliation,
         coAuthors: parsedCoAuthors,
-        submittedAt: new Date(), 
+        submittedAt: new Date(),
       });
 
       const updatedSubmission = await queryRunner.manager.save(submission);
 
       await queryRunner.commitTransaction();
       const result = await this.submissionRepository.findOne({
-        where: { 
+        where: {
           id: updatedSubmission.id,
           deletedAt: null as any,
           isActive: true,
@@ -326,10 +337,10 @@ export class SubmissionsService {
       await queryRunner.release();
     }
   }
-// Rút submission
+  // Rút submission
   async withdraw(id: string, authorId: number): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: null as any,
         isActive: true,
@@ -370,7 +381,7 @@ export class SubmissionsService {
     return await this.submissionRepository.save(submission);
   }
 
-// Update status submission
+  // Update status submission
   async updateStatus(
     id: string,
     updateStatusDto: UpdateStatusDto,
@@ -379,7 +390,7 @@ export class SubmissionsService {
     authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: null as any,
         isActive: true,
@@ -389,11 +400,15 @@ export class SubmissionsService {
     if (!submission) {
       throw new NotFoundException(`Submission với ID ${id} không tồn tại`);
     }
-    const isAutoReviewingTransition = 
-      submission.status === 'SUBMITTED' && 
+    const isAutoReviewingTransition =
+      submission.status === 'SUBMITTED' &&
       updateStatusDto.status === 'REVIEWING';
 
-    if (!isAutoReviewingTransition && !userRoles.includes('CHAIR') && !userRoles.includes('ADMIN')) {
+    if (
+      !isAutoReviewingTransition &&
+      !userRoles.includes('CHAIR') &&
+      !userRoles.includes('ADMIN')
+    ) {
       throw new ForbiddenException(
         'Chỉ Chair hoặc Admin mới được cập nhật trạng thái',
       );
@@ -411,8 +426,9 @@ export class SubmissionsService {
     const savedSubmission = await this.submissionRepository.save(submission);
 
     const newStatus = savedSubmission.status;
-    const isAcceptedOrRejected = newStatus === SubmissionStatus.ACCEPTED || 
-                                  newStatus === SubmissionStatus.REJECTED;
+    const isAcceptedOrRejected =
+      newStatus === SubmissionStatus.ACCEPTED ||
+      newStatus === SubmissionStatus.REJECTED;
 
     if (authToken && isAcceptedOrRejected) {
       this.sendSubmissionStatusEmail(
@@ -440,13 +456,18 @@ export class SubmissionsService {
     }
 
     try {
-      const authorInfo = await this.identityClient.getUserById(submission.authorId, authToken);
-      
+      const authorInfo = await this.identityClient.getUserById(
+        submission.authorId,
+        authToken,
+      );
+
       if (!authorInfo || !authorInfo.email) {
         return;
       }
 
-      const conferenceName = await this.conferenceClient.getConferenceName(submission.conferenceId);
+      const conferenceName = await this.conferenceClient.getConferenceName(
+        submission.conferenceId,
+      );
       const authorName = authorInfo.fullName || authorInfo.email || 'Tác giả';
 
       if (status === 'ACCEPTED') {
@@ -466,17 +487,16 @@ export class SubmissionsService {
           decisionNote,
         );
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   }
-// Upload camera-ready file
+  // Upload camera-ready file
   async uploadCameraReady(
     id: string,
     file: Express.Multer.File,
     authorId: number,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: null as any,
         isActive: true,
@@ -517,7 +537,7 @@ export class SubmissionsService {
 
     return await this.submissionRepository.save(submission);
   }
-// Lấy ds submission fileetr và phân trang
+  // Lấy ds submission fileetr và phân trang
   async findAll(
     queryDto: QuerySubmissionsDto,
     userId: number,
@@ -535,10 +555,12 @@ export class SubmissionsService {
 
     const queryBuilder =
       this.submissionRepository.createQueryBuilder('submission');
-  
-    const isChairOrAdmin = userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
-    const isReviewer = userRoles.includes('REVIEWER') || userRoles.includes('PC_MEMBER');
-    
+
+    const isChairOrAdmin =
+      userRoles.includes('CHAIR') || userRoles.includes('ADMIN');
+    const isReviewer =
+      userRoles.includes('REVIEWER') || userRoles.includes('PC_MEMBER');
+
     if (isReviewer && queryDto.trackId) {
       try {
         if (authToken) {
@@ -549,16 +571,18 @@ export class SubmissionsService {
           );
         }
       } catch (error) {
-        throw new ForbiddenException('Bạn không có quyền xem submission của track này');
+        throw new ForbiddenException(
+          'Bạn không có quyền xem submission của track này',
+        );
       }
     }
-    
+
     if (!isChairOrAdmin && !isReviewer) {
       queryBuilder.where('submission.authorId = :userId', { userId });
     } else if (isReviewer && !queryDto.trackId) {
       queryBuilder.where('submission.authorId = :userId', { userId });
     }
-    
+
     if (queryDto.trackId) {
       const trackIdNumber = Number(queryDto.trackId);
       queryBuilder.andWhere('submission.trackId = :trackId', {
@@ -594,7 +618,9 @@ export class SubmissionsService {
     }
 
     queryBuilder.andWhere('submission.deletedAt IS NULL');
-    queryBuilder.andWhere('submission.isActive = :isActive', { isActive: true });
+    queryBuilder.andWhere('submission.isActive = :isActive', {
+      isActive: true,
+    });
 
     const total = await queryBuilder.getCount();
 
@@ -616,7 +642,7 @@ export class SubmissionsService {
   // Lấy danh sách submissions của author
   async findAllByAuthor(authorId: number): Promise<Submission[]> {
     return await this.submissionRepository.find({
-      where: { 
+      where: {
         authorId,
         deletedAt: null as any,
         isActive: true,
@@ -643,7 +669,7 @@ export class SubmissionsService {
     authToken?: string,
   ): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: null as any,
         isActive: true,
@@ -670,37 +696,41 @@ export class SubmissionsService {
       }
       return submission;
     }
-    
+
     if (isReviewer) {
       let reviewerSubmissionIds: string[] = [];
-      
+
       if (!assignmentIds || assignmentIds.length === 0) {
         try {
-          const assignments = await this.reviewClient.getReviewerAssignments(authToken);
+          const assignments =
+            await this.reviewClient.getReviewerAssignments(authToken);
           reviewerSubmissionIds = assignments.map((a) => a.submissionId);
         } catch (error) {
           throw new ForbiddenException('Bạn không có quyền xem submission này');
         }
       }
-      
+
       if (reviewerSubmissionIds.includes(id)) {
         if (submission.versions) {
           submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
         }
         return submission;
       }
-      
+
       if (submission.trackId) {
         try {
-          const trackCheck = await this.conferenceClient.checkReviewerTrackAssignment(
-            userId,
-            submission.trackId,
-            authToken,
-          );
-          
+          const trackCheck =
+            await this.conferenceClient.checkReviewerTrackAssignment(
+              userId,
+              submission.trackId,
+              authToken,
+            );
+
           if (trackCheck.hasAccepted) {
             if (submission.versions) {
-              submission.versions.sort((a, b) => b.versionNumber - a.versionNumber);
+              submission.versions.sort(
+                (a, b) => b.versionNumber - a.versionNumber,
+              );
             }
             return submission;
           }
@@ -721,7 +751,7 @@ export class SubmissionsService {
     Array<{ score: number; commentForAuthor: string; recommendation: string }>
   > {
     const submission = await this.submissionRepository.findOne({
-      where: { 
+      where: {
         id,
         deletedAt: null as any,
         isActive: true,
@@ -756,7 +786,7 @@ export class SubmissionsService {
       },
     });
   }
-// Lấy danh sách submission IDs theo track ID
+  // Lấy danh sách submission IDs theo track ID
   async getSubmissionIdsByTrackId(trackId: number): Promise<string[]> {
     const submissions = await this.submissionRepository.find({
       where: {
@@ -767,10 +797,6 @@ export class SubmissionsService {
       select: ['id'],
     });
 
-    return submissions.map(s => s.id);
+    return submissions.map((s) => s.id);
   }
 }
-
-
-
-

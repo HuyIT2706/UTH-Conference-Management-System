@@ -1,5 +1,25 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Delete, Query, UnauthorizedException, NotFoundException, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+  Delete,
+  Query,
+  UnauthorizedException,
+  NotFoundException,
+  Req,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -32,14 +52,16 @@ export class UsersController {
   async getProfile(@CurrentUser('sub') userId: number) {
     try {
       if (!userId || typeof userId !== 'number') {
-        throw new UnauthorizedException('Token không hợp lệ hoặc thiếu thông tin người dùng');
+        throw new UnauthorizedException(
+          'Token không hợp lệ hoặc thiếu thông tin người dùng',
+        );
       }
-      
+
       const user = await this.usersService.getProfile(userId);
       if (!user) {
         throw new NotFoundException('Không tìm thấy thông tin người dùng');
       }
-      
+
       const { password, roles, ...rest } = user;
       return {
         message: 'Lấy thông tin người dùng thành công',
@@ -50,12 +72,18 @@ export class UsersController {
       };
     } catch (error: any) {
       // Re-throw known exceptions
-      if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       // Log and throw generic error for unknown errors
       console.error('[UsersController] Error in getProfile:', error);
-      throw new UnauthorizedException('Lỗi khi lấy thông tin người dùng: ' + (error?.message || 'Unknown error'));
+      throw new UnauthorizedException(
+        'Lỗi khi lấy thông tin người dùng: ' +
+          (error?.message || 'Unknown error'),
+      );
     }
   }
 
@@ -75,29 +103,46 @@ export class UsersController {
 
   @Post('forgot-password')
   @ApiOperation({ summary: 'Gửi mã reset mật khẩu qua email' })
-  @ApiResponse({ status: 200, description: 'Đã gửi mã reset mật khẩu (luôn trả về 200 để bảo mật)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Đã gửi mã reset mật khẩu (luôn trả về 200 để bảo mật)',
+  })
   async forgotPassword(@Body('email') email: string) {
-    console.log(`[UsersController] Forgot password request received for email: ${email}`);
+    console.log(
+      `[UsersController] Forgot password request received for email: ${email}`,
+    );
     try {
       // Service sẽ return ngay sau khi lưu token, email gửi ở background
       await this.usersService.forgotPassword(email);
-      console.log(`[UsersController] Forgot password processed successfully for email: ${email}`);
+      console.log(
+        `[UsersController] Forgot password processed successfully for email: ${email}`,
+      );
       return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
     } catch (error: any) {
-      console.error(`[UsersController] Error in forgotPassword for email ${email}:`, error);
+      console.error(
+        `[UsersController] Error in forgotPassword for email ${email}:`,
+        error,
+      );
       // Vẫn trả về 200 để bảo mật (không tiết lộ email có tồn tại hay không)
       return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
     }
   }
 
   @Get('get-reset-code')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Lấy code db để xác thực email',
-    description: 'Helper endpoint để lấy reset code cho user để test.'
+    description: 'Helper endpoint để lấy reset code cho user để test.',
   })
-  @ApiQuery({ name: 'email', description: 'Email của user cần lấy code', required: true })
+  @ApiQuery({
+    name: 'email',
+    description: 'Email của user cần lấy code',
+    required: true,
+  })
   @ApiResponse({ status: 200, description: 'Lấy code thành công' })
-  @ApiResponse({ status: 404, description: 'User không tồn tại hoặc chưa có code' })
+  @ApiResponse({
+    status: 404,
+    description: 'User không tồn tại hoặc chưa có code',
+  })
   async getResetCode(@Query('email') email: string) {
     const result = await this.usersService.getResetCodeByEmail(email);
     return {
@@ -116,15 +161,17 @@ export class UsersController {
   ) {
     const isValid = await this.usersService.verifyResetCode(email, code);
     if (!isValid) {
-      throw new UnauthorizedException('Mã reset mật khẩu không hợp lệ hoặc đã hết hạn');
+      throw new UnauthorizedException(
+        'Mã reset mật khẩu không hợp lệ hoặc đã hết hạn',
+      );
     }
     return { message: 'Mã reset mật khẩu hợp lệ', valid: true };
   }
 
   @Post('reset-password')
   @ApiOperation({
-      summary: "Đặt lại password",
-      description: "Đặt lại password khi quên pass"
+    summary: 'Đặt lại password',
+    description: 'Đặt lại password khi quên pass',
   })
   async resetPassword(
     @Body('email') email: string,
@@ -221,7 +268,10 @@ export class UsersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Cập nhật role cho user (Admin thực hiện)' })
   @ApiResponse({ status: 200, description: 'Cập nhật role thành công' })
-  @ApiResponse({ status: 400, description: 'Không thể cập nhật vai trò (có submissions/reviews)' })
+  @ApiResponse({
+    status: 400,
+    description: 'Không thể cập nhật vai trò (có submissions/reviews)',
+  })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   async updateUserRoles(
     @Param('id', ParseIntPipe) userId: number,
@@ -252,9 +302,14 @@ export class UsersController {
   @Roles(RoleName.ADMIN)
   @Delete(':id')
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Xóa user (Admin only) - Soft Delete với Guard Clauses' })
+  @ApiOperation({
+    summary: 'Xóa user (Admin only) - Soft Delete với Guard Clauses',
+  })
   @ApiResponse({ status: 200, description: 'Xóa user thành công' })
-  @ApiResponse({ status: 400, description: 'Không thể xóa user (có submissions/reviews)' })
+  @ApiResponse({
+    status: 400,
+    description: 'Không thể xóa user (có submissions/reviews)',
+  })
   @ApiResponse({ status: 403, description: 'Không có quyền ADMIN' })
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
   async deleteUser(
@@ -262,12 +317,11 @@ export class UsersController {
     @Req() req: Request,
   ) {
     const authHeader = req.headers.authorization;
-    const authToken = authHeader?.startsWith('Bearer ') 
-      ? authHeader.substring(7) 
+    const authToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
       : undefined;
 
     await this.usersService.deleteUser(userId, authToken);
     return { message: 'Xóa user thành công (soft delete)' };
   }
 }
-

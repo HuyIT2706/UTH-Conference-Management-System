@@ -21,7 +21,7 @@ export class RolesGuard implements CanActivate {
     );
 
     if (!requiredRoles) {
-      return true; 
+      return true;
     }
 
     const request = context.switchToHttp().getRequest();
@@ -45,18 +45,3 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

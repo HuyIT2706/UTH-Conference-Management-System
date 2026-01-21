@@ -68,13 +68,11 @@ export class CreateSubmissionDto {
 
   @ApiProperty({
     description: 'Danh sách đồng tác giả (JSON string)',
-    example: '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
+    example:
+      '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
     required: false,
   })
   @IsString()
   @IsOptional()
   coAuthors?: string;
 }
-
-
-

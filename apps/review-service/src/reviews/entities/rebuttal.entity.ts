@@ -11,7 +11,7 @@ export class Rebuttal {
   id: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; 
+  submissionId: string;
 
   @Column({ type: 'int' })
   authorId: number;
@@ -25,17 +25,3 @@ export class Rebuttal {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

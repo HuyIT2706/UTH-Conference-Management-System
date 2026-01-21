@@ -32,14 +32,3 @@ export class PasswordResetToken {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-

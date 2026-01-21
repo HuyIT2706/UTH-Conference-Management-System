@@ -17,16 +17,16 @@ export class SubmissionVersion {
   submissionId: string;
 
   @Column({ type: 'int' })
-  versionNumber: number; 
+  versionNumber: number;
 
   @Column({ type: 'varchar', length: 500 })
-  title: string; 
+  title: string;
 
   @Column({ type: 'text' })
-  abstract: string; 
+  abstract: string;
 
   @Column({ type: 'text' })
-  fileUrl: string; 
+  fileUrl: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   keywords: string | null;
@@ -40,18 +40,3 @@ export class SubmissionVersion {
   @JoinColumn({ name: 'submissionId' })
   submission: Submission;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

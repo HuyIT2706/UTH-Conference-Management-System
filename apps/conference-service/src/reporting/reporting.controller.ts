@@ -140,7 +140,10 @@ export class ReportingController {
       'Lấy thống kê tổng hợp cho dashboard bao gồm submissions, acceptance rate, reviewers, và phân bố theo track.',
   })
   @ApiParam({ name: 'conferenceId', description: 'ID của hội nghị' })
-  @ApiResponse({ status: 200, description: 'Lấy thống kê dashboard thành công' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lấy thống kê dashboard thành công',
+  })
   @ApiResponse({ status: 403, description: 'Không có quyền quản lý hội nghị' })
   @ApiResponse({ status: 404, description: 'Không tìm thấy hội nghị' })
   async getDashboardStats(

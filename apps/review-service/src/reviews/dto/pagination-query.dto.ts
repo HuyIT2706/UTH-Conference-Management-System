@@ -31,20 +31,3 @@ export class PaginationQueryDto {
   @IsOptional()
   limit?: number = 10;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

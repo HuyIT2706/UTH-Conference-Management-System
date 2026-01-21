@@ -14,14 +14,14 @@ async function bootstrap() {
   }
 
   const app = await NestFactory.create(IdentityServiceModule);
-  
+
   app.enableCors({
-    origin: true, 
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
-  
+
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -54,6 +54,8 @@ async function bootstrap() {
   const port = process.env.PORT || process.env.port || 3001;
   await app.listen(port, '0.0.0.0');
   console.log(`[Identity-Service] Running on http://0.0.0.0:${port}`);
-  console.log(`[Identity-Service] Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(
+    `[Identity-Service] Swagger documentation: http://localhost:${port}/api/docs`,
+  );
 }
 bootstrap();

@@ -10,10 +10,7 @@ import {
   ReviewPreference,
   PreferenceType,
 } from './entities/review-preference.entity';
-import {
-  Assignment,
-  AssignmentStatus,
-} from './entities/assignment.entity';
+import { Assignment, AssignmentStatus } from './entities/assignment.entity';
 import { Review } from './entities/review.entity';
 import { PcDiscussion } from './entities/pc-discussion.entity';
 import { Decision, FinalDecision } from './entities/decision.entity';
@@ -21,7 +18,10 @@ import { Rebuttal } from './entities/rebuttal.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ConferenceClientService } from '../integrations/conference-client.service';
-import { SubmissionClientService, Submission } from '../integrations/submission-client.service';
+import {
+  SubmissionClientService,
+  Submission,
+} from '../integrations/submission-client.service';
 import { IdentityClientService } from '../integrations/identity-client.service';
 
 @Injectable()
@@ -45,11 +45,14 @@ export class ReviewsService {
   ) {}
 
   // Reviewer submit preference cho bài báo
-  async submitBid(reviewerId: number, dto: CreateBidDto): Promise<ReviewPreference> {
+  async submitBid(
+    reviewerId: number,
+    dto: CreateBidDto,
+  ): Promise<ReviewPreference> {
     const existingBid = await this.reviewPreferenceRepository.findOne({
       where: {
         reviewerId,
-        submissionId: dto.submissionId, 
+        submissionId: dto.submissionId,
       },
     });
 
@@ -59,7 +62,7 @@ export class ReviewsService {
     }
     const bid = this.reviewPreferenceRepository.create({
       reviewerId,
-      submissionId: dto.submissionId, 
+      submissionId: dto.submissionId,
       conferenceId: dto.conferenceId,
       preference: dto.preference,
     });
@@ -73,7 +76,8 @@ export class ReviewsService {
     submissionId: string | number,
     conferenceId?: number,
   ): Promise<boolean> {
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     const where: Record<string, any> = {
       reviewerId,
       submissionId: submissionIdStr,
@@ -92,7 +96,7 @@ export class ReviewsService {
   // Reviewer tự phân công bài báo cho chính mình (khi đã chấp nhận track)
   async selfAssignSubmission(
     reviewerId: number,
-    submissionId: string, 
+    submissionId: string,
     conferenceId: number,
   ): Promise<Assignment> {
     const hasConflict = await this.checkConflictOfInterest(
@@ -184,7 +188,11 @@ export class ReviewsService {
   }
 
   // Reviewer nộp bài chấm (có thể tạo mới hoặc cập nhật nếu deadline chưa hết)
-  async submitReview(reviewerId: number, dto: CreateReviewDto, authToken?: string): Promise<Review> {
+  async submitReview(
+    reviewerId: number,
+    dto: CreateReviewDto,
+    authToken?: string,
+  ): Promise<Review> {
     const assignment = await this.assignmentRepository.findOne({
       where: { id: dto.assignmentId },
     });
@@ -211,26 +219,26 @@ export class ReviewsService {
           'Assignment đã hoàn thành nhưng không tìm thấy review. Vui lòng liên hệ admin.',
         );
       }
-      
+
       // Check assignment dueDate to see if deadline has passed
       if (assignment.dueDate && new Date() > new Date(assignment.dueDate)) {
         throw new BadRequestException(
           'Đã hết hạn phản biện, không thể cập nhật đánh giá',
         );
       }
-      
+
       // Deadline not passed or no dueDate, allow update
       existingReview.score = dto.score;
       existingReview.confidence = dto.confidence;
       existingReview.commentForAuthor = dto.commentForAuthor || null;
       existingReview.commentForPC = dto.commentForPC || null;
       existingReview.recommendation = dto.recommendation;
-      
+
       const savedReview = await this.reviewRepository.save(existingReview);
-      
+
       // Also update submission status if needed (same logic as new review)
       await this.updateSubmissionStatusIfNeeded(assignment, authToken);
-      
+
       return savedReview;
     }
 
@@ -242,7 +250,9 @@ export class ReviewsService {
     }
 
     if (existingReview) {
-      throw new BadRequestException('Review cho assignment này đã được nộp rồi');
+      throw new BadRequestException(
+        'Review cho assignment này đã được nộp rồi',
+      );
     }
 
     // Create new review
@@ -282,7 +292,7 @@ export class ReviewsService {
         assignment.submissionId,
         authToken,
       );
-      
+
       if (submission && submission.status === 'SUBMITTED') {
         await this.submissionClient.updateSubmissionStatus(
           assignment.submissionId,
@@ -301,7 +311,8 @@ export class ReviewsService {
     submissionId: string | number,
   ): Promise<boolean> {
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     const assignment = await this.assignmentRepository.findOne({
       where: {
         reviewerId,
@@ -319,7 +330,8 @@ export class ReviewsService {
     authToken?: string,
   ): Promise<any[]> {
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     // Find all assignments for this submission
     const assignments = await this.assignmentRepository.find({
       where: { submissionId: submissionIdStr },
@@ -348,15 +360,21 @@ export class ReviewsService {
 
     if (reviewerIds.length > 0 && authToken) {
       try {
-        const userMap = await this.identityClient.getUsersByIds(reviewerIds, authToken);
+        const userMap = await this.identityClient.getUsersByIds(
+          reviewerIds,
+          authToken,
+        );
         return reviews.map((review) => {
           const reviewerId = review.assignment?.reviewerId;
           const reviewer = reviewerId ? userMap.get(reviewerId) : null;
-          
+
           return {
             ...review,
             reviewerId: reviewerId || review.assignment?.reviewerId,
-            reviewerName: reviewer?.fullName || reviewer?.email || `Reviewer #${reviewerId}`,
+            reviewerName:
+              reviewer?.fullName ||
+              reviewer?.email ||
+              `Reviewer #${reviewerId}`,
           };
         });
       } catch (error) {
@@ -385,7 +403,8 @@ export class ReviewsService {
   ): Promise<ReviewPreference[]> {
     const skip = (page - 1) * limit;
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
 
     return this.reviewPreferenceRepository.find({
       where: { submissionId: submissionIdStr },
@@ -403,7 +422,8 @@ export class ReviewsService {
   ): Promise<PcDiscussion[]> {
     const skip = (page - 1) * limit;
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
 
     return this.pcDiscussionRepository.find({
       where: { submissionId: submissionIdStr },
@@ -414,7 +434,9 @@ export class ReviewsService {
   }
 
   // Lấy reviews đã ẩn danh cho tác giả xem (single-blind)
-  async getAnonymizedReviewsBySubmission(submissionId: string | number): Promise<
+  async getAnonymizedReviewsBySubmission(
+    submissionId: string | number,
+  ): Promise<
     Array<{
       score: number;
       commentForAuthor: string | null;
@@ -442,7 +464,8 @@ export class ReviewsService {
     lastReviewAt: Date | null;
   }> {
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     const assignments = await this.assignmentRepository.find({
       where: { submissionId: submissionIdStr },
     });
@@ -459,9 +482,10 @@ export class ReviewsService {
     const reviewsSubmitted = reviews.length;
     const lastReviewAt =
       reviews.length > 0
-        ? reviews.reduce((latest, r) =>
-            r.createdAt > latest ? r.createdAt : latest,
-          reviews[0].createdAt)
+        ? reviews.reduce(
+            (latest, r) => (r.createdAt > latest ? r.createdAt : latest),
+            reviews[0].createdAt,
+          )
         : null;
 
     return {
@@ -525,7 +549,8 @@ export class ReviewsService {
     decision: Decision | null;
   }> {
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     // Get all reviews for this submission
     const assignments = await this.assignmentRepository.find({
       where: { submissionId: submissionIdStr },
@@ -584,7 +609,8 @@ export class ReviewsService {
     note?: string,
   ): Promise<Decision> {
     // Ensure submissionId is string (UUID)
-    const submissionIdStr = typeof submissionId === 'string' ? submissionId : String(submissionId);
+    const submissionIdStr =
+      typeof submissionId === 'string' ? submissionId : String(submissionId);
     let decision = await this.decisionRepository.findOne({
       where: { submissionId: submissionIdStr },
     });
@@ -613,7 +639,8 @@ export class ReviewsService {
   ): Promise<Submission[]> {
     let acceptedTracks: any[] = [];
     try {
-      const trackAssignments = await this.conferenceClient.getMyTrackAssignments(authToken);
+      const trackAssignments =
+        await this.conferenceClient.getMyTrackAssignments(authToken);
       acceptedTracks = trackAssignments.filter(
         (assignment) => assignment.status === 'ACCEPTED',
       );
@@ -626,7 +653,7 @@ export class ReviewsService {
     }
 
     const allSubmissions: Submission[] = [];
-    
+
     for (const trackAssignment of acceptedTracks) {
       try {
         const submissions = await this.submissionClient.getSubmissionsByTrack(
@@ -634,17 +661,19 @@ export class ReviewsService {
           authToken,
           undefined,
         );
-        
+
         let filteredSubmissions = submissions;
         if (status && status.length > 0) {
           const statusArray = Array.isArray(status) ? status : [status];
-          filteredSubmissions = submissions.filter((s) => statusArray.includes(s.status));
+          filteredSubmissions = submissions.filter((s) =>
+            statusArray.includes(s.status),
+          );
         } else {
           filteredSubmissions = submissions.filter(
-            (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN'
+            (s) => s.status !== 'DRAFT' && s.status !== 'WITHDRAWN',
           );
         }
-        
+
         allSubmissions.push(...filteredSubmissions);
       } catch (error) {
         // Continue with other tracks even if one fails
@@ -669,31 +698,21 @@ export class ReviewsService {
       where: { reviewerId },
     });
 
-    const assignmentIds = assignments.map(a => a.id);
-    const reviews = assignmentIds.length > 0
-      ? await this.reviewRepository.find({
-          where: { assignmentId: In(assignmentIds) },
-        })
-      : [];
+    const assignmentIds = assignments.map((a) => a.id);
+    const reviews =
+      assignmentIds.length > 0
+        ? await this.reviewRepository.find({
+            where: { assignmentId: In(assignmentIds) },
+          })
+        : [];
 
     return {
       assignmentCount: assignments.length,
       reviewCount: reviews.length,
-      hasActiveAssignments: assignments.some(a => 
-        a.status === 'PENDING' || a.status === 'ACCEPTED'
+      hasActiveAssignments: assignments.some(
+        (a) => a.status === 'PENDING' || a.status === 'ACCEPTED',
       ),
       completedReviews: reviews.length,
     };
   }
 }
-
-
-
-
-
-
-
-
-
-
-

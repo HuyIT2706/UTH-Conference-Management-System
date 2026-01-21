@@ -24,7 +24,7 @@ export class Assignment {
   reviewerId: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; 
+  submissionId: string;
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -37,7 +37,7 @@ export class Assignment {
   status: AssignmentStatus;
 
   @Column({ type: 'int' })
-  assignedBy: number; 
+  assignedBy: number;
 
   @Column({ type: 'timestamptz', nullable: true })
   dueDate: Date | null;
@@ -51,15 +51,3 @@ export class Assignment {
   @OneToOne(() => Review, (review) => review.assignment)
   review: Review | null;
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -80,7 +80,8 @@ export class EmailService {
     decisionNote?: string,
   ): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const subject = `[${appName}] 🎉 Bài nộp của bạn đã được chấp nhận`;
     const html = `
@@ -176,12 +177,16 @@ export class EmailService {
                 <div class="info-item">
                   <span class="info-label">Tiêu đề bài nộp:</span> ${submissionTitle}
                 </div>
-                ${decisionNote ? `
+                ${
+                  decisionNote
+                    ? `
                 <div class="info-item">
                   <span class="info-label">Ghi chú từ ban tổ chức:</span><br>
                   ${decisionNote.replace(/\n/g, '<br>')}
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
 
               <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết và thực hiện các bước tiếp theo (nếu có).</p>
@@ -227,7 +232,8 @@ Trân trọng,
     decisionNote?: string,
   ): Promise<void> {
     const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
-    const appUrl = this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
+    const appUrl =
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const subject = `[${appName}] Thông báo về bài nộp của bạn`;
     const html = `
@@ -323,12 +329,16 @@ Trân trọng,
                 <div class="info-item">
                   <span class="info-label">Tiêu đề bài nộp:</span> ${submissionTitle}
                 </div>
-                ${decisionNote ? `
+                ${
+                  decisionNote
+                    ? `
                 <div class="info-item">
                   <span class="info-label">Ghi chú từ ban tổ chức:</span><br>
                   ${decisionNote.replace(/\n/g, '<br>')}
                 </div>
-                ` : ''}
+                `
+                    : ''
+                }
               </div>
 
               <p>Chúng tôi cảm ơn bạn đã tham gia và mong được gặp lại bạn trong các hội nghị tiếp theo.</p>

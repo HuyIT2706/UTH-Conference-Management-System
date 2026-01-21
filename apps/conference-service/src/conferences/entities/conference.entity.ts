@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Track } from './track.entity';
 import { ConferenceMember } from './conference-member.entity';
 import { CfpSetting } from '../../cfp/entities/cfp-setting.entity';
@@ -23,10 +29,20 @@ export class Conference {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'short_description' })
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    name: 'short_description',
+  })
   shortDescription: string | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'contact_email' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'contact_email',
+  })
   contactEmail: string | null;
 
   @Column({ type: 'int' })

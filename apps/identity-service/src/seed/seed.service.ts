@@ -13,10 +13,10 @@ export class SeedService implements OnModuleInit {
   async onModuleInit() {
     await this.seedRoles();
   }
-// Khởi tạo các vai trò mặc định trong hệ thống
+  // Khởi tạo các vai trò mặc định trong hệ thống
   private async seedRoles() {
     const roleNames = Object.values(RoleName);
-    
+
     for (const roleName of roleNames) {
       const existingRole = await this.roleRepository.findOne({
         where: { name: roleName },

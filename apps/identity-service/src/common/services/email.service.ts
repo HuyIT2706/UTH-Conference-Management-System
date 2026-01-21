@@ -73,11 +73,9 @@ export class EmailService {
    * Gửi email reset password code
    */
   async sendPasswordResetCode(email: string, code: string): Promise<void> {
-    const appName =
-      this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
+    const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
     const appUrl =
-      this.configService.get<string>('APP_BASE_URL') ||
-      'http://localhost:5173';
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const subject = `[${appName}] Mã xác nhận đặt lại mật khẩu`;
     const html = `
@@ -202,8 +200,7 @@ export class EmailService {
     code: string,
     fullName?: string,
   ): Promise<void> {
-    const appName =
-      this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
+    const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
 
     const subject = `[${appName}] Mã xác minh email của bạn`;
     const html = `
@@ -329,11 +326,9 @@ export class EmailService {
     password: string,
     fullName?: string,
   ): Promise<void> {
-    const appName =
-      this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
+    const appName = this.configService.get<string>('APP_NAME') || 'UTH ConfMS';
     const appUrl =
-      this.configService.get<string>('APP_BASE_URL') ||
-      'http://localhost:5173';
+      this.configService.get<string>('APP_BASE_URL') || 'http://localhost:5173';
 
     const subject = `[${appName}] Tài khoản của bạn đã được tạo`;
     const html = `
@@ -486,4 +481,3 @@ export class EmailService {
     }
   }
 }
-

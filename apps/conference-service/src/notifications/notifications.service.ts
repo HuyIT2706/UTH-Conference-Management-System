@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BulkNotificationDto, RecipientType } from './dto/bulk-notification.dto';
+import {
+  BulkNotificationDto,
+  RecipientType,
+} from './dto/bulk-notification.dto';
 import {
   ConferenceMember,
   ConferenceMemberRole,
@@ -29,7 +32,7 @@ export class NotificationsService {
     }
     return rendered;
   }
-// Lấy danh sách người nhận dựa trên loại
+  // Lấy danh sách người nhận dựa trên loại
   private async getRecipients(
     conferenceId: number,
     recipientType: RecipientType,
@@ -55,7 +58,7 @@ export class NotificationsService {
         return [];
     }
   }
-// Gửi email hàng loạt
+  // Gửi email hàng loạt
   async sendBulkNotification(
     conferenceId: number,
     dto: BulkNotificationDto,
@@ -70,10 +73,15 @@ export class NotificationsService {
     });
 
     if (!conference) {
-      throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
+      throw new NotFoundException(
+        `Conference với ID ${conferenceId} không tồn tại`,
+      );
     }
 
-    const recipients = await this.getRecipients(conferenceId, dto.recipientType);
+    const recipients = await this.getRecipients(
+      conferenceId,
+      dto.recipientType,
+    );
     const subject = dto.subject || 'Notification';
     const body = dto.body || '';
     const variables = {
@@ -96,7 +104,7 @@ export class NotificationsService {
       errors,
     };
   }
-// Xem trước thông báo
+  // Xem trước thông báo
   async previewNotification(
     conferenceId: number,
     dto: BulkNotificationDto,
@@ -106,7 +114,9 @@ export class NotificationsService {
     });
 
     if (!conference) {
-      throw new NotFoundException(`Conference với ID ${conferenceId} không tồn tại`);
+      throw new NotFoundException(
+        `Conference với ID ${conferenceId} không tồn tại`,
+      );
     }
 
     const subject = dto.subject || 'Notification';

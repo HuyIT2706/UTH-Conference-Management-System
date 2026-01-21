@@ -8,10 +8,7 @@ import {
   Max,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  ConfidenceLevel,
-  RecommendationType,
-} from '../entities/review.entity';
+import { ConfidenceLevel, RecommendationType } from '../entities/review.entity';
 
 export class CreateReviewDto {
   @ApiProperty({
@@ -44,7 +41,8 @@ export class CreateReviewDto {
   confidence: ConfidenceLevel;
 
   @ApiProperty({
-    description: 'Nhận xét cho tác giả (sẽ được hiển thị cho author sau khi có decision)',
+    description:
+      'Nhận xét cho tác giả (sẽ được hiển thị cho author sau khi có decision)',
     example: 'Bài viết tốt, cần chỉnh sửa một số phần nhỏ.',
     required: false,
   })
@@ -70,19 +68,3 @@ export class CreateReviewDto {
   @IsNotEmpty()
   recommendation: RecommendationType;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

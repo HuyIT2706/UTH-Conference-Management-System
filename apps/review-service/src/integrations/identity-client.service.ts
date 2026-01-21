@@ -105,7 +105,7 @@ export class IdentityClientService {
           `Lỗi khi lấy thông tin user với ID ${userId}`,
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
-        }
+      }
     });
 
     await Promise.all(promises);

@@ -32,7 +32,7 @@ export class Submission {
   keywords: string | null;
 
   @Column({ type: 'text' })
-  fileUrl: string; 
+  fileUrl: string;
 
   @Column({
     type: 'enum',
@@ -47,7 +47,12 @@ export class Submission {
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'author_name' })
   authorName: string | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'author_affiliation' })
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'author_affiliation',
+  })
   authorAffiliation: string | null;
 
   @Column({ type: 'int' })
@@ -57,7 +62,11 @@ export class Submission {
   conferenceId: number;
 
   @Column({ type: 'jsonb', nullable: true })
-  coAuthors: Array<{ name: string; email: string; affiliation?: string }> | null;
+  coAuthors: Array<{
+    name: string;
+    email: string;
+    affiliation?: string;
+  }> | null;
 
   @Column({ type: 'text', nullable: true })
   cameraReadyFileUrl: string | null;
@@ -82,6 +91,3 @@ export class Submission {
   })
   versions: SubmissionVersion[];
 }
-
-
-

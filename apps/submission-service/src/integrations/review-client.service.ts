@@ -20,7 +20,9 @@ export class ReviewClientService {
   }
   async getAnonymizedReviewsForAuthor(
     submissionId: string,
-  ): Promise<Array<{ score: number; commentForAuthor: string; recommendation: string }>> {
+  ): Promise<
+    Array<{ score: number; commentForAuthor: string; recommendation: string }>
+  > {
     try {
       const response = await firstValueFrom(
         this.httpService.get(`/reviews/submission/${submissionId}/anonymized`),

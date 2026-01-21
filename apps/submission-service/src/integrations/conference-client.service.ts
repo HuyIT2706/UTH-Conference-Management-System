@@ -11,10 +11,16 @@ interface CacheEntry<T> {
 @Injectable()
 export class ConferenceClientService {
   private readonly conferenceServiceUrl: string;
-  private readonly TRACK_CACHE_TTL = 5 * 60 * 1000; 
-  private readonly DEADLINE_CACHE_TTL = 60 * 1000; 
-  private trackCache = new Map<string, CacheEntry<{ valid: boolean; track?: any }>>();
-  private deadlineCache = new Map<string, CacheEntry<{ valid: boolean; deadline?: Date; message: string }>>();
+  private readonly TRACK_CACHE_TTL = 5 * 60 * 1000;
+  private readonly DEADLINE_CACHE_TTL = 60 * 1000;
+  private trackCache = new Map<
+    string,
+    CacheEntry<{ valid: boolean; track?: any }>
+  >();
+  private deadlineCache = new Map<
+    string,
+    CacheEntry<{ valid: boolean; deadline?: Date; message: string }>
+  >();
 
   constructor(
     private configService: ConfigService,
@@ -58,16 +64,16 @@ export class ConferenceClientService {
           `${this.conferenceServiceUrl}/public/conferences/${conferenceId}/tracks/${trackId}/validate`,
         ),
       );
-      
+
       let result = response.data;
       if (result && result.data && typeof result.data.valid === 'boolean') {
         result = result.data;
       }
-      
+
       if (!result || typeof result.valid !== 'boolean') {
         return { valid: false };
       }
-      
+
       if (result.valid) {
         this.trackCache.set(cacheKey, {
           data: result,
@@ -82,11 +88,14 @@ export class ConferenceClientService {
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi validate track';
-      
-      if (status === HttpStatus.UNAUTHORIZED || status === HttpStatus.FORBIDDEN) {
+
+      if (
+        status === HttpStatus.UNAUTHORIZED ||
+        status === HttpStatus.FORBIDDEN
+      ) {
         return { valid: false };
       }
-      
+
       if (status === HttpStatus.NOT_FOUND) {
         const result = { valid: false };
         this.trackCache.set(cacheKey, {
@@ -95,11 +104,11 @@ export class ConferenceClientService {
         });
         return result;
       }
-      
+
       if (status === HttpStatus.BAD_REQUEST) {
         return { valid: false };
       }
-      
+
       // Với các lỗi khác, throw exception để submission service xử lý
       throw new HttpException(
         `Conference-service validateTrack lỗi: ${message}`,
@@ -126,14 +135,14 @@ export class ConferenceClientService {
           params: { type },
         }),
       );
-      
+
       let result = response.data;
-      
+
       // Handle nested response format if needed
       if (result && result.data && typeof result.data.valid === 'boolean') {
         result = result.data;
       }
-      
+
       // Ensure result has required fields
       if (!result || typeof result.valid !== 'boolean') {
         console.error(`[ConferenceClient] Invalid response format:`, result);
@@ -142,12 +151,12 @@ export class ConferenceClientService {
           HttpStatus.BAD_GATEWAY,
         );
       }
-      
+
       // Convert deadline string to Date if needed
       if (result.deadline && typeof result.deadline === 'string') {
         result.deadline = new Date(result.deadline);
       }
-      
+
       this.deadlineCache.set(cacheKey, {
         data: result,
         expiresAt: Date.now() + this.DEADLINE_CACHE_TTL,
@@ -161,10 +170,15 @@ export class ConferenceClientService {
         error.response?.data?.message ||
         error.message ||
         'Lỗi khi kiểm tra deadline';
-        
-      console.error(`[ConferenceClient] Error status: ${status}, message: ${message}`);
-      
-      if (status === HttpStatus.NOT_FOUND || status === HttpStatus.BAD_REQUEST) {
+
+      console.error(
+        `[ConferenceClient] Error status: ${status}, message: ${message}`,
+      );
+
+      if (
+        status === HttpStatus.NOT_FOUND ||
+        status === HttpStatus.BAD_REQUEST
+      ) {
         throw new HttpException(
           `Không thể kiểm tra deadline: ${message}`,
           HttpStatus.BAD_REQUEST,
@@ -179,7 +193,9 @@ export class ConferenceClientService {
       );
     }
   }
-  async getTrackInfo(trackId: number): Promise<{ conferenceId: number } | null> {
+  async getTrackInfo(
+    trackId: number,
+  ): Promise<{ conferenceId: number } | null> {
     try {
       return null;
     } catch (error) {
@@ -191,14 +207,16 @@ export class ConferenceClientService {
   async getConferenceName(conferenceId: number): Promise<string> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.conferenceServiceUrl}/public/conferences/${conferenceId}/cfp`),
+        this.httpService.get(
+          `${this.conferenceServiceUrl}/public/conferences/${conferenceId}/cfp`,
+        ),
       );
-      
+
       const conference = response.data?.data?.conference;
       if (conference && conference.name) {
         return conference.name;
       }
-      
+
       return `Hội nghị #${conferenceId}`;
     } catch (error: any) {
       return `Hội nghị #${conferenceId}`;
@@ -216,21 +234,20 @@ export class ConferenceClientService {
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
-      
+
       const url = `${this.conferenceServiceUrl}/conferences/reviewer/my-track-assignments`;
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers,
         }),
       );
-      
+
       const assignments = response.data?.data || [];
       const hasAccepted = assignments.some(
-        (assignment: any) => 
-          assignment.trackId === trackId && 
-          assignment.status === 'ACCEPTED'
+        (assignment: any) =>
+          assignment.trackId === trackId && assignment.status === 'ACCEPTED',
       );
-      
+
       return { hasAccepted };
     } catch (error: any) {
       return { hasAccepted: false };

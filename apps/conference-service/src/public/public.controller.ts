@@ -3,16 +3,16 @@ import { ConferencesService } from '../conferences/conferences.service';
 
 @Controller('public/conferences')
 export class PublicController {
-  constructor(
-    private readonly conferencesService: ConferencesService,
-  ) {}
-//  Lấy thông tin deadline CFP công khai
+  constructor(private readonly conferencesService: ConferencesService) {}
+  //  Lấy thông tin deadline CFP công khai
   @Get(':conferenceId/cfp/check-deadline')
   async checkDeadline(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
-    @Query('type') type: 'submission' | 'review' | 'notification' | 'camera-ready',
+    @Query('type')
+    type: 'submission' | 'review' | 'notification' | 'camera-ready',
   ) {
-    const cfpSetting = await this.conferencesService.getCfpSetting(conferenceId);
+    const cfpSetting =
+      await this.conferencesService.getCfpSetting(conferenceId);
 
     if (!cfpSetting) {
       return {
@@ -54,12 +54,10 @@ export class PublicController {
     return {
       valid,
       deadline,
-      message: valid
-        ? `${deadlineName} chưa qua`
-        : `${deadlineName} đã qua`,
+      message: valid ? `${deadlineName} chưa qua` : `${deadlineName} đã qua`,
     };
   }
-// lấy thông tin track và xác thực track công khai
+  // lấy thông tin track và xác thực track công khai
   @Get(':conferenceId/tracks/:trackId/validate')
   async validateTrack(
     @Param('conferenceId', ParseIntPipe) conferenceId: number,
@@ -73,12 +71,13 @@ export class PublicController {
       track: track || undefined,
     };
   }
-// Lấy thông tin CFP công khai
+  // Lấy thông tin CFP công khai
   @Get(':id/cfp')
   async getPublicCfp(@Param('id', ParseIntPipe) conferenceId: number) {
     const conference = await this.conferencesService.findOne(conferenceId);
     const tracks = await this.conferencesService.findAllTracks(conferenceId);
-    const cfpSetting = await this.conferencesService.getCfpSetting(conferenceId);
+    const cfpSetting =
+      await this.conferencesService.getCfpSetting(conferenceId);
 
     return {
       message: 'Lấy thông tin CFP công khai thành công',
@@ -108,7 +107,7 @@ export class PublicController {
       },
     };
   }
-// lấy danh sách track công khai
+  // lấy danh sách track công khai
   @Get(':id/tracks')
   async getPublicTracks(@Param('id', ParseIntPipe) conferenceId: number) {
     const tracks = await this.conferencesService.findAllTracks(conferenceId);

@@ -1,9 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsInt,
-  MaxLength,
-} from 'class-validator';
+import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -61,13 +56,11 @@ export class UpdateSubmissionDto {
 
   @ApiProperty({
     description: 'Danh sách đồng tác giả (JSON string, tùy chọn)',
-    example: '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
+    example:
+      '[{"name":"Nguyễn Văn A","email":"a@example.com","affiliation":"UTH"}]',
     required: false,
   })
   @IsString()
   @IsOptional()
   coAuthors?: string;
 }
-
-
-

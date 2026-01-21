@@ -1,4 +1,10 @@
-import { IsDateString, IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateConferenceDto {
@@ -72,7 +78,3 @@ export class UpdateConferenceDto {
   @MaxLength(255)
   contactEmail?: string;
 }
-
-
-
-

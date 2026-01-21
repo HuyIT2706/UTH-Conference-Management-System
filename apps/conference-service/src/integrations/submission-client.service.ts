@@ -26,17 +26,18 @@ export class SubmissionClientService {
     private configService: ConfigService,
     private httpService: HttpService,
   ) {
-    const isDocker = process.env.DOCKER_ENV === 'true' || 
-                     process.env.SUBMISSION_SERVICE_URL?.includes('submission-service');
-    
+    const isDocker =
+      process.env.DOCKER_ENV === 'true' ||
+      process.env.SUBMISSION_SERVICE_URL?.includes('submission-service');
+
     this.submissionServiceUrl =
       this.configService.get<string>('SUBMISSION_SERVICE_URL') ||
-      (isDocker 
-        ? 'http://submission-service:3003/api' 
+      (isDocker
+        ? 'http://submission-service:3003/api'
         : 'http://localhost:3003/api');
   }
-  
-  // Lấy danh sách submissions theo conferenceId 
+
+  // Lấy danh sách submissions theo conferenceId
   async getSubmissionsByConference(
     conferenceId: number,
     authToken: string,
@@ -68,7 +69,8 @@ export class SubmissionClientService {
       if (status === HttpStatus.BAD_GATEWAY || !status) {
         throw new HttpException(
           {
-            message: 'Không thể lấy danh sách submissions. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
+            message:
+              'Không thể lấy danh sách submissions. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               conferenceId,
               service: 'submission-service',
@@ -93,7 +95,13 @@ export class SubmissionClientService {
     authToken: string,
   ): Promise<{
     totalSubmissions: number;
-    submissionsByTrack: Array<{ trackId: number; trackName: string; count: number; accepted: number; rejected: number }>;
+    submissionsByTrack: Array<{
+      trackId: number;
+      trackName: string;
+      count: number;
+      accepted: number;
+      rejected: number;
+    }>;
     submissionsByStatus: Record<string, number>;
     acceptanceRate: number;
     totalAccepted: number;
@@ -131,7 +139,10 @@ export class SubmissionClientService {
         trackStat.count += 1;
 
         // Consider both ACCEPTED and CAMERA_READY as accepted submissions
-        if (submission.status === 'ACCEPTED' || submission.status === 'CAMERA_READY') {
+        if (
+          submission.status === 'ACCEPTED' ||
+          submission.status === 'CAMERA_READY'
+        ) {
           trackStat.accepted += 1;
           totalAccepted += 1;
         } else if (submission.status === 'REJECTED') {
@@ -142,9 +153,7 @@ export class SubmissionClientService {
 
       const totalSubmissions = submissions.length;
       const acceptanceRate =
-        totalSubmissions > 0
-          ? (totalAccepted / totalSubmissions) * 100
-          : 0;
+        totalSubmissions > 0 ? (totalAccepted / totalSubmissions) * 100 : 0;
 
       const submissionsByTrack = Array.from(
         submissionsByTrackMap.entries(),
@@ -166,19 +175,22 @@ export class SubmissionClientService {
     }
   }
 
-//  Lấy danh sách submission IDs theo trackId
+  //  Lấy danh sách submission IDs theo trackId
   async getSubmissionIdsByTrack(
     trackId: number,
     authToken: string,
   ): Promise<string[]> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.submissionServiceUrl}/submissions/track/${trackId}/ids`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
+        this.httpService.get(
+          `${this.submissionServiceUrl}/submissions/track/${trackId}/ids`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+            timeout: 10000,
           },
-          timeout: 10000,
-        }),
+        ),
       );
 
       const data = response.data?.data || response.data || {};
@@ -186,20 +198,19 @@ export class SubmissionClientService {
     } catch (error: any) {
       const status = error.response?.status;
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Unknown error';
+        error.response?.data?.message || error.message || 'Unknown error';
       if (!status || status >= 500) {
         throw new HttpException(
           {
-            message: 'Không thể xác minh track có submissions hay không. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
+            message:
+              'Không thể xác minh track có submissions hay không. Submission-service đang không khả dụng. Vui lòng thử lại sau hoặc liên hệ admin.',
             detail: {
               trackId,
               service: 'submission-service',
               reason: 'Service unavailable or timeout',
             },
           },
-          HttpStatus.SERVICE_UNAVAILABLE, 
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
@@ -215,9 +226,10 @@ export class SubmissionClientService {
             service: 'submission-service',
           },
         },
-        status && status >= 400 && status < 600 ? status : HttpStatus.BAD_GATEWAY, 
+        status && status >= 400 && status < 600
+          ? status
+          : HttpStatus.BAD_GATEWAY,
       );
     }
   }
 }
-

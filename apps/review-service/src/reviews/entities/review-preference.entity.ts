@@ -24,7 +24,7 @@ export class ReviewPreference {
   reviewerId: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; 
+  submissionId: string;
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -42,19 +42,3 @@ export class ReviewPreference {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

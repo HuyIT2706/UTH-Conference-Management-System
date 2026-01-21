@@ -188,10 +188,8 @@ export class ConferencesService {
     // Kiểm tra xem hội nghị có submissions hay không
     if (authToken) {
       try {
-        const submissions = await this.submissionClient.getSubmissionsByConference(
-          id,
-          authToken,
-        );
+        const submissions =
+          await this.submissionClient.getSubmissionsByConference(id, authToken);
 
         if (submissions && submissions.length > 0) {
           throw new BadRequestException(
@@ -279,10 +277,11 @@ export class ConferencesService {
     // Kiểm tra xem track có submissions hay không
     if (authToken) {
       try {
-        const submissionIds = await this.submissionClient.getSubmissionIdsByTrack(
-          trackId,
-          authToken,
-        );
+        const submissionIds =
+          await this.submissionClient.getSubmissionIdsByTrack(
+            trackId,
+            authToken,
+          );
 
         if (submissionIds && submissionIds.length > 0) {
           throw new BadRequestException(

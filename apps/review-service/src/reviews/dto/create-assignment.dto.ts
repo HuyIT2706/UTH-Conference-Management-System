@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAssignmentDto {
@@ -16,7 +23,7 @@ export class CreateAssignmentDto {
   })
   @IsUUID()
   @IsNotEmpty()
-  submissionId: string; 
+  submissionId: string;
 
   @ApiProperty({
     description: 'ID của conference',
@@ -35,14 +42,3 @@ export class CreateAssignmentDto {
   @IsOptional()
   dueDate?: string;
 }
-
-
-
-
-
-
-
-
-
-
-

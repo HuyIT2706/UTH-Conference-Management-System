@@ -11,7 +11,7 @@ export class PcDiscussion {
   id: number;
 
   @Column({ type: 'uuid' })
-  submissionId: string; 
+  submissionId: string;
 
   @Column({ type: 'int', nullable: true })
   conferenceId: number | null;
@@ -25,19 +25,3 @@ export class PcDiscussion {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

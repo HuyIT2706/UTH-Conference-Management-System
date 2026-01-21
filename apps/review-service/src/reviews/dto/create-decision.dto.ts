@@ -1,4 +1,11 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { FinalDecision } from '../entities/decision.entity';
 
@@ -29,17 +36,3 @@ export class CreateDecisionDto {
   @IsOptional()
   note?: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

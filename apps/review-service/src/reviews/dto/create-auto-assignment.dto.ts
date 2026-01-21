@@ -1,4 +1,10 @@
-import { IsArray, IsInt, IsNotEmpty, ArrayNotEmpty, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  ArrayNotEmpty,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAutoAssignmentDto {
@@ -28,15 +34,3 @@ export class CreateAutoAssignmentDto {
   @IsInt({ each: true })
   reviewerIds: number[];
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -42,8 +42,7 @@ import { HealthController } from './health/health.controller';
         const port = Number(config.get<string>('DB_PORT')) || 5432;
         const username = config.get<string>('DB_USERNAME') || 'admin';
         const password = config.get<string>('DB_PASSWORD') || 'admin123';
-        const database =
-          config.get<string>('DB_DATABASE') || 'db_conference';
+        const database = config.get<string>('DB_DATABASE') || 'db_conference';
         return {
           type: 'postgres' as const,
           host,

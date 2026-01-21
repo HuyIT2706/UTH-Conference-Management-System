@@ -26,7 +26,8 @@ export class BulkNotificationDto {
   recipientType: RecipientType;
 
   @ApiProperty({
-    description: 'ID của email template để sử dụng (tùy chọn, nếu không có sẽ dùng subject và body)',
+    description:
+      'ID của email template để sử dụng (tùy chọn, nếu không có sẽ dùng subject và body)',
     example: 1,
     required: false,
   })
@@ -36,7 +37,8 @@ export class BulkNotificationDto {
   templateId?: number;
 
   @ApiProperty({
-    description: 'Các biến để thay thế trong template (ví dụ: {{authorName}}, {{deadline}})',
+    description:
+      'Các biến để thay thế trong template (ví dụ: {{authorName}}, {{deadline}})',
     example: {
       deadline: '2025-03-15',
       conferenceName: 'International UTH Conference 2025',
@@ -49,7 +51,8 @@ export class BulkNotificationDto {
   variables?: Record<string, string>;
 
   @ApiProperty({
-    description: 'Tiêu đề email (tùy chọn, nếu có templateId thì sẽ dùng subject từ template)',
+    description:
+      'Tiêu đề email (tùy chọn, nếu có templateId thì sẽ dùng subject từ template)',
     example: 'Reminder: Review Deadline Approaching',
     required: false,
   })
@@ -59,8 +62,10 @@ export class BulkNotificationDto {
   subject?: string;
 
   @ApiProperty({
-    description: 'Nội dung email (tùy chọn, nếu có templateId thì sẽ dùng body từ template)',
-    example: 'Dear reviewer,\n\nThis is a reminder that the review deadline is approaching...',
+    description:
+      'Nội dung email (tùy chọn, nếu có templateId thì sẽ dùng body từ template)',
+    example:
+      'Dear reviewer,\n\nThis is a reminder that the review deadline is approaching...',
     required: false,
   })
   @IsOptional()
@@ -68,16 +73,3 @@ export class BulkNotificationDto {
   @IsNotEmpty()
   body?: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
