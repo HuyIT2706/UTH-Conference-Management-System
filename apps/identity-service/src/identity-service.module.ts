@@ -11,6 +11,7 @@ import { EmailVerificationToken } from './auth/entities/email-verification-token
 import { PasswordResetToken } from './users/entities/password-reset-token.entity';
 import { HealthController } from './health/health.controller';
 
+// Module chính của Identity Service
 @Module({
   imports: [
     ConfigModule.forRoot({
