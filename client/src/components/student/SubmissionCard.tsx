@@ -42,7 +42,7 @@ const SubmissionCard = ({
       submission.status === 'ACCEPTED' ||
       submission.status === 'REJECTED' ||
       submission.status === 'CAMERA_READY');
-
+  
   // Prefetch reviews to check if they exist (always fetch if shouldCheckReviews, not just when expanded)
   const { data: reviewsData, isLoading: isLoadingReviews } =
     useGetAnonymizedReviewsForSubmissionQuery(submission.id, {
@@ -78,7 +78,6 @@ const SubmissionCard = ({
 
   // Show camera-ready upload button only if status is ACCEPTED
   const canUploadCameraReady = submission.status === 'ACCEPTED';
-
   const handleCameraReadyClick = () => {
     fileInputRef.current?.click();
   };

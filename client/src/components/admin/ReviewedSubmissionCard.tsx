@@ -46,7 +46,7 @@ const ReviewedSubmissionCard = memo(
           return status;
       }
     };
-
+// Thẻ hiển thị thông tin bài nộp đã được phản biện trong trang quản trị
     return (
       <div className="bg-white rounded-lg shadow p-6 border border-gray-200 hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between mb-4">

@@ -7,7 +7,7 @@ interface SubmissionRowProps {
   submission: Submission;
   trackName: string;
 }
-
+// Hàng cho từng bài nộp trong bảng danh sách bài nộp trang quản trị
 const SubmissionRow = memo(({
   submission,
   trackName,

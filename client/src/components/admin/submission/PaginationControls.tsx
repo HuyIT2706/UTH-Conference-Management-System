@@ -7,7 +7,7 @@ interface PaginationControlsProps {
   limit: number;
   onPageChange: (page: number) => void;
 }
-
+// Phân trang cho danh sách bài nộp trong trang quản trị
 const PaginationControls = memo(({
   currentPage,
   totalPages,

@@ -7,7 +7,7 @@ interface SubmissionActionsMenuProps {
   onEdit: (submissionId: string) => void;
   onDelete: (submissionId: string) => void;
 }
-
+// Menu hành động cho từng bài nộp trong trang quản trị
 const SubmissionActionsMenu = memo(({
   submissionId,
   fileUrl,
@@ -36,7 +36,6 @@ const SubmissionActionsMenu = memo(({
 
   return (
     <div className="flex items-center justify-end gap-2" ref={menuRef}>
-      {/* Edit Button */}
       <button
         onClick={() => onEdit(submissionId)}
         className="p-2 rounded-lg hover:bg-emerald-50 transition-colors"
@@ -57,8 +56,6 @@ const SubmissionActionsMenu = memo(({
           />
         </svg>
       </button>
-
-      {/* Kebab Menu */}
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -69,8 +66,6 @@ const SubmissionActionsMenu = memo(({
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>
-
-        {/* Dropdown Menu */}
         {isOpen && (
           <>
             <div

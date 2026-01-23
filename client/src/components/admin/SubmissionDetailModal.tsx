@@ -20,7 +20,6 @@ const SubmissionDetailModal = memo(
       useGetReviewsForSubmissionQuery(submissionId);
     const isInLayoutApp = useIsInLayoutApp();
 
-    // Fetch users to enrich reviewer names if in LayoutApp
     const { data: usersData } = useGetUsersQuery(undefined, {
       skip: !isInLayoutApp,
     });
@@ -28,7 +27,6 @@ const SubmissionDetailModal = memo(
     const submission = submissionData?.data;
     const rawReviews: Review[] = reviewsData?.data || [];
 
-    // Enrich reviews with reviewer names from users API if in LayoutApp
     const reviews = useMemo(() => {
       if (!isInLayoutApp || !usersData?.data) {
         return rawReviews;
@@ -39,12 +37,9 @@ const SubmissionDetailModal = memo(
       );
 
       return rawReviews.map((review) => {
-        // If reviewerName already exists and is not a fallback "Reviewer #ID", use it
         if (review.reviewerName && !review.reviewerName.startsWith('Reviewer #')) {
           return review;
         }
-
-        // Try to get reviewer name from users list
         const reviewer = review.reviewerId ? userMap.get(review.reviewerId) : null;
         if (reviewer) {
           return {

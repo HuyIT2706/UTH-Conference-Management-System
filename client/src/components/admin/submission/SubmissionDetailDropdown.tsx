@@ -24,7 +24,7 @@ const SubmissionDetailDropdown = memo(
     const dropdownRef = useRef<HTMLDivElement>(null);
     const isInLayoutApp = useIsInLayoutApp();
 
-    // Fetch users to enrich reviewer names if in LayoutApp
+    // Gọi API lấy danh sách người dùng nếu trong LayoutApp (để hiển thị tên rv thực)
     const { data: usersData } = useGetUsersQuery(undefined, {
       skip: !isInLayoutApp,
     });
@@ -32,16 +32,14 @@ const SubmissionDetailDropdown = memo(
     const submission = submissionData?.data;
     const rawReviews: Review[] = reviewsData?.data || [];
 
-    // Enrich reviews with reviewer names from users API if in LayoutApp
     const reviews = useMemo(() => {
       if (!isInLayoutApp || !usersData?.data) {
         return rawReviews;
       }
 
       const userMap = new Map(usersData.data.map((u) => [u.id, u]));
-
+      // Trả về tên rv nếu admin, Chan tên rv đã được gán, hoặc giữ nguyên tên ẩn danh
       return rawReviews.map((review) => {
-        // If reviewerName already exists and is not a fallback "Reviewer #ID", use it
         if (
           review.reviewerName &&
           !review.reviewerName.startsWith('Reviewer #')
@@ -49,7 +47,6 @@ const SubmissionDetailDropdown = memo(
           return review;
         }
 
-        // Try to get reviewer name from users list
         const reviewer = review.reviewerId
           ? userMap.get(review.reviewerId)
           : null;
@@ -96,10 +93,8 @@ const SubmissionDetailDropdown = memo(
 
     return (
       <>
-        {/* Backdrop */}
         <div className="fixed inset-0 z-40" onClick={onClose} />
 
-        {/* Dropdown Content */}
         <div
           ref={dropdownRef}
           className="fixed right-4 top-20 w-[800px] max-h-[600px] overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 z-50"
@@ -110,7 +105,6 @@ const SubmissionDetailDropdown = memo(
             </div>
           ) : submission ? (
             <div className="p-6">
-              {/* Header */}
               <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
                 <h2 className="text-xl font-bold text-gray-800">
                   Chi tiết bài nộp
@@ -123,7 +117,6 @@ const SubmissionDetailDropdown = memo(
                 </button>
               </div>
 
-              {/* Submission Info */}
               <div className="bg-gray-50 rounded-lg p-6 mb-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span
@@ -268,11 +261,8 @@ const SubmissionDetailDropdown = memo(
                 ) : (
                   <div className="space-y-4">
                     {reviews.map((review) => {
-                      // Show reviewer name if in LayoutApp (admin pages), otherwise show anonymous
-                      // Reviewer name is enriched from users API in useMemo above
                       let reviewerName: string;
                       if (isInLayoutApp) {
-                        // In admin pages (LayoutApp), use enriched reviewerName
                         if (
                           review.reviewerName &&
                           !review.reviewerName.startsWith('Reviewer #')
@@ -284,7 +274,6 @@ const SubmissionDetailDropdown = memo(
                           reviewerName = 'Reviewer';
                         }
                       } else {
-                        // In other pages (student/reviewer), always show anonymous
                         reviewerName = review.reviewerId
                           ? `Reviewer #${review.reviewerId}`
                           : 'Reviewer';
