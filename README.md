@@ -131,6 +131,8 @@ npm run dev
        Reviewer: buivanhuy2706tb@gmail.com / huybv123
 
        Student: huybv1177@gmail.com/ huyech123
+
+       Các tài khoản test deploy
 ```
 ## 🌐 Access Points
 
@@ -178,7 +180,7 @@ uth-confms-private/
 
 ## Support
 
--buivanhuy2706@gmail.com
+buivanhuy2706@gmail.com
 ---
 
 ## Happy Coding!

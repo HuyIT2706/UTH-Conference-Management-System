@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # Database 
   postgres:
@@ -14,10 +16,12 @@ services:
     networks:
       - uth-net
 
+  # 1. Identity Service
   identity-service:
     build:
       context: .
       dockerfile: ./apps/identity-service/Dockerfile
+    image: huyit2005/uth-identity-service:latest   
     ports:
       - "3001:3001"
     environment:
@@ -34,10 +38,12 @@ services:
     networks:
       - uth-net
 
+  # 2. Conference Service
   conference-service:
     build:
       context: .
       dockerfile: ./apps/conference-service/dockerfile
+    image: huyit2005/uth-conference-service:latest   
     ports:
       - "3002:3002"
     env_file:
@@ -63,10 +69,12 @@ services:
     networks:
       - uth-net
 
+  # 3. Review Service
   review-service:
     build:
       context: .
       dockerfile: ./apps/review-service/Dockerfile
+    image: huyit2005/uth-review-service:latest   
     ports:
       - "3004:3004"
     environment:
@@ -87,10 +95,12 @@ services:
     networks:
       - uth-net
 
+  # 4. Submission Service
   submission-service:
     build:
       context: .
       dockerfile: ./apps/submission-service/Dockerfile
+    image: huyit2005/uth-submission-service:latest   
     ports:
       - "3003:3003"
     env_file:
@@ -119,10 +129,12 @@ services:
     networks:
       - uth-net
 
+  # 5. API Gateway
   api-gateway:
     build:
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
+    image: huyit2005/uth-api-gateway:latest   
     ports:
       - "3000:3000"
     environment:
