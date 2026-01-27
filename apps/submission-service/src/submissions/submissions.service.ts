@@ -337,7 +337,7 @@ export class SubmissionsService {
       await queryRunner.release();
     }
   }
-  // Rút submission
+  // Rút submission (Withdraw)
   async withdraw(id: string, authorId: number): Promise<Submission> {
     const submission = await this.submissionRepository.findOne({
       where: {
