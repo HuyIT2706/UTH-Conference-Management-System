@@ -381,7 +381,7 @@ export class SubmissionsService {
     return await this.submissionRepository.save(submission);
   }
 
-  // Update status submission
+  // Update status submission của bài 
   async updateStatus(
     id: string,
     updateStatusDto: UpdateStatusDto,
