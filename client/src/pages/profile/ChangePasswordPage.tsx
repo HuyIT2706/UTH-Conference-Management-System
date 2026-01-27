@@ -81,6 +81,11 @@ const ChangePasswordPage = () => {
     } catch (err: any) {
       const errorMessage =
         err?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu';
+      
+      // Show toast notification for better visibility
+      showToast.error(errorMessage);
+      
+      // Also display in form for context
       setErrors({ general: errorMessage });
     }
   };

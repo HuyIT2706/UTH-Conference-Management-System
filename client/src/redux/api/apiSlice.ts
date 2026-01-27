@@ -15,6 +15,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
   const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
   const isLogoutRequest = typeof args === 'object' && args.url === '/auth/logout';
+  const isChangePasswordRequest = typeof args === 'object' && args.url === '/users/change-password';
   const isPublicRequest = typeof args === 'object' && 
     (args.url?.startsWith('/public/') || 
      args.url?.startsWith('/auth/verify-email') || 
@@ -38,7 +39,7 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401 && !isLoginRequest && !isLogoutRequest) {
+  if (result.error && result.error.status === 401 && !isLoginRequest && !isLogoutRequest && !isChangePasswordRequest) {
     const refreshToken = sessionStorage.getItem('refreshToken');
     if (refreshToken) {
       try {
