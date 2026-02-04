@@ -118,7 +118,7 @@ docker-compose ps
 ```
 ### 3. Start Frontend
 ```bash
-cd client 
+cd Frontend 
 
 npm install
 
@@ -154,13 +154,13 @@ After starting the services:
 
 ```
 uth-confms-private/
-├── apps/                          # Backend microservices
+├── Backend/                       # Backend microservices
 │   ├── api-gateway/              # API Gateway service
 │   ├── identity-service/         # Authentication & user management
 │   ├── conference-service/       # Conference management
 │   ├── submission-service/       # Paper submission handling
 │   └── review-service/           # Review workflow
-├── client/                        # Frontend React application
+├── Frontend/                      # Frontend React application
 │   ├── src/
 │   │   ├── api/                  # API client configurations
 │   │   ├── components/           # Reusable React components

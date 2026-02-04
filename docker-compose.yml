@@ -20,10 +20,12 @@ services:
   identity-service:
     build:
       context: .
-      dockerfile: ./apps/identity-service/Dockerfile
+      dockerfile: ./Backend/identity-service/Dockerfile
     image: huyit2005/uth-identity-service:latest   
     ports:
       - "3001:3001"
+    env_file:
+      - ./Backend/identity-service/.env
     environment:
       - DOCKER_ENV=true
       - DB_HOST=postgres
@@ -33,6 +35,10 @@ services:
       - DB_DATABASE=db_identity
       - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
       - REVIEW_SERVICE_URL=http://review-service:3004/api
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres 
     networks:
@@ -42,12 +48,12 @@ services:
   conference-service:
     build:
       context: .
-      dockerfile: ./apps/conference-service/dockerfile
+      dockerfile: ./Backend/conference-service/dockerfile
     image: huyit2005/uth-conference-service:latest   
     ports:
       - "3002:3002"
     env_file:
-      - .env
+      - ./Backend/conference-service/.env
     environment:
       - PORT=3002
       - DOCKER_ENV=true
@@ -73,10 +79,12 @@ services:
   review-service:
     build:
       context: .
-      dockerfile: ./apps/review-service/Dockerfile
+      dockerfile: ./Backend/review-service/Dockerfile
     image: huyit2005/uth-review-service:latest   
     ports:
       - "3004:3004"
+    env_file:
+      - ./Backend/review-service/.env
     environment:
       - PORT=3004
       - DOCKER_ENV=true
@@ -99,12 +107,12 @@ services:
   submission-service:
     build:
       context: .
-      dockerfile: ./apps/submission-service/Dockerfile
+      dockerfile: ./Backend/submission-service/Dockerfile
     image: huyit2005/uth-submission-service:latest   
     ports:
       - "3003:3003"
     env_file:
-      - .env
+      - ./Backend/submission-service/.env
     environment:
       - PORT=3003
       - DOCKER_ENV=true
@@ -133,7 +141,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: ./apps/api-gateway/Dockerfile
+      dockerfile: ./Backend/api-gateway/Dockerfile
     image: huyit2005/uth-api-gateway:latest   
     ports:
       - "3000:3000"
