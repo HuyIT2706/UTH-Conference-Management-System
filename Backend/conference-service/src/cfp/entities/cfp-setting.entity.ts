@@ -12,19 +12,19 @@ export class CfpSetting {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'submission_deadline', type: 'timestamptz' })
   submissionDeadline: Date;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'review_deadline', type: 'timestamptz' })
   reviewDeadline: Date;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'notification_date', type: 'timestamptz' })
   notificationDate: Date;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'camera_ready_deadline', type: 'timestamptz' })
   cameraReadyDeadline: Date;
 
-  @Column({ type: 'int', unique: true })
+  @Column({ name: 'conference_id', type: 'int', unique: true })
   conferenceId: number;
 
   @OneToOne(() => Conference, (conference) => conference.cfpSetting, {

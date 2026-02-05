@@ -9,31 +9,31 @@ import {
 
 @Entity('submission_summaries')
 export class SubmissionSummary {
-  @PrimaryGeneratedColumn()
-  aiId: number;
+  @PrimaryGeneratedColumn({name: 'ai_id'})
+  id: number;
 
-  @Index({ unique: true })
-  @Column()
+  @Index({ unique: true})
+  @Column({ name: 'submission_id', type: 'int' })
   submissionId: number;
 
-  @Column('text')
-  aiSummary: string;
+  @Column({name: 'ai_summary', type: 'text'})
+  summary: string;
 
-  @Column('text')
-  aiProblem: string;
+  @Column({name: 'ai_problem', type: 'text'})
+  problem: string;
 
-  @Column('text')
-  aiSolution: string;
+  @Column({name: 'ai_solution', type: 'text'})
+  solution: string;
 
-  @Column('text')
-  aiResult: string;
+  @Column({name: 'ai_result', type: 'text'})
+  result: string;
 
-  @Column('simple-array', { nullable: true })
-  aiKeywords: string[];
+  @Column({ name: 'ai_keywords', type: 'simple-array', nullable: true })
+  keywords: string[];
 
-  @CreateDateColumn()
-  aiCreatedAt: Date;
+  @CreateDateColumn({name: 'ai_created_at'})
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  aiUpdatedAt: Date;
+  @UpdateDateColumn({name: 'ai_updated_at'})
+  updatedAt: Date;
 }

@@ -13,19 +13,19 @@ import { Role } from './role.entity';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: "user_id"})
   id: number;
 
-  @Column({ unique: true })
+  @Column({name: 'user_email', unique: true, type: 'varchar', length: 150})
   email: string;
 
-  @Column()
+  @Column({name: 'user_password', type: 'varchar', length: 30})
   password: string;
 
-  @Column({ name: 'full_name' })
+  @Column({ name: 'user_full_name', type: 'varchar', length: 50 })
   fullName: string;
 
-  @Column({ default: false, name: 'is_verified' })
+  @Column({ default: false, name: 'user_is_verified', type: 'boolean' })
   isVerified: boolean;
 
   @ManyToMany(() => Role, (role) => role.users)
@@ -39,15 +39,15 @@ export class User {
   @OneToMany(() => RefreshToken, (token) => token.user, { cascade: true })
   refreshTokens: RefreshToken[];
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'user_created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: 'user_updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  @Column({ type: 'timestamptz', nullable: true, name: 'user_deleted_at' })
   deletedAt: Date | null;
 
-  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  @Column({ type: 'boolean', default: true, name: 'user_is_active' })
   isActive: boolean;
 }

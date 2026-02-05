@@ -11,10 +11,11 @@ export enum RoleName {
 
 @Entity({ name: 'roles' })
 export class Role {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'role_id'})
   id: number;
 
   @Column({
+    name: 'role_name',
     type: 'enum',
     enum: RoleName,
     unique: true,

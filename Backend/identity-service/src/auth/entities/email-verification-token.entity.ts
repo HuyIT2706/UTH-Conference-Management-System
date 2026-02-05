@@ -14,21 +14,21 @@ export class EmailVerificationToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'token', type: 'varchar', length: 255 })
   token: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
-  @Column({ name: 'user_id' })
+  @Column({ name: 'email_verification_token_user_id', type: 'int' })
   userId: number;
 
-  @Column({ name: 'expires_at', type: 'timestamptz' })
+  @Column({ name: 'email_verification_token_expires_at', type: 'timestamptz' })
   expiresAt: Date;
 
   @Column({ name: 'used', default: false })
   used: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'email_verification_token_created_at', type: 'timestamptz' })
   createdAt: Date;
 }

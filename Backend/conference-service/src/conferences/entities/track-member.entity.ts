@@ -10,26 +10,27 @@ import { Track } from './track.entity';
 
 @Entity({ name: 'track_members' })
 export class TrackMember {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'track_member_id'})
   id: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'track_id', type: 'int' })
   trackId: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'user_id', type: 'int' })
   userId: number;
 
   @Column({
+    name: 'track_member_status',
     type: 'enum',
     enum: ['PENDING', 'ACCEPTED', 'REJECTED'],
     default: 'PENDING',
   })
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'track_member_created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'track_member_updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @ManyToOne(() => Track, (track) => track.members, {

@@ -17,16 +17,16 @@ export enum PreferenceType {
 @Entity({ name: 'review_preferences' })
 @Unique(['reviewerId', 'submissionId'])
 export class ReviewPreference {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'review_preference_id'})
   id: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', name: 'review_preference_reviewer_id' })
   reviewerId: number;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', name: 'review_preference_submission_id' })
   submissionId: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'review_preference_conference_id' })
   conferenceId: number | null;
 
   @Column({
@@ -36,9 +36,9 @@ export class ReviewPreference {
   })
   preference: PreferenceType;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'review_preference_created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'review_preference_updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }

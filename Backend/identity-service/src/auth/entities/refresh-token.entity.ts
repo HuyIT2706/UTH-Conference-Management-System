@@ -14,10 +14,10 @@ export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'token', type: 'varchar', length: 255 })
   token: string;
 
-  @Column({ name: 'expiry_date', type: 'timestamptz' })
+  @Column({ name: 'refresh_token_expiry_date', type: 'timestamptz' })
   expiryDate: Date;
 
   @ManyToOne(() => User, (user) => user.refreshTokens, {
@@ -25,9 +25,9 @@ export class RefreshToken {
   })
   user: User;
 
-  @Column({ name: 'user_id' })
+  @Column({ name: 'user_id', type: 'int' })
   userId: number;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: 'refresh_token_created_at', type: 'timestamptz' })
   createdAt: Date;
 }

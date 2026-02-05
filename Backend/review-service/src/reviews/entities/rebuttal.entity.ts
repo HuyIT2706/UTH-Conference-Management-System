@@ -7,21 +7,21 @@ import {
 
 @Entity({ name: 'rebuttals' })
 export class Rebuttal {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'rebuttal_id'})
   id: number;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', name: 'rebuttal_submission_id' })
   submissionId: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', name: 'rebuttal_author_id' })
   authorId: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'rebuttal_conference_id' })
   conferenceId: number | null;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', name: 'rebuttal_message' })
   message: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'rebuttal_created_at', type: 'timestamptz' })
   createdAt: Date;
 }

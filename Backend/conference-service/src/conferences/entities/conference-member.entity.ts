@@ -9,16 +9,16 @@ export enum ConferenceMemberRole {
 
 @Entity({ name: 'conference_members' })
 export class ConferenceMember {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'conference_member_id'})
   id: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'conference_id', type: 'int' })
   conferenceId: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'user_id', type: 'int' })
   userId: number;
 
-  @Column({ type: 'enum', enum: ConferenceMemberRole })
+  @Column({ name: 'role', type: 'enum', enum: ConferenceMemberRole })
   role: ConferenceMemberRole;
 
   @ManyToOne(() => Conference, (conference) => conference.members, {

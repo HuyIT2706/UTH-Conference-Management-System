@@ -237,11 +237,11 @@ Please respond in the following JSON format ONLY (no markdown, no explanation ou
   }
 
   private parseSummaryResponse(response: string): {
-    aiSummary: string;
-    aiProblem: string;
-    aiSolution: string;
-    aiResult: string;
-    aiKeywords: string[];
+    summary: string;
+    problem: string;
+    solution: string;
+    result: string;
+    keywords: string[];
   } {
     try {
       // Remove potential markdown code blocks
@@ -253,20 +253,20 @@ Please respond in the following JSON format ONLY (no markdown, no explanation ou
       const parsed = JSON.parse(cleanResponse);
 
       return {
-        aiSummary: parsed.summary || 'Summary not available',
-        aiProblem: parsed.problem || 'Problem not identified',
-        aiSolution: parsed.solution || 'Solution not identified',
-        aiResult: parsed.result || 'Results not available',
-        aiKeywords: parsed.keywords || [],
+        summary: parsed.summary || 'Summary not available',
+        problem: parsed.problem || 'Problem not identified',
+        solution: parsed.solution || 'Solution not identified',
+        result: parsed.result || 'Results not available',
+        keywords: parsed.keywords || [],
       };
     } catch (error) {
       this.logger.error('Failed to parse summary response:', error);
       return {
-        aiSummary: 'Failed to generate summary',
-        aiProblem: 'Unable to identify problem',
-        aiSolution: 'Unable to identify solution',
-        aiResult: 'Unable to identify results',
-        aiKeywords: [],
+        summary: 'Failed to generate summary',
+        problem: 'Unable to identify problem',
+        solution: 'Unable to identify solution',
+        result: 'Unable to identify results',
+        keywords: [],
       };
     }
   }
@@ -274,12 +274,12 @@ Please respond in the following JSON format ONLY (no markdown, no explanation ou
   private mapEntityToResponse(entity: SubmissionSummary): SummaryResponse {
     return {
       submissionId: entity.submissionId,
-      summary: entity.aiSummary,
-      problem: entity.aiProblem,
-      solution: entity.aiSolution,
-      result: entity.aiResult,
-      keywords: entity.aiKeywords || [],
-      createdAt: entity.aiCreatedAt,
+      summary: entity.summary,
+      problem: entity.problem,
+      solution: entity.solution,
+      result: entity.result,
+      keywords: entity.keywords || [],
+      createdAt: entity.createdAt,
     };
   }
 }

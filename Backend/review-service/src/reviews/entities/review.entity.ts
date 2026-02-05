@@ -24,41 +24,43 @@ export enum RecommendationType {
 
 @Entity({ name: 'reviews' })
 export class Review {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'review_id'})
   id: number;
 
-  @Column({ type: 'int', unique: true })
+  @Column({ type: 'int', unique: true, name: 'review_assignment_id' })
   assignmentId: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', nullable: true, name: 'review_conference_id' })
   conferenceId: number | null;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', name: 'review_score' })
   score: number;
 
   @Column({
+    name: 'review_confidence',
     type: 'enum',
     enum: ConfidenceLevel,
     default: ConfidenceLevel.MEDIUM,
   })
   confidence: ConfidenceLevel;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'review_comment_for_author' })
   commentForAuthor: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, name: 'review_comment_for_pc' })
   commentForPC: string | null;
 
   @Column({
     type: 'enum',
     enum: RecommendationType,
+    name: 'review_recommendation',  
   })
   recommendation: RecommendationType;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'review_created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'review_updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
   @OneToOne(() => Assignment, (assignment) => assignment.review)

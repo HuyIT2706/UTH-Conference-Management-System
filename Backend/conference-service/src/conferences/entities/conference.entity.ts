@@ -11,22 +11,22 @@ import { CfpSetting } from '../../cfp/entities/cfp-setting.entity';
 
 @Entity({ name: 'conferences' })
 export class Conference {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'conference_id'})
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ name: 'conference_name', type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'conference_start_date', type: 'timestamptz' })
   startDate: Date;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ name: 'conference_end_date', type: 'timestamptz' })
   endDate: Date;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ name: 'conference_venue', type: 'varchar', length: 255 })
   venue: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'conference_description', type: 'text', nullable: true })
   description: string | null;
 
   @Column({
@@ -45,13 +45,13 @@ export class Conference {
   })
   contactEmail: string | null;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'organizer_id', type: 'int' })
   organizerId: number;
 
-  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  @Column({ type: 'timestamptz', nullable: true, name: 'conference_deleted_at' })
   deletedAt: Date | null;
 
-  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  @Column({ type: 'boolean', default: true, name: 'conference_is_active' })
   isActive: boolean;
 
   @OneToMany(() => Track, (track) => track.conference)

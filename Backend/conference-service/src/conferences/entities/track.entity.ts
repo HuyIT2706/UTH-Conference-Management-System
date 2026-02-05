@@ -12,28 +12,28 @@ import { TrackMember } from './track-member.entity';
 
 @Entity({ name: 'tracks' })
 export class Track {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'track_id'})
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ name: 'track_name', type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'track_conference_id', type: 'int' })
   conferenceId: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'track_description', type: 'text', nullable: true })
   description: string | null;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'track_created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ name: 'track_updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @Column({ type: 'timestamptz', nullable: true, name: 'deleted_at' })
+  @Column({ type: 'timestamptz', nullable: true, name: 'track_deleted_at' })
   deletedAt: Date | null;
 
-  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  @Column({ type: 'boolean', default: true, name: 'track_is_active' })
   isActive: boolean;
 
   @ManyToOne(() => Conference, (conference) => conference.tracks, {

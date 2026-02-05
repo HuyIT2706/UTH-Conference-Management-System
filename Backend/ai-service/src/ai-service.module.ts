@@ -47,7 +47,7 @@ import { HealthController } from './health/health.controller';
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_ACCESS_SECRET') || 'access_secret',
         signOptions: {
-          expiresIn: config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
+          expiresIn: Number(config.get<string>('JWT_ACCESS_EXPIRES_IN')) || 900,
         },
       }),
     }),

@@ -7,21 +7,21 @@ import {
 
 @Entity({ name: 'pc_discussions' })
 export class PcDiscussion {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({name: 'pc_discussion_id'})
   id: number;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', name: 'pc_discussion_submission_id'})
   submissionId: string;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'pc_discussion_conference_id', type: 'int', nullable: true })
   conferenceId: number | null;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'pc_discussion_user_id', type: 'int' })
   userId: number;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', name: 'pc_discussion_message' })
   message: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ name: 'pc_discussion_created_at', type: 'timestamptz' })
   createdAt: Date;
 }
