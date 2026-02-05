@@ -28,6 +28,9 @@ async function bootstrap() {
   const reviewServiceUrl =
     process.env.REVIEW_SERVICE_URL ||
     (isDocker ? 'http://review-service:3004' : 'http://localhost:3004');
+  const aiServiceUrl =
+    process.env.AI_SERVICE_URL ||
+    (isDocker ? 'http://ai-service:3005' : 'http://localhost:3005');
 
   // Get Express instance from NestJS
   const httpAdapter = app.getHttpAdapter();
@@ -141,6 +144,16 @@ async function bootstrap() {
       target: reviewServiceUrl,
       pathRewrite: {
         '^(.*)': '/api/reviews$1',
+      },
+      ...proxyOptions,
+    }),
+  );
+  expressApp.use(
+    '/api/ai',
+    createProxyMiddleware({
+      target: aiServiceUrl,
+      pathRewrite: {
+        '^(.*)': '/api/ai$1',
       },
       ...proxyOptions,
     }),

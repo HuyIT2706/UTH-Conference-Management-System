@@ -63,6 +63,15 @@
       "compilerOptions": {
         "tsConfigPath": "Backend/uth-confms/tsconfig.app.json"
       }
+    },
+    "ai-service": {
+      "type": "application",
+      "root": "Backend/ai-service",
+      "entryFile": "main",
+      "sourceRoot": "Backend/ai-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "Backend/ai-service/tsconfig.app.json"
+      }
     }
   }
 }
