@@ -6,8 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { HttpModule } from '@nestjs/axios';
 import { ConferencesController } from './conferences/conferences.controller';
 import { ConferencesService } from './conferences/conferences.service';
-import { NotificationsController } from './notifications/notifications.controller';
-import { NotificationsService } from './notifications/notifications.service';
 import { PublicController } from './public/public.controller';
 import { ReportingController } from './reporting/reporting.controller';
 import { ReportingService } from './reporting/reporting.service';
@@ -84,14 +82,12 @@ import { HealthController } from './health/health.controller';
   controllers: [
     HealthController,
     ConferencesController,
-    NotificationsController,
     PublicController,
     ReportingController,
     ValidationController,
   ],
   providers: [
     ConferencesService,
-    NotificationsService,
     ReportingService,
     JwtStrategy,
     SubmissionClientService,
