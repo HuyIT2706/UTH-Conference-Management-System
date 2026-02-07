@@ -28,17 +28,8 @@ services:
       - ./Backend/identity-service/.env
     environment:
       - DOCKER_ENV=true
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin123
-      - DB_DATABASE=db_identity
       - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
       - REVIEW_SERVICE_URL=http://review-service:3004/api
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres 
     networks:
@@ -55,20 +46,10 @@ services:
     env_file:
       - ./Backend/conference-service/.env
     environment:
-      - PORT=3002
       - DOCKER_ENV=true
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin123
-      - DB_DATABASE=db_conference
       - IDENTITY_SERVICE_URL=http://identity-service:3001/api
       - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
       - REVIEW_SERVICE_URL=http://review-service:3004/api
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres
       - identity-service
@@ -86,14 +67,7 @@ services:
     env_file:
       - ./Backend/review-service/.env
     environment:
-      - PORT=3004
       - DOCKER_ENV=true
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin123
-      - DB_DATABASE=db_review
-      - TYPEORM_SYNCHRONIZE=true
       - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
       - SUBMISSION_SERVICE_URL=http://submission-service:3003/api
     depends_on:
@@ -114,22 +88,10 @@ services:
     env_file:
       - ./Backend/submission-service/.env
     environment:
-      - PORT=3003
       - DOCKER_ENV=true
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin123
-      - DB_DATABASE=db_submission
-      - SUPABASE_URL=${SUPABASE_URL:-}
-      - SUPABASE_KEY=${SUPABASE_KEY:-}
       - CONFERENCE_SERVICE_URL=http://conference-service:3002/api
       - REVIEW_SERVICE_URL=http://review-service:3004/api
       - IDENTITY_SERVICE_URL=http://identity-service:3001/api
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-465}
     depends_on:
       - postgres
       - conference-service
@@ -172,15 +134,7 @@ services:
     env_file:
       - ./Backend/ai-service/.env
     environment:
-      - PORT=3005
       - DOCKER_ENV=true
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=admin
-      - DB_PASSWORD=admin123
-      - DB_DATABASE=db_aiservice
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-uth-confms-dev-access-secret-123}
     depends_on:
       - postgres
     networks:
