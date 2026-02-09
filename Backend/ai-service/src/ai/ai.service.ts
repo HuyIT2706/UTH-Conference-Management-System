@@ -10,11 +10,14 @@ import {
   SummaryResponse,
 } from './dto';
 
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
   private readonly geminiApiKey: string;
-  private readonly geminiApiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent';
+  private readonly apiUrl: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -22,253 +25,164 @@ export class AiService {
     private readonly summaryRepository: Repository<SubmissionSummary>,
   ) {
     this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY') || '';
+    
+    this.apiUrl = `${GEMINI_BASE_URL}/${GEMINI_MODEL}:generateContent?key=${this.geminiApiKey}`;
+
     if (!this.geminiApiKey) {
-      this.logger.warn('GEMINI_API_KEY is not configured!');
+      this.logger.warn('⚠️ GEMINI_API_KEY is missing in .env');
     }
   }
-
-  /**
-   * Check grammar and spelling errors using Google Gemini
-   */
+  // Api check lỗi chính tả
   async checkGrammar(dto: CheckGrammarDto): Promise<GrammarCheckResponse> {
-    const prompt = this.buildGrammarPrompt(dto);
-
-    try {
-      const response = await this.callGemini(prompt);
-      return this.parseGrammarResponse(dto.text, response);
-    } catch (error) {
-      this.logger.error('Grammar check failed:', error);
-      throw new HttpException(
-        'Failed to check grammar. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const prompt = this.generateGrammarPrompt(dto);
+    return this.processGeminiRequest<GrammarCheckResponse>(prompt, {
+      original: dto.text,
+      corrected: dto.text,
+      corrections: [],
+      score: 100,
+    });
   }
 
   /**
-   * Summarize submission using Google Gemini
+   * Tính năng 2: Tóm tắt bài báo 
    */
   async summarizeSubmission(dto: SummarizeDto): Promise<SummaryResponse> {
-    // Check if summary already exists
-    const existing = await this.summaryRepository.findOne({
-      where: { submissionId: dto.submissionId },
-    });
-
-    if (existing) {
-      return this.mapEntityToResponse(existing);
-    }
-
-    const prompt = this.buildSummaryPrompt(dto);
-
+    // Check bài nộp
+    const existing = await this.summaryRepository.findOne({ where: { submissionId: dto.submissionId } });
+    if (existing) return this.mapEntityToResponse(existing);
+    // Gọi Promt 
+    const prompt = this.generateSummaryPrompt(dto);
+    const parsedResult = await this.processGeminiRequest<any>(prompt, null);
+    // Lưu vào DB 
     try {
-      const response = await this.callGemini(prompt);
-      const parsed = this.parseSummaryResponse(response);
-
-      // Save to database
       const summary = this.summaryRepository.create({
         submissionId: dto.submissionId,
-        ...parsed,
+        ...parsedResult,
       });
       const saved = await this.summaryRepository.save(summary);
-
-      return this.mapEntityToResponse(saved);
+      return this.mapEntityToResponse(Array.isArray(saved) ? saved[0] : saved);
     } catch (error) {
-      this.logger.error('Summarization failed:', error);
+      this.logger.error('Database save failed:', error);
+      throw new HttpException('Failed to save summary', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Regenerate: Xóa cũ tạo mới
+   */
+  async regenerateSummary(dto: SummarizeDto): Promise<SummaryResponse> {
+    await this.summaryRepository.delete({ submissionId: dto.submissionId });
+    return this.summarizeSubmission(dto); // Tái sử dụng logic của hàm trên
+  }
+
+  async getSummary(submissionId: number): Promise<SummaryResponse | null> {
+    const summary = await this.summaryRepository.findOne({ where: { submissionId } });
+    return summary ? this.mapEntityToResponse(summary) : null;
+  }
+
+  /**
+   * @param prompt 
+   * @param fallbackValue 
+   */
+  private async processGeminiRequest<T>(prompt: string, fallbackValue: T | null): Promise<T> {
+    try {
+      const jsonText = await this.callGeminiApi(prompt);
+      return this.parseJsonFromText<T>(jsonText);
+    } catch (error) {
+      this.logger.error(`AI Task Failed: ${error.message}`);
+      if (fallbackValue) return fallbackValue; 
+      
       throw new HttpException(
-        'Failed to summarize submission. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'AI Service is currently unavailable. Please try again.',
+        HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
   }
 
   /**
-   * Get existing summary by submission ID
+   * Gửi Request HTTP raw (Dùng fetch)
    */
-  async getSummary(submissionId: number): Promise<SummaryResponse | null> {
-    const summary = await this.summaryRepository.findOne({
-      where: { submissionId },
-    });
-
-    if (!summary) {
-      return null;
-    }
-
-    return this.mapEntityToResponse(summary);
-  }
-
-  /**
-   * Regenerate summary for a submission
-   */
-  async regenerateSummary(dto: SummarizeDto): Promise<SummaryResponse> {
-    // Delete existing summary
-    await this.summaryRepository.delete({ submissionId: dto.submissionId });
-
-    // Generate new summary
-    const prompt = this.buildSummaryPrompt(dto);
-    const response = await this.callGemini(prompt);
-    const parsed = this.parseSummaryResponse(response);
-
-    const summary = this.summaryRepository.create({
-      submissionId: dto.submissionId,
-      ...parsed,
-    });
-    const saved = await this.summaryRepository.save(summary);
-
-    return this.mapEntityToResponse(saved);
-  }
-
-  // ==================== Private Methods ====================
-
-  private async callGemini(prompt: string): Promise<string> {
-    if (!this.geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured');
-    }
-
-    const url = `${this.geminiApiUrl}?key=${this.geminiApiKey}`;
-
-    const response = await fetch(url, {
+  private async callGeminiApi(prompt: string): Promise<string> {
+    const response = await fetch(this.apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }],
-          },
-        ],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 2048,
+          temperature: 0.3, 
+          responseMimeType: "application/json" 
         },
       }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      this.logger.error('Gemini API error:', error);
-      throw new Error(`Gemini API error: ${response.status}`);
+      const errText = await response.text();
+      throw new Error(`Gemini Error ${response.status}: ${errText}`);
     }
 
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) throw new Error('Empty response from Gemini');
+    return text;
   }
 
-  private buildGrammarPrompt(dto: CheckGrammarDto): string {
-    const typeContext = {
+  /**
+   * Clean và Parse JSON an toàn
+   */
+  private parseJsonFromText<T>(text: string): T {
+    try {
+      const cleanText = text.replace(/```json|```/g, '').trim();
+      return JSON.parse(cleanText) as T;
+    } catch (error) {
+      this.logger.error('JSON Parse Failed:', text);
+      throw new Error('Invalid JSON format from AI');
+    }
+  }
+
+
+  private generateGrammarPrompt(dto: CheckGrammarDto): string {
+    const typeMap = {
       abstract: 'academic paper abstract',
       title: 'academic paper title',
       content: 'academic paper content',
     };
 
-    return `You are an expert academic editor. Please check the following ${typeContext[dto.type]} for grammar, spelling, and punctuation errors.
+    return `
+      Role: Expert Academic Editor.
+      Task: Check grammar, spelling, and punctuation for the following ${typeMap[dto.type] || 'text'}.
+      
+      Requirements:
+      1. Output MUST be valid JSON only. No markdown.
+      2. Format: { "corrected": "...", "corrections": [{"error": "...", "correction": "...", "explanation": "..."}], "score": 0-100 }
+      3. If perfect, "corrections" is empty and "score" is 100.
 
-TEXT TO CHECK:
-"""
-${dto.text}
-"""
-
-Please respond in the following JSON format ONLY (no markdown, no explanation outside JSON):
-{
-  "corrected": "The corrected text with all errors fixed",
-  "corrections": [
-    {
-      "error": "the original error text",
-      "correction": "the corrected version",
-      "explanation": "brief explanation of why this is wrong"
-    }
-  ],
-  "score": 85
-}
-
-The score should be 0-100 based on the overall quality (100 = perfect, no errors).
-If there are no errors, return the original text as corrected with an empty corrections array and score 100.`;
+      Text to check:
+      """${dto.text}"""
+    `;
   }
 
-  private buildSummaryPrompt(dto: SummarizeDto): string {
-    return `You are an expert academic reviewer. Please summarize the following academic submission.
+  private generateSummaryPrompt(dto: SummarizeDto): string {
+    const safeContent = dto.content ? dto.content.substring(0, 8000) : 'No content provided';
 
-TITLE: ${dto.title}
+    return `
+      Role: Expert Academic Reviewer.
+      Task: Summarize this submission.
+      
+      Title: ${dto.title}
+      Abstract: ${dto.abstract}
+      Content Snippet: ${safeContent}
 
-ABSTRACT:
-${dto.abstract}
-
-${dto.content ? `CONTENT:\n${dto.content.substring(0, 5000)}` : ''}
-
-Please respond in the following JSON format ONLY (no markdown, no explanation outside JSON):
-{
-  "summary": "A comprehensive 2-3 sentence summary of the paper",
-  "problem": "The main problem or research question addressed (1-2 sentences)",
-  "solution": "The proposed solution, methodology, or approach (1-2 sentences)",
-  "result": "The key findings, results, or contributions (1-2 sentences)",
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
-}`;
-  }
-
-  private parseGrammarResponse(
-    originalText: string,
-    response: string,
-  ): GrammarCheckResponse {
-    try {
-      // Remove potential markdown code blocks
-      const cleanResponse = response
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
-
-      const parsed = JSON.parse(cleanResponse);
-
-      return {
-        original: originalText,
-        corrected: parsed.corrected || originalText,
-        corrections: parsed.corrections || [],
-        score: parsed.score || 100,
-      };
-    } catch (error) {
-      this.logger.error('Failed to parse grammar response:', error);
-      // Return a safe default
-      return {
-        original: originalText,
-        corrected: originalText,
-        corrections: [],
-        score: 100,
-      };
-    }
-  }
-
-  private parseSummaryResponse(response: string): {
-    summary: string;
-    problem: string;
-    solution: string;
-    result: string;
-    keywords: string[];
-  } {
-    try {
-      // Remove potential markdown code blocks
-      const cleanResponse = response
-        .replace(/```json\n?/g, '')
-        .replace(/```\n?/g, '')
-        .trim();
-
-      const parsed = JSON.parse(cleanResponse);
-
-      return {
-        summary: parsed.summary || 'Summary not available',
-        problem: parsed.problem || 'Problem not identified',
-        solution: parsed.solution || 'Solution not identified',
-        result: parsed.result || 'Results not available',
-        keywords: parsed.keywords || [],
-      };
-    } catch (error) {
-      this.logger.error('Failed to parse summary response:', error);
-      return {
-        summary: 'Failed to generate summary',
-        problem: 'Unable to identify problem',
-        solution: 'Unable to identify solution',
-        result: 'Unable to identify results',
-        keywords: [],
-      };
-    }
+      Requirements:
+      1. Output MUST be valid JSON only.
+      2. Format: { 
+         "summary": "2-3 sentences overview", 
+         "problem": "Research question (1-2 sentences)", 
+         "solution": "Methodology (1-2 sentences)", 
+         "result": "Key findings (1-2 sentences)", 
+         "keywords": ["tag1", "tag2", "tag3", "tag4", "tag5"] 
+      }
+    `;
   }
 
   private mapEntityToResponse(entity: SubmissionSummary): SummaryResponse {

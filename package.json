@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build api-gateway && nest build identity-service && nest build conference-service && nest build submission-service && nest build review-service",
+    "build": "nest build ai-service && nest build api-gateway && nest build identity-service && nest build conference-service && nest build submission-service && nest build review-service",
     "format": "prettier --write \"Backend/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
