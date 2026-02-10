@@ -35,12 +35,37 @@ export class AiService {
   // Api check lỗi chính tả
   async checkGrammar(dto: CheckGrammarDto): Promise<GrammarCheckResponse> {
     const prompt = this.generateGrammarPrompt(dto);
-    return this.processGeminiRequest<GrammarCheckResponse>(prompt, {
-      original: dto.text,
+    // Gọi AI và map kết quả về đúng schema, luôn đảm bảo có "original"
+    const rawResult = await this.processGeminiRequest<
+      Partial<Omit<GrammarCheckResponse, 'original'>>
+    >(prompt, {
       corrected: dto.text,
       corrections: [],
       score: 100,
-    });
+    } as any);
+
+    const corrected =
+      typeof rawResult.corrected === 'string' && rawResult.corrected.trim().length > 0
+        ? rawResult.corrected
+        : dto.text;
+
+    const corrections = Array.isArray(rawResult.corrections)
+      ? rawResult.corrections
+      : [];
+
+    const score =
+      typeof rawResult.score === 'number' && rawResult.score >= 0 && rawResult.score <= 100
+        ? rawResult.score
+        : corrections.length > 0
+        ? 80
+        : 100;
+
+    return {
+      original: dto.text,
+      corrected,
+      corrections,
+      score,
+    };
   }
 
   /**

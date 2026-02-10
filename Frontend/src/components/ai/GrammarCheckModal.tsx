@@ -17,6 +17,12 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
   const [result, setResult] = useState<GrammarCheckResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const titleMap: Record<GrammarCheckModalProps['type'], string> = {
+    title: 'Kiểm tra Tiêu đề (AI)',
+    abstract: 'Kiểm tra Tóm tắt (AI)',
+    content: 'Kiểm tra Nội dung (AI)',
+  };
+
   // This useEffect is responsible for triggering the grammar check when the modal opens or text changes.
   // It is not redundant as it handles side effects based on component lifecycle and prop changes.
   // The provided "Code Edit" attempts to move this logic into a useState initialization, which is syntactically incorrect
@@ -71,9 +77,27 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Kiểm tra Ngữ pháp (AI)</h2>
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-2xl px-4 sm:px-0">
+      <div className="bg-white rounded-xl shadow-2xl border border-teal-100 p-5 sm:p-6 max-h-[75vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+              {titleMap[type]}
+            </h2>
+            {type === 'abstract' && (
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                Gợi ý: Tóm tắt nên cô đọng 200–300 từ, nêu rõ vấn đề, phương pháp và kết quả chính.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-100"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
         
         {loading && (
           <div className="flex flex-col items-center justify-center py-8">
