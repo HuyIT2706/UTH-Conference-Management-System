@@ -1,5 +1,5 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetAnonymizedReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
+import { useGetAnonymizedReviewsForSubmissionQuery } from '../../services/reviewsApi';
 
 interface ReviewsTableProps {
   submissionId: string;

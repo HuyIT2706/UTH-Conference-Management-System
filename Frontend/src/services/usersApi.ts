@@ -1,5 +1,5 @@
 import { apiSlice } from './apiSlice';
-import type { User } from '../../types/api.types';
+import type { User } from '../types/api.types.js';
 
 export interface ChangePasswordRequest {
   oldPassword: string;

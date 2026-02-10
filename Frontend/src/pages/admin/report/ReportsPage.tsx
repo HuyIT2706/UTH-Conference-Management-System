@@ -3,7 +3,7 @@ import {
   useGetConferencesQuery,
   useGetDashboardStatsQuery,
   useGetTracksQuery,
-} from '../../../redux/api/conferencesApi';
+} from '../../../services/conferencesApi';
 import CircularProgress from '@mui/material/CircularProgress';
 
 const ReportsPage = () => {

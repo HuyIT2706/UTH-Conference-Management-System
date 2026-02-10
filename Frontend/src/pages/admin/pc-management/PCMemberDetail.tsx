@@ -3,8 +3,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetTrackMembersQuery,
   useDeleteTrackMemberMutation,
-} from '../../../redux/api/conferencesApi';
-import { useGetUsersQuery } from '../../../redux/api/usersApi';
+} from '../../../services/conferencesApi';
+import { useGetUsersQuery } from '../../../services/usersApi';
 import type { TrackMember, User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
 import { showDialog } from '../../../utils/dialog';

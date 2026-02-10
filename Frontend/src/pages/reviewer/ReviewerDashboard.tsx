@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetMyTrackAssignmentsQuery } from '../../redux/api/conferencesApi';
+import { useGetMyTrackAssignmentsQuery } from '../../services/conferencesApi';
 import { showToast } from '../../utils/toast';
 import { tokenUtils } from '../../utils/token';
 import ReviewerTabs from '../../components/reviewer/ReviewerTabs';

@@ -6,4 +6,4 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build submission-service
 EXPOSE 3003
-CMD ["node", "dist/apps/submission-service/main"]
+CMD ["node", "dist/Backend/submission-service/main.js"]

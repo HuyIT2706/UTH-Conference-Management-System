@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useAuth } from '../../hooks/useAuth';
-import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
-import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation, useGetMySubmissionsQuery } from '../../redux/api/submissionsApi';
+import { useGetConferenceByIdQuery, useGetPublicTracksQuery } from '../../services/conferencesApi';
+import { useCreateSubmissionMutation, useGetSubmissionByIdQuery, useUpdateSubmissionMutation, useGetMySubmissionsQuery } from '../../services/submissionsApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
 import StudentSubmissionsList from '../../components/student/StudentSubmissionsList';
 import type { Track } from '../../types/api.types';
+import GrammarCheckModal from '../../components/ai/GrammarCheckModal';
 
 interface CoAuthor {
   name: string;
@@ -54,6 +55,32 @@ const StudentSubmitForm = () => {
   const [coAuthors, setCoAuthors] = useState<CoAuthor[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+
+  // AI State
+  const [showAiMenu, setShowAiMenu] = useState(false);
+  const [grammarModalOpen, setGrammarModalOpen] = useState(false);
+  const [grammarCheckType, setGrammarCheckType] = useState<'title' | 'abstract'>('title');
+  const [grammarText, setGrammarText] = useState('');
+
+  const openGrammarCheck = (type: 'title' | 'abstract') => {
+    const text = type === 'title' ? title : abstract;
+    if (!text.trim()) {
+      showToast.info('Vui lòng nhập nội dung trước khi kiểm tra');
+      return;
+    }
+    setGrammarCheckType(type);
+    setGrammarText(text);
+    setGrammarModalOpen(true);
+  };
+
+  const handleApplyCorrection = (corrected: string) => {
+    if (grammarCheckType === 'title') {
+      setTitle(corrected);
+    } else {
+      setAbstract(corrected);
+    }
+    showToast.success('Đã áp dụng chỉnh sửa từ AI');
+  };
 
   useEffect(() => {
     if (!conferenceId) {
@@ -349,6 +376,15 @@ const StudentSubmitForm = () => {
           )}
         </div>
 
+        {/* Grammar Check Modal */}
+        <GrammarCheckModal
+          isOpen={grammarModalOpen}
+          onClose={() => setGrammarModalOpen(false)}
+          textToCheck={grammarText}
+          type={grammarCheckType}
+          onApplyCorrection={handleApplyCorrection}
+        />
+
         {/* Form */}
         <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
           {/* Article Information */}
@@ -594,6 +630,47 @@ const StudentSubmitForm = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Floating AI Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+        {/* Menu */}
+        {showAiMenu && (
+          <div className="bg-white rounded-lg shadow-xl border border-teal-100 p-2 mb-2 w-48 animate-fade-in-up">
+            <button
+              onClick={() => {
+                openGrammarCheck('title');
+                setShowAiMenu(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-teal-50 rounded text-gray-700 text-sm flex items-center gap-2"
+            >
+              <span>📝</span> Kiểm tra Tiêu đề
+            </button>
+            <button
+              onClick={() => {
+                openGrammarCheck('abstract');
+                setShowAiMenu(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-teal-50 rounded text-gray-700 text-sm flex items-center gap-2"
+            >
+              <span>📄</span> Kiểm tra Tóm tắt
+            </button>
+          </div>
+        )}
+        
+        {/* FAB */}
+        <button
+          onClick={() => setShowAiMenu(!showAiMenu)}
+          className="bg-gradient-to-r from-teal-500 to-blue-500 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2 group"
+          title="AI Assistant"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap">
+            AI Assistant
+          </span>
+        </button>
       </div>
     </div>
   );

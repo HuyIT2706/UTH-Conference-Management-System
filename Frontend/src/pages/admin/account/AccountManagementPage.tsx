@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetUsersQuery,
   useDeleteUserMutation,
-} from '../../../redux/api/usersApi';
+} from '../../../services/usersApi';
 import type { User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
 import { showDialog } from '../../../utils/dialog';

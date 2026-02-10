@@ -1,8 +1,8 @@
-import { useGetMeQuery, useLogoutMutation, useCheckSessionMutation } from '../redux/api/authApi';
+import { useGetMeQuery, useLogoutMutation, useCheckSessionMutation } from '../services/authApi';
 import { tokenUtils } from '../utils/token';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { apiSlice } from '../redux/api/apiSlice';
+import { apiSlice } from '../services/apiSlice';
 import { useState, useEffect, useRef } from 'react';
 import { showToast } from '../utils/toast';
 

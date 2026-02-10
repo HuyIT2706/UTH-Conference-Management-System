@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import bgUth from '../../assets/bg_uth.svg';
 import iconUth from '../../assets/icon_uth.svg';
 import imageUth from '../../assets/image-uth.jpg';
-import { useResetPasswordMutation } from '../../redux/api/usersApi';
+import { useResetPasswordMutation } from '../../services/usersApi';
 import { formatApiError } from '../../utils/api-helpers';
 
 const ResetPasswordPage = () => {

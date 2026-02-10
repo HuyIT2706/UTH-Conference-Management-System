@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCreateTrackMutation } from '../../../redux/api/conferencesApi';
+import { useCreateTrackMutation } from '../../../services/conferencesApi';
 import { showToast } from '../../../utils/toast';
 
 interface CreateTrackFormProps {

@@ -4,7 +4,7 @@ import bgUth from '../../assets/bg_uth.svg';
 import {
   useForgotPasswordMutation,
   useVerifyResetCodeMutation,
-} from '../../redux/api/usersApi';
+} from '../../services/usersApi';
 import { formatApiError } from '../../utils/api-helpers';
 
 const ForgotPasswordPage = () => {

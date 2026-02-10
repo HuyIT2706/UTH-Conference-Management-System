@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetConferencesQuery } from '../../../redux/api/conferencesApi';
+import { useGetConferencesQuery } from '../../../services/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import TrackListForPC from './TrackListForPC';
 import PCMemberDetail from './PCMemberDetail';

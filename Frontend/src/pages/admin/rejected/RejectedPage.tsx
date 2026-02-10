@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionsQuery } from '../../../redux/api/submissionsApi';
+import { useGetSubmissionsQuery } from '../../../services/submissionsApi';
 import {
   useGetConferencesQuery,
   useGetTracksQuery,
-} from '../../../redux/api/conferencesApi';
+} from '../../../services/conferencesApi';
 import { formatApiError } from '../../../utils/api-helpers';
 import SubmissionsFilters from '../../../components/admin/submission/SubmissionsFilters';
 import SubmissionsTable from '../../../components/admin/submission/SubmissionsTable';

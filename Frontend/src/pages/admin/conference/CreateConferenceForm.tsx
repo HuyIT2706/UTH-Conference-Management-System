@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCreateConferenceMutation } from '../../../redux/api/conferencesApi';
+import { useCreateConferenceMutation } from '../../../services/conferencesApi';
 import { showToast } from '../../../utils/toast';
 
 interface CreateConferenceFormProps {

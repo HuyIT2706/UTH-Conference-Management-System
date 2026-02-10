@@ -4,7 +4,7 @@ import type {
   Track,
   TrackMember,
   ApiResponse,
-} from '../../types/api.types';
+} from '../types/api.types.js';
 
 export const conferencesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

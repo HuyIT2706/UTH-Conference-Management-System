@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetMySubmissionsQuery } from '../redux/api/submissionsApi';
-import { useGetConferencesQuery } from '../redux/api/conferencesApi';
+import { useGetMySubmissionsQuery } from '../services/submissionsApi';
+import { useGetConferencesQuery } from '../services/conferencesApi';
 import type { Submission, SubmissionStatus } from '../types/api.types';
 
 const MySubmissions = () => {

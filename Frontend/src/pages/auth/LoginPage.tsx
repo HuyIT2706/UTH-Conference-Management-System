@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '../../redux/api/authApi';
+import { useLoginMutation } from '../../services/authApi';
 import { tokenUtils } from '../../utils/token';
 import { formatApiError } from '../../utils/api-helpers';
 import bgUth from '../../assets/bg_uth.svg';

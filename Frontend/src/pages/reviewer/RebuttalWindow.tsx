@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
-import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
-import { useGetConferenceByIdQuery } from '../../redux/api/conferencesApi';
+import { useGetSubmissionByIdQuery } from '../../services/submissionsApi';
+import { useGetReviewsForSubmissionQuery } from '../../services/reviewsApi';
+import { useGetConferenceByIdQuery } from '../../services/conferencesApi';
 import RebuttalHeader from '../../components/reviewer/RebuttalHeader';
 import ReviewCard from '../../components/reviewer/ReviewCard';
 

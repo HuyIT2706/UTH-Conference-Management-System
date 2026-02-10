@@ -1,8 +1,8 @@
 import { memo, useEffect, useRef, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../../redux/api/submissionsApi';
-import { useGetReviewsForSubmissionQuery } from '../../../redux/api/reviewsApi';
-import { useGetUsersQuery } from '../../../redux/api/usersApi';
+import { useGetSubmissionByIdQuery } from '../../../services/submissionsApi';
+import { useGetReviewsForSubmissionQuery } from '../../../services/reviewsApi';
+import { useGetUsersQuery } from '../../../services/usersApi';
 import {
   getStatusColor,
   getStatusLabel,

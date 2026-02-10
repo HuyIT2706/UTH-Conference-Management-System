@@ -1,4 +1,4 @@
-import { useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
+import { useGetPublicTracksQuery } from '../../services/conferencesApi';
 import CircularProgress from '@mui/material/CircularProgress';
 import type { Conference, Track } from '../../types/api.types';
 

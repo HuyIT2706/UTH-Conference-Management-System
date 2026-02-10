@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetConferencesQuery } from '../../redux/api/conferencesApi';
+import { useGetConferencesQuery } from '../../services/conferencesApi';
 import ConferenceCard from '../../components/student/ConferenceCard';
 import type { Conference } from '../../types/api.types';
 

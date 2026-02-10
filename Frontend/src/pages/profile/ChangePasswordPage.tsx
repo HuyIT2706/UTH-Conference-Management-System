@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useChangePasswordMutation } from '../../redux/api/usersApi';
+import { useChangePasswordMutation } from '../../services/usersApi';
 import { useNavigate } from 'react-router-dom';
 import { showToast } from '../../utils/toast';
 import bgUth from '../../assets/bg_uth.svg';

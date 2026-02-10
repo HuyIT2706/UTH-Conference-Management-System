@@ -3,9 +3,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetSubmissionByIdQuery,
   useUpdateSubmissionStatusMutation,
-} from '../../redux/api/submissionsApi';
-import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
-import { useGetUsersQuery } from '../../redux/api/usersApi';
+} from '../../services/submissionsApi';
+import { useGetReviewsForSubmissionQuery } from '../../services/reviewsApi';
+import { useGetUsersQuery } from '../../services/usersApi';
 import { useAuth } from '../../hooks/useAuth';
 import { showToast } from '../../utils/toast';
 import { showDialog } from '../../utils/dialog';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
-import { useGetConferenceByIdQuery, useGetTracksQuery } from '../../redux/api/conferencesApi';
-import { useGetAnonymizedReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
+import { useGetSubmissionByIdQuery } from '../../services/submissionsApi';
+import { useGetConferenceByIdQuery, useGetTracksQuery } from '../../services/conferencesApi';
+import { useGetAnonymizedReviewsForSubmissionQuery } from '../../services/reviewsApi';
 import ReviewsTable from '../../components/student/ReviewsTable';
 // Removed import - using local functions instead
 import type { SubmissionStatus } from '../../types/api.types';

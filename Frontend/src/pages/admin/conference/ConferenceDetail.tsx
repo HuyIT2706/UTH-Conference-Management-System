@@ -4,7 +4,7 @@ import {
   useGetConferenceByIdQuery,
   useUpdateConferenceMutation,
   useSetCfpSettingsMutation,
-} from '../../../redux/api/conferencesApi';
+} from '../../../services/conferencesApi';
 import { showToast } from '../../../utils/toast';
 
 interface ConferenceDetailProps {

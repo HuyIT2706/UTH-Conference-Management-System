@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useAddTrackMemberMutation } from '../../../redux/api/conferencesApi';
-import { useGetUsersQuery } from '../../../redux/api/usersApi';
+import { useAddTrackMemberMutation } from '../../../services/conferencesApi';
+import { useGetUsersQuery } from '../../../services/usersApi';
 import type { User } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
 

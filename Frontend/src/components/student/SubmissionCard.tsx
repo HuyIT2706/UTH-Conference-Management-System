@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetAnonymizedReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
-import { useUploadCameraReadyMutation } from '../../redux/api/submissionsApi';
+import { useGetAnonymizedReviewsForSubmissionQuery } from '../../services/reviewsApi';
+import { useUploadCameraReadyMutation } from '../../services/submissionsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 import type { Submission } from '../../types/api.types';

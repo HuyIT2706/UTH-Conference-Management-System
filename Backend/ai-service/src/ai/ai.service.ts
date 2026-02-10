@@ -29,7 +29,7 @@ export class AiService {
     this.apiUrl = `${GEMINI_BASE_URL}/${GEMINI_MODEL}:generateContent?key=${this.geminiApiKey}`;
 
     if (!this.geminiApiKey) {
-      this.logger.warn('⚠️ GEMINI_API_KEY is missing in .env');
+      this.logger.warn(' GEMINI_API_KEY is missing in .env');
     }
   }
   // Api check lỗi chính tả

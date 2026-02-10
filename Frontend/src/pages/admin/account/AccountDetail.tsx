@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetUserByIdQuery,
   useUpdateUserRolesMutation,
-} from '../../../redux/api/usersApi';
+} from '../../../services/usersApi';
 import { showToast } from '../../../utils/toast';
 
 interface AccountDetailProps {

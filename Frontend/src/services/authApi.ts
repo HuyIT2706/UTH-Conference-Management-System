@@ -6,7 +6,7 @@ import type {
   RefreshTokenRequest,
   RefreshTokenResponse,
   User,
-} from '../../types/api.types';
+} from '../types/api.types.js';
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

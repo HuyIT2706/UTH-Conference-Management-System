@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
+import { useGetSubmissionByIdQuery } from '../../services/submissionsApi';
 import {
   useCreateReviewMutation,
   useGetMyAssignmentsQuery,
-} from '../../redux/api/reviewsApi';
+} from '../../services/reviewsApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 import { tokenUtils } from '../../utils/token';

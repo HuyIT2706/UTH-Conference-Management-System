@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionsQuery } from '../../../redux/api/submissionsApi';
-import { useGetConferencesQuery, useGetTracksQuery } from '../../../redux/api/conferencesApi';
-import { useGetReviewsForSubmissionQuery } from '../../../redux/api/reviewsApi';
+import { useGetSubmissionsQuery } from '../../../services/submissionsApi';
+import { useGetConferencesQuery, useGetTracksQuery } from '../../../services/conferencesApi';
+import { useGetReviewsForSubmissionQuery } from '../../../services/reviewsApi';
 import ReviewedSubmissionCard from '../../../components/admin/ReviewedSubmissionCard';
 import type { Submission } from '../../../types/api.types';
 

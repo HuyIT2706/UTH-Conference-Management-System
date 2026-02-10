@@ -6,7 +6,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build review-service
 EXPOSE 3004
-CMD ["node", "dist/apps/review-service/main"]
+CMD ["node", "dist/Backend/review-service/main.js"]
 
 
 

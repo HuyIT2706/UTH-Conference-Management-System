@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetTracksQuery } from '../../../redux/api/conferencesApi';
+import { useGetTracksQuery } from '../../../services/conferencesApi';
 import type { Conference, Track } from '../../../types/api.types';
 
 interface TrackListForPCProps {

@@ -40,6 +40,13 @@ export const API_ENDPOINTS = {
     ASSIGNMENTS: '/reviews/assignments/me',
     SUBMISSION_ANONYMIZED: (submissionId: string) => `/reviews/submission/${submissionId}/anonymized`,
   },
+  // AI
+  AI: {
+    CHECK_GRAMMAR: '/ai/check-grammar',
+    SUMMARIZE: '/ai/summarize',
+    REGENERATE_SUMMARY: '/ai/summarize/regenerate',
+    GET_SUMMARY: (id: number) => `/ai/summaries/${id}`,
+  },
 } as const;
 
 

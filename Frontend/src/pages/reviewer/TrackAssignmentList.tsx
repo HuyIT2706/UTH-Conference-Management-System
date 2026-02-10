@@ -3,7 +3,7 @@ import {
   useGetMyTrackAssignmentsQuery,
   useAcceptTrackAssignmentMutation,
   useRejectTrackAssignmentMutation,
-} from '../../redux/api/conferencesApi';
+} from '../../services/conferencesApi';
 import { showToast } from '../../utils/toast';
 import { formatApiError } from '../../utils/api-helpers';
 import { tokenUtils } from '../../utils/token';

@@ -4,7 +4,7 @@ import type {
   ReviewAssignment,
   Submission,
   ApiResponse,
-} from '../../types/api.types';
+} from '../types/api.types.js';
 
 export const reviewsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

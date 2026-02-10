@@ -8,4 +8,4 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build identity-service
 EXPOSE 3001
-CMD ["node", "dist/apps/identity-service/main"]
+CMD ["node", "dist/Backend/identity-service/main.js"]

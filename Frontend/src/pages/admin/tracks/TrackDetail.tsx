@@ -4,7 +4,7 @@ import {
   useGetTracksQuery,
   useUpdateTrackMutation,
   useDeleteTrackMutation,
-} from '../../../redux/api/conferencesApi';
+} from '../../../services/conferencesApi';
 import type { Track } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
 import { showDialog } from '../../../utils/dialog';

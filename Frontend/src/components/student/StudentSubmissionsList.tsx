@@ -4,8 +4,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetMySubmissionsQuery,
   useWithdrawSubmissionMutation,
-} from '../../redux/api/submissionsApi';
-import { useGetConferencesQuery, useGetPublicTracksQuery } from '../../redux/api/conferencesApi';
+} from '../../services/submissionsApi';
+import { useGetConferencesQuery, useGetPublicTracksQuery } from '../../services/conferencesApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
 import { showDialog } from '../../utils/dialog';

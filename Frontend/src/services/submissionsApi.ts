@@ -6,7 +6,7 @@ import type {
   QuerySubmissionsDto,
   AnonymizedReview,
   ApiResponse,
-} from '../../types/api.types';
+} from '../types/api.types.js';
 
 export const submissionsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

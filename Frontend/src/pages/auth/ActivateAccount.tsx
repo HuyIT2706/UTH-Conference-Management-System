@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   useGetVerificationTokenQuery,
   useVerifyEmailMutation,
-} from '../../redux/api/authApi';
+} from '../../services/authApi';
 import { formatApiError } from '../../utils/api-helpers';
 import { showToast } from '../../utils/toast';
 

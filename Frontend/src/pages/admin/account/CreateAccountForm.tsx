@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useCreateUserMutation } from '../../../redux/api/usersApi';
+import { useCreateUserMutation } from '../../../services/usersApi';
 import { showToast } from '../../../utils/toast';
-import type { CreateUserRequest } from '../../../redux/api/usersApi';
+import type { CreateUserRequest } from '../../../services/usersApi';
 
 interface CreateAccountFormProps {
   onSuccess: (userId: number) => void;

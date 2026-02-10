@@ -1,9 +1,9 @@
 import { memo, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
-import { useGetReviewsForSubmissionQuery } from '../../redux/api/reviewsApi';
-import { useGetUsersQuery } from '../../redux/api/usersApi';
+import { useGetSubmissionByIdQuery } from '../../services/submissionsApi';
+import { useGetReviewsForSubmissionQuery } from '../../services/reviewsApi';
+import { useGetUsersQuery } from '../../services/usersApi';
 import { useIsInLayoutApp } from '../../utils/layout-helpers';
 import type { Review } from '../../types/api.types';
 

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetSubmissionByIdQuery } from '../../redux/api/submissionsApi';
+import { useGetSubmissionByIdQuery } from '../../services/submissionsApi';
 import type { ReviewAssignment, Submission } from '../../types/api.types';
 
 interface SubmissionListProps {

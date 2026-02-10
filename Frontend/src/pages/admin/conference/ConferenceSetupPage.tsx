@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {
   useGetConferencesQuery,
   useDeleteConferenceMutation,
-} from '../../../redux/api/conferencesApi';
+} from '../../../services/conferencesApi';
 import type { Conference } from '../../../types/api.types';
 import { showToast } from '../../../utils/toast';
 import { showDialog } from '../../../utils/dialog';

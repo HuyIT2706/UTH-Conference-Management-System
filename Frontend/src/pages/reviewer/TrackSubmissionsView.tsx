@@ -5,7 +5,7 @@ import {
   useSelfAssignSubmissionMutation,
   useGetSubmissionsForReviewerQuery,
   useAcceptAssignmentMutation,
-} from '../../redux/api/reviewsApi';
+} from '../../services/reviewsApi';
 import type { TrackMember, Submission, ReviewAssignment } from '../../types/api.types';
 import { SubmissionStatus } from '../../types/api.types';
 import { showToast } from '../../utils/toast';
