@@ -1,14 +1,14 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SummarizeDto {
   @ApiProperty({
     description: 'Submission ID to summarize',
-    example: 1,
+    example: '3f7a2b1c-1234-5678-abcd-ef0123456789',
   })
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  submissionId: number;
+  submissionId: string;
 
   @ApiProperty({
     description: 'Title of the submission',
@@ -37,7 +37,7 @@ export class SummarizeDto {
 
 export class SummaryResponse {
   @ApiProperty({ description: 'Submission ID' })
-  submissionId: number;
+  submissionId: string;
 
   @ApiProperty({ description: 'Full summary text' })
   summary: string;

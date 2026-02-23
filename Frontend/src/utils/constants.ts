@@ -45,7 +45,7 @@ export const API_ENDPOINTS = {
     CHECK_GRAMMAR: '/ai/check-grammar',
     SUMMARIZE: '/ai/summarize',
     REGENERATE_SUMMARY: '/ai/summarize/regenerate',
-    GET_SUMMARY: (id: number) => `/ai/summaries/${id}`,
+    GET_SUMMARY: (id: string) => `/ai/summaries/${id}`,
   },
 } as const;
 

@@ -7,7 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 interface SummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  submissionId: number;
+  submissionId: string;
   title?: string;
   abstract?: string;
   keywords?: string;
@@ -28,6 +28,10 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
   }, [isOpen, submissionId]);
 
   const loadSummary = async () => {
+    if (!submissionId) {
+      setError('submissionId không hợp lệ');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -100,8 +104,8 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl border border-teal-100 p-5 sm:p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto mx-4">
+    <div className="fixed bottom-6 right-6 z-50 w-full max-w-[320px] px-4 sm:px-0">
+      <div className="bg-white rounded-xl shadow-2xl border border-teal-100 p-5 sm:p-6 max-h-[75vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div>
@@ -177,22 +181,7 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
           <div className="space-y-4">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <h3 className="font-semibold text-blue-800 mb-1">Tóm tắt chung</h3>
-              <p className="text-gray-800">{summary.summary}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-red-50 p-3 rounded-lg border border-red-100">
-                <h4 className="font-semibold text-red-800 text-sm mb-1">Vấn đề</h4>
-                <p className="text-sm text-gray-700">{summary.problem}</p>
-              </div>
-              <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                <h4 className="font-semibold text-green-800 text-sm mb-1">Giải pháp</h4>
-                <p className="text-sm text-gray-700">{summary.solution}</p>
-              </div>
-              <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                <h4 className="font-semibold text-purple-800 text-sm mb-1">Kết quả</h4>
-                <p className="text-sm text-gray-700">{summary.result}</p>
-              </div>
+              <p className="text-gray-800 whitespace-pre-wrap">{summary.summary}</p>
             </div>
 
             {keywords && (

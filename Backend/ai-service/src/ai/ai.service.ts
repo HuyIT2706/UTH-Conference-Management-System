@@ -11,7 +11,8 @@ import {
 } from './dto';
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
-const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_BASE_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models';
 
 @Injectable()
 export class AiService {
@@ -25,7 +26,7 @@ export class AiService {
     private readonly summaryRepository: Repository<SubmissionSummary>,
   ) {
     this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY') || '';
-    
+
     this.apiUrl = `${GEMINI_BASE_URL}/${GEMINI_MODEL}:generateContent?key=${this.geminiApiKey}`;
 
     if (!this.geminiApiKey) {
@@ -45,7 +46,8 @@ export class AiService {
     } as any);
 
     const corrected =
-      typeof rawResult.corrected === 'string' && rawResult.corrected.trim().length > 0
+      typeof rawResult.corrected === 'string' &&
+      rawResult.corrected.trim().length > 0
         ? rawResult.corrected
         : dto.text;
 
@@ -54,11 +56,13 @@ export class AiService {
       : [];
 
     const score =
-      typeof rawResult.score === 'number' && rawResult.score >= 0 && rawResult.score <= 100
+      typeof rawResult.score === 'number' &&
+      rawResult.score >= 0 &&
+      rawResult.score <= 100
         ? rawResult.score
         : corrections.length > 0
-        ? 80
-        : 100;
+          ? 80
+          : 100;
 
     return {
       original: dto.text,
@@ -69,16 +73,18 @@ export class AiService {
   }
 
   /**
-   * Tính năng 2: Tóm tắt bài báo 
+   * Tính năng 2: Tóm tắt bài báo
    */
   async summarizeSubmission(dto: SummarizeDto): Promise<SummaryResponse> {
     // Check bài nộp
-    const existing = await this.summaryRepository.findOne({ where: { submissionId: dto.submissionId } });
+    const existing = await this.summaryRepository.findOne({
+      where: { submissionId: dto.submissionId },
+    });
     if (existing) return this.mapEntityToResponse(existing);
-    // Gọi Promt 
+    // Gọi Promt
     const prompt = this.generateSummaryPrompt(dto);
     const parsedResult = await this.processGeminiRequest<any>(prompt, null);
-    // Lưu vào DB 
+    // Lưu vào DB
     try {
       const summary = this.summaryRepository.create({
         submissionId: dto.submissionId,
@@ -88,7 +94,10 @@ export class AiService {
       return this.mapEntityToResponse(Array.isArray(saved) ? saved[0] : saved);
     } catch (error) {
       this.logger.error('Database save failed:', error);
-      throw new HttpException('Failed to save summary', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to save summary',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -100,23 +109,28 @@ export class AiService {
     return this.summarizeSubmission(dto); // Tái sử dụng logic của hàm trên
   }
 
-  async getSummary(submissionId: number): Promise<SummaryResponse | null> {
-    const summary = await this.summaryRepository.findOne({ where: { submissionId } });
+  async getSummary(submissionId: string): Promise<SummaryResponse | null> {
+    const summary = await this.summaryRepository.findOne({
+      where: { submissionId },
+    });
     return summary ? this.mapEntityToResponse(summary) : null;
   }
 
   /**
-   * @param prompt 
-   * @param fallbackValue 
+   * @param prompt
+   * @param fallbackValue
    */
-  private async processGeminiRequest<T>(prompt: string, fallbackValue: T | null): Promise<T> {
+  private async processGeminiRequest<T>(
+    prompt: string,
+    fallbackValue: T | null,
+  ): Promise<T> {
     try {
       const jsonText = await this.callGeminiApi(prompt);
       return this.parseJsonFromText<T>(jsonText);
     } catch (error) {
       this.logger.error(`AI Task Failed: ${error.message}`);
-      if (fallbackValue) return fallbackValue; 
-      
+      if (fallbackValue) return fallbackValue;
+
       throw new HttpException(
         'AI Service is currently unavailable. Please try again.',
         HttpStatus.SERVICE_UNAVAILABLE,
@@ -134,8 +148,8 @@ export class AiService {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.3, 
-          responseMimeType: "application/json" 
+          temperature: 0.3,
+          responseMimeType: 'application/json',
         },
       }),
     });
@@ -147,7 +161,7 @@ export class AiService {
 
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+
     if (!text) throw new Error('Empty response from Gemini');
     return text;
   }
@@ -164,7 +178,6 @@ export class AiService {
       throw new Error('Invalid JSON format from AI');
     }
   }
-
 
   private generateGrammarPrompt(dto: CheckGrammarDto): string {
     const typeMap = {
@@ -205,10 +218,7 @@ export class AiService {
       4. Do NOT generate keywords. Return an empty array for keywords.
       5. Keep the summary faithful and concise.
       6. Format: { 
-         "summary": "Tóm tắt chung 2-3 câu, chỉ dựa trên nội dung đã cho", 
-         "problem": "Vấn đề được đề cập (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
-         "solution": "Giải pháp/phương pháp (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
-         "result": "Kết quả (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
+        "summary": "Tóm tắt về lại về tiêu đề (tiêu đề hãy để style nghiêng đậm nhé cho dễ phân biệt) và tóm tắt khoảng 4-5 câu, chỉ dựa trên nội dung đã cho", 
          "keywords": [] 
       }
     `;
@@ -218,9 +228,9 @@ export class AiService {
     return {
       submissionId: entity.submissionId,
       summary: entity.summary,
-      problem: entity.problem,
-      solution: entity.solution,
-      result: entity.result,
+      problem: entity.problem || '',
+      solution: entity.solution || '',
+      result: entity.result || '',
       keywords: entity.keywords || [],
       createdAt: entity.createdAt,
     };

@@ -19,14 +19,14 @@ export interface GrammarCheckResponse {
 }
 
 export interface SummarizeDto {
-  submissionId: number;
+  submissionId: string;
   title: string;
   abstract: string;
   content?: string;
 }
 
 export interface SummaryResponse {
-  submissionId: number;
+  submissionId: string;
   summary: string;
   problem: string;
   solution: string;
@@ -52,7 +52,7 @@ export const aiApi = {
     return response.data;
   },
 
-  getSummary: async (submissionId: number): Promise<SummaryResponse> => {
+  getSummary: async (submissionId: string): Promise<SummaryResponse> => {
     const response = await axiosInstance.get<SummaryResponse>(API_ENDPOINTS.AI.GET_SUMMARY(submissionId));
     return response.data;
   },

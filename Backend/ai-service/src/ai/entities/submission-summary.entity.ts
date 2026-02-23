@@ -13,19 +13,19 @@ export class SubmissionSummary {
   id: number;
 
   @Index({ unique: true})
-  @Column({ name: 'submission_id', type: 'int' })
-  submissionId: number;
+  @Column({ name: 'submission_id', type: 'varchar', length: 255 })
+  submissionId: string;
 
   @Column({name: 'ai_summary', type: 'text'})
   summary: string;
 
-  @Column({name: 'ai_problem', type: 'text'})
+  @Column({name: 'ai_problem', type: 'text', nullable: true})
   problem: string;
 
-  @Column({name: 'ai_solution', type: 'text'})
+  @Column({name: 'ai_solution', type: 'text', nullable: true})
   solution: string;
 
-  @Column({name: 'ai_result', type: 'text'})
+  @Column({name: 'ai_result', type: 'text', nullable: true})
   result: string;
 
   @Column({ name: 'ai_keywords', type: 'simple-array', nullable: true })

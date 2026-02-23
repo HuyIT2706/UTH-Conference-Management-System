@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   UseGuards,
-  ParseIntPipe,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -95,7 +94,7 @@ export class AiController {
     description: 'Summary not found',
   })
   async getSummary(
-    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('submissionId') submissionId: string,
   ): Promise<SummaryResponse> {
     const summary = await this.aiService.getSummary(submissionId);
     if (!summary) {

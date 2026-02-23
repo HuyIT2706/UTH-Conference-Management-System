@@ -121,7 +121,7 @@ const SubmissionInfoSection = memo(
         <SummaryModal
           isOpen={summaryModalOpen}
           onClose={() => setSummaryModalOpen(false)}
-          submissionId={parseInt(submission.id)}
+          submissionId={submission.id}
           title={submission.title}
           abstract={submission.abstract}
           keywords={submission.keywords}
