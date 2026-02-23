@@ -188,24 +188,28 @@ export class AiService {
   }
 
   private generateSummaryPrompt(dto: SummarizeDto): string {
-    const safeContent = dto.content ? dto.content.substring(0, 8000) : 'No content provided';
+    const safeContent = dto.content ? dto.content.substring(0, 8000) : '';
 
     return `
-      Role: Expert Academic Reviewer.
-      Task: Summarize this submission.
+      Role: You are a strict text summarizer.
+      Task: Summarize ONLY the information provided below. Do NOT add, infer, or suggest any information that is not explicitly stated in the input.
       
       Title: ${dto.title}
       Abstract: ${dto.abstract}
-      Content Snippet: ${safeContent}
+      ${safeContent ? `Content: ${safeContent}` : ''}
 
-      Requirements:
+      Rules:
       1. Output MUST be valid JSON only.
-      2. Format: { 
-         "summary": "2-3 sentences overview", 
-         "problem": "Research question (1-2 sentences)", 
-         "solution": "Methodology (1-2 sentences)", 
-         "result": "Key findings (1-2 sentences)", 
-         "keywords": ["tag1", "tag2", "tag3", "tag4", "tag5"] 
+      2. You MUST respond in the SAME LANGUAGE as the input. If the input is in Vietnamese, respond in Vietnamese. If in English, respond in English.
+      3. ONLY summarize what is explicitly written in the input. Do NOT invent, assume, or add any new information.
+      4. Do NOT generate keywords. Return an empty array for keywords.
+      5. Keep the summary faithful and concise.
+      6. Format: { 
+         "summary": "Tóm tắt chung 2-3 câu, chỉ dựa trên nội dung đã cho", 
+         "problem": "Vấn đề được đề cập (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
+         "solution": "Giải pháp/phương pháp (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
+         "result": "Kết quả (1-2 câu), nếu không rõ thì ghi 'Không nêu rõ'", 
+         "keywords": [] 
       }
     `;
   }

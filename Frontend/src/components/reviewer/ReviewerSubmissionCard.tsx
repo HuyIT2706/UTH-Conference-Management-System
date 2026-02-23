@@ -122,6 +122,9 @@ const ReviewerSubmissionCard = memo(({
         isOpen={summaryModalOpen}
         onClose={() => setSummaryModalOpen(false)}
         submissionId={parseInt(submission.id)}
+        title={submission.title}
+        abstract={submission.abstract}
+        keywords={submission.keywords}
       />
     </div>
   );

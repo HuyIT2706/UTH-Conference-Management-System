@@ -92,8 +92,9 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-100"
+            className="text-gray-500 hover:text-red-600 rounded-full p-2 hover:bg-gray-100 transition-colors text-lg font-bold leading-none"
             aria-label="Đóng"
+            title="Đóng"
           >
             ✕
           </button>
@@ -154,23 +155,26 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
                 </ul>
               </div>
             )}
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleApply}
-                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
-              >
-                Áp dụng chỉnh sửa
-              </button>
-            </div>
           </div>
         )}
+
+        {/* Footer buttons - always visible */}
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+          >
+            Đóng
+          </button>
+          {result && (
+            <button
+              onClick={handleApply}
+              className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
+            >
+              Áp dụng chỉnh sửa
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

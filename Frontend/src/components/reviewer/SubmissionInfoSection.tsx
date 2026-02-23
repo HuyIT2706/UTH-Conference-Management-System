@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import type { Submission } from '../../types/api.types';
+import SummaryModal from '../ai/SummaryModal';
 
 interface SubmissionInfoSectionProps {
   submission: Submission;
@@ -7,6 +8,8 @@ interface SubmissionInfoSectionProps {
 
 const SubmissionInfoSection = memo(
   ({ submission }: SubmissionInfoSectionProps) => {
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -80,28 +83,49 @@ const SubmissionInfoSection = memo(
               <p className="text-sm font-medium text-gray-700 mb-2">
                 File bài nộp:
               </p>
-              <button
-                onClick={() => window.open(submission.fileUrl, '_blank')}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex items-center gap-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => window.open(submission.fileUrl, '_blank')}
+                  className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex items-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                Tải xuống file PDF
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Tải xuống file PDF
+                </button>
+
+                <button
+                  onClick={() => setSummaryModalOpen(true)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Tóm tắt AI
+                </button>
+              </div>
             </div>
           )}
         </div>
+
+        <SummaryModal
+          isOpen={summaryModalOpen}
+          onClose={() => setSummaryModalOpen(false)}
+          submissionId={parseInt(submission.id)}
+          title={submission.title}
+          abstract={submission.abstract}
+          keywords={submission.keywords}
+        />
       </div>
     );
   },
