@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { aiApi } from '../../services/aiApi';
-import type { CheckGrammarDto, GrammarCheckResponse } from '../../services/aiApi';
+import type { GrammarCheckResponse } from '../../services/aiApi';
 import { showToast } from '../../utils/toast';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -23,17 +23,10 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
     content: 'Kiểm tra Nội dung (AI)',
   };
 
-  // This useEffect is responsible for triggering the grammar check when the modal opens or text changes.
-  // It is not redundant as it handles side effects based on component lifecycle and prop changes.
-  // The provided "Code Edit" attempts to move this logic into a useState initialization, which is syntactically incorrect
-  // and misuses React hooks. Therefore, the useEffect must remain as it is.
   useEffect(() => {
     if (isOpen && textToCheck) {
-      // Reset state when opening or text changes
       setResult(null);
       setError(null);
-      
-      // Auto trigger check
       const performCheck = async () => {
         setLoading(true);
         try {
@@ -50,7 +43,7 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
       
       performCheck();
     }
-  }, [isOpen, textToCheck]); // Run when modal opens or text changes
+  }, [isOpen, textToCheck]); 
 
   // Handler for retry button
   const handleRetry = async () => {
@@ -110,7 +103,6 @@ const GrammarCheckModal = ({ isOpen, onClose, textToCheck, type, onApplyCorrecti
         {!loading && !result && error && (
              <div className="text-center py-8">
                 <p className="text-red-500 mb-4">Không thể kết nối đến AI Service ({error})</p>
-                <p className="text-gray-500 text-sm mb-4">Vui lòng kiểm tra lại kết nối mạng hoặc liên hệ quản trị viên.</p>
                 <button
                   onClick={handleRetry}
                   className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"

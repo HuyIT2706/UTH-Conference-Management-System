@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useAuth } from '../hooks/useAuth';
-import { showToast } from '../utils/toast';
+import { useAuth } from '../../hooks/useAuth';
+import { showToast } from '../../utils/toast';
 import { useEffect, useState } from 'react';
 
 interface RoleProtectedRouteProps {

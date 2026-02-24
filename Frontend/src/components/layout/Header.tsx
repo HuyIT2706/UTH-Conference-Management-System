@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import iconUth from '../assets/icon_uth.svg';
+import { useAuth } from '../../hooks/useAuth';
+import iconUth from '../../assets/icon_uth.svg';
 
 const Header = () => {
   const { user, logout } = useAuth();

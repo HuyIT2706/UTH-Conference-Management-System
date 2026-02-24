@@ -108,23 +108,8 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
       <div className="bg-white rounded-xl shadow-2xl border border-teal-100 p-5 sm:p-6 max-h-[75vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Tóm tắt bài báo (AI)</h2>
-            <p className="mt-1 text-xs sm:text-sm text-gray-500">
-              AI sẽ phân tích và tóm tắt nội dung bài nộp tự động.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-600 rounded-full p-2 hover:bg-gray-100 transition-colors text-lg font-bold leading-none"
-            aria-label="Đóng"
-            title="Đóng"
-          >
-            ✕
-          </button>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Tóm tắt bài nộp</h2>
         </div>
-
-        {/* Loading state */}
         {(loading || generating) && (
           <div className="flex flex-col items-center justify-center py-8">
             <CircularProgress />
@@ -138,7 +123,6 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
         {!loading && !generating && error && !summary && (
           <div className="text-center py-8">
             <p className="text-red-500 mb-4">Không thể kết nối đến AI Service ({error})</p>
-            <p className="text-gray-500 text-sm mb-4">Vui lòng kiểm tra lại kết nối mạng hoặc liên hệ quản trị viên.</p>
             <button
               onClick={loadSummary}
               className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition-colors"
@@ -148,7 +132,6 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
           </div>
         )}
 
-        {/* No summary - show generate button */}
         {!loading && !generating && !summary && !error && (
           <div className="text-center py-8">
             <div className="mb-4">
@@ -166,11 +149,11 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Tạo tóm tắt AI
+                Tạo tóm tắt 
               </button>
             ) : (
               <p className="text-amber-600 text-sm">
-                ⚠ Không thể tạo tóm tắt: thiếu thông tin tiêu đề hoặc tóm tắt bài nộp.
+                 Không thể tạo tóm tắt: thiếu thông tin tiêu đề hoặc tóm tắt bài nộp.
               </p>
             )}
           </div>

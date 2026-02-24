@@ -1,6 +1,6 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import { useGetConferencesQuery } from '../services/conferencesApi';
-import type { Conference } from '../types/api.types';
+import { useGetConferencesQuery } from '../../services/conferencesApi';
+import type { Conference } from '../../types/api.types';
 
 const Competition = () => {
   const { data, isLoading, error } = useGetConferencesQuery();

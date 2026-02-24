@@ -1,4 +1,4 @@
-import imageUth from '../assets/image-uth.jpg';
+import imageUth from '../../assets/image-uth.jpg';
 
 const ContactStudent = () => {
 

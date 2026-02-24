@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import iconUth from '../assets/icon_uth.svg';
-import { showToast } from '../utils/toast';
+import iconUth from '../../assets/icon_uth.svg';
+import { showToast } from '../../utils/toast';
 
 const Footer = () => {
   const [email, setEmail] = useState('');

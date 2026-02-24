@@ -130,11 +130,6 @@ const SubmissionDetailSection = memo(
       }
     };
 
-    // Check if can accept/reject
-    // Show buttons if:
-    // 1. User is Chair/Admin
-    // 2. Submission has reviews (reviews.length > 0)
-    // 3. Status is REVIEWING (can make decision) or SUBMITTED with reviews (can make decision after review)
     const hasReviews = reviews.length > 0;
     const canMakeDecision =
       isChairOrAdmin &&

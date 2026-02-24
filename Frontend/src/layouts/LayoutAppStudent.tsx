@@ -1,8 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import FeatureStudent from "../components/FeatureStudent";
-import Footer from "../components/Footer";
-import HeaderStudent from "../components/HeaderStudent";
-import HeroStudent from "../components/HeroStudent";
+import FeatureStudent from "../components/student/FeatureStudent";
+import Footer from "../components/layout/Footer";
+import HeaderStudent from "../components/student/HeaderStudent";
+import HeroStudent from "../components/student/HeroStudent";
 
 const LayoutAppStudent = () => {
     const location = useLocation();

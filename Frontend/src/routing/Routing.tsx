@@ -3,7 +3,7 @@ import LayoutApp from '../layouts/LayoutApp';
 import LoginPage from '../pages/auth/LoginPage';
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
-import ProtectedRoute from '../components/ProtectedRoute';
+import ProtectedRoute from '../components/common/ProtectedRoute';
 import ActivateAccount from '../pages/auth/ActivateAccount';
 import AccountManagementPage from '../pages/admin/account/AccountManagementPage';
 import ConferenceSetupPage from '../pages/admin/conference/ConferenceSetupPage';
@@ -16,14 +16,14 @@ import ReportsPage from '../pages/admin/report/ReportsPage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import ChangePasswordPage from '../pages/profile/ChangePasswordPage';
 import LayoutAppStudent from '../layouts/LayoutAppStudent';
-import ContactStudent from '../components/ContactStudent';
-import Competition from '../components/Competition';
-import CompetitionWithTabs from '../components/CompetitionWithTabs';
+import ContactStudent from '../components/student/ContactStudent';
+import Competition from '../components/student/Competition';
+import CompetitionWithTabs from '../components/student/CompetitionWithTabs';
 import StudentSubmissionLanding from '../pages/student/StudentSubmissionLanding';
 import StudentSubmitForm from '../pages/student/StudentSubmitForm';
 import StudentSubmissionDetail from '../pages/student/StudentSubmissionDetail';
 import ReviewerDashboard from '../pages/reviewer/ReviewerDashboard';
-import RoleProtectedRoute from '../components/RoleProtectedRoute';
+import RoleProtectedRoute from '../components/common/RoleProtectedRoute';
 import RejectedPage from '../pages/admin/rejected/RejectedPage';
 
 const appRouter = createBrowserRouter([
