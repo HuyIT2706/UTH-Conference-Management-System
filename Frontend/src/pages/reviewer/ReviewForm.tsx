@@ -193,10 +193,10 @@ const ReviewForm = ({
                   <CircularProgress size={16} disableShrink />
                   Đang xử lý...
                 </span>
-              ) : canEdit ? (
+              ) : existingReview ? (
                 'Cập nhật đánh giá'
               ) : (
-                'Nộp đánh giá'
+                'Gửi đánh giá'
               )}
             </button>
           )}

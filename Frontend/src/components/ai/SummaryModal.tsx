@@ -42,8 +42,6 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
         setSummary(null);
       }
     } catch (err: any) {
-      // Axios interceptor transforms errors to { message, statusCode, error }
-      // 404 means no summary exists yet - that's expected
       if (err.statusCode !== 404) {
         console.error(err);
         setError(err.message || 'Lỗi kết nối');

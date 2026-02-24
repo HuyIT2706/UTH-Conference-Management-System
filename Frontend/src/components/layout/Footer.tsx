@@ -27,7 +27,7 @@ const Footer = () => {
               </p>
             </div>
             <div className="space-y-1 text-sm text-white">
-              <p>Copyright © 2024 UTH ConfMS</p>
+              <p>Copyright © 2025 UTH ConfMS</p>
               <p>All rights reserved</p>
             </div>
             <div className="flex space-x-4 pt-2">

@@ -18,7 +18,7 @@ export const useAuth = () => {
   const isLoggingOut = useRef(false);
   
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
-    skip: !hasToken, 
+    skip: !hasToken || isLoggingOut.current, 
   });
 
   useEffect(() => {
@@ -86,10 +86,9 @@ export const useAuth = () => {
       clearInterval(interval);
     };
   }, [hasToken]);
-
   const logout = async () => {
+    isLoggingOut.current = true;
     const refreshToken = tokenUtils.getRefreshToken();
-    setHasToken(false);
     if (refreshToken) {
       try {
         await logoutMutation({ refreshToken }).unwrap();
@@ -97,6 +96,7 @@ export const useAuth = () => {
       }
     }
     tokenUtils.clearTokens();
+    setHasToken(false);
     dispatch(apiSlice.util.resetApiState());
     navigate('/login', { replace: true });
   };

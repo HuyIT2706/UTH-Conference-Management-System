@@ -45,7 +45,6 @@ export const authApi = apiSlice.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['User'],
     }),
     verifyEmail: builder.mutation<
       { message: string },

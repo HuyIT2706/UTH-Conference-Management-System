@@ -86,7 +86,7 @@ const SubmissionInfoSection = memo(
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => window.open(submission.fileUrl, '_blank')}
-                  className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm flex items-center gap-2"
+                  className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700  hover:cursor-pointer transition-colors text-sm flex items-center gap-2"
                 >
                   <svg
                     className="w-4 h-4"
@@ -106,12 +106,9 @@ const SubmissionInfoSection = memo(
 
                 <button
                   onClick={() => setSummaryModalOpen(true)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm flex items-center gap-2 hover:cursor-pointer"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Tóm tắt AI
+                  Tóm tắt bài nộp
                 </button>
               </div>
             </div>
