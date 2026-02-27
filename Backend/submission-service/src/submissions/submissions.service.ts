@@ -3,10 +3,9 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
-  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, Like, In } from 'typeorm';
+import { DataSource, Repository, IsNull } from 'typeorm';
 import { Submission, SubmissionStatus } from '../entities/submission.entity';
 import { SubmissionVersion } from '../entities/submission-version.entity';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -90,6 +89,31 @@ export class SubmissionsService {
       throw new BadRequestException(`Lỗi khi upload file: ${error.message}`);
     }
   }
+  async deleteFile(fileUrl: string): Promise<boolean> {
+    if (!fileUrl) return false;
+
+    try {
+      const urlParts = fileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1]; 
+      const bucketName = 'submissions'; 
+      const { data, error } = await this.supabaseService.getClient()
+        .storage
+        .from(bucketName)
+        .remove([fileName]); 
+
+      if (error) {
+        console.error(`[SupabaseService] Lỗi khi dọn rác file: ${error.message}`);
+        return false;
+      }
+      
+      console.log(`[SupabaseService] Đã dọn rác thành công file: ${fileName}`);
+      return true;
+
+    } catch (err) {
+      console.error(`[SupabaseService] Ngoại lệ khi xóa file:`, err);
+      return false;
+    }
+  }
   // Validate trạng thái chuyển đổi
   private validateStatusTransition(
     currentStatus: SubmissionStatus,
@@ -144,9 +168,9 @@ export class SubmissionsService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    let fileUrl: string | undefined;;
     try {
-      const fileUrl = await this.uploadFile(file);
+      fileUrl = await this.uploadFile(file);
       let parsedCoAuthors: Array<{
         name: string;
         email: string;
@@ -199,7 +223,10 @@ export class SubmissionsService {
 
       return result;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      await queryRunner.rollbackTransaction();  
+      if (fileUrl) {
+        await this.deleteFile(fileUrl);
+      }
       throw error;
     } finally {
       await queryRunner.release();
@@ -644,7 +671,7 @@ export class SubmissionsService {
     return await this.submissionRepository.find({
       where: {
         authorId,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
       relations: ['versions'],
