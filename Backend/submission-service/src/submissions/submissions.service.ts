@@ -211,7 +211,7 @@ export class SubmissionsService {
       const result = await this.submissionRepository.findOne({
         where: {
           id: savedSubmission.id,
-          deletedAt: null as any,
+          deletedAt: IsNull(),
           isActive: true,
         },
         relations: ['versions'],
@@ -242,12 +242,13 @@ export class SubmissionsService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    let newFileUrl: string | null = null;
+    let isNewFileUpload = false;
     try {
       const submission = await queryRunner.manager.findOne(Submission, {
         where: {
           id,
-          deletedAt: null as any,
+          deletedAt: IsNull(),
           isActive: true,
         },
       });
@@ -304,9 +305,11 @@ export class SubmissionsService {
         keywords: submission.keywords,
       });
 
-      let newFileUrl = submission.fileUrl;
+      let finalFileUrl = submission.fileUrl;
       if (file) {
         newFileUrl = await this.uploadFile(file);
+        finalFileUrl = newFileUrl;
+        isNewFileUpload = true;
       }
 
       let parsedCoAuthors: Array<{
@@ -329,7 +332,7 @@ export class SubmissionsService {
         abstract: updateDto.abstract ?? submission.abstract,
         keywords: updateDto.keywords ?? submission.keywords,
         trackId: updateDto.trackId ?? submission.trackId,
-        fileUrl: newFileUrl,
+        fileUrl: finalFileUrl,
         authorAffiliation:
           updateDto.authorAffiliation !== undefined
             ? updateDto.authorAffiliation
@@ -341,10 +344,11 @@ export class SubmissionsService {
       const updatedSubmission = await queryRunner.manager.save(submission);
 
       await queryRunner.commitTransaction();
+
       const result = await this.submissionRepository.findOne({
         where: {
           id: updatedSubmission.id,
-          deletedAt: null as any,
+          deletedAt: IsNull(),
           isActive: true,
         },
         relations: ['versions'],
@@ -355,10 +359,12 @@ export class SubmissionsService {
           `Không tìm thấy bài dự thi sau khi cập nhật`,
         );
       }
-
       return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      if (isNewFileUpload && newFileUrl) {
+        await this.deleteFile(newFileUrl);
+      }
       throw error;
     } finally {
       await queryRunner.release();
@@ -369,7 +375,7 @@ export class SubmissionsService {
     const submission = await this.submissionRepository.findOne({
       where: {
         id,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
     });
@@ -419,7 +425,7 @@ export class SubmissionsService {
     const submission = await this.submissionRepository.findOne({
       where: {
         id,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
     });
@@ -525,7 +531,7 @@ export class SubmissionsService {
     const submission = await this.submissionRepository.findOne({
       where: {
         id,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
     });
@@ -698,7 +704,7 @@ export class SubmissionsService {
     const submission = await this.submissionRepository.findOne({
       where: {
         id,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
       relations: ['versions'],
@@ -780,7 +786,7 @@ export class SubmissionsService {
     const submission = await this.submissionRepository.findOne({
       where: {
         id,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
     });
@@ -808,7 +814,7 @@ export class SubmissionsService {
     return await this.submissionRepository.count({
       where: {
         authorId,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
     });
@@ -818,7 +824,7 @@ export class SubmissionsService {
     const submissions = await this.submissionRepository.find({
       where: {
         trackId,
-        deletedAt: null as any,
+        deletedAt: IsNull(),
         isActive: true,
       },
       select: ['id'],
