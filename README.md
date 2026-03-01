@@ -8,42 +8,42 @@ UTH ConFMS is a full-stack application providing an end-to-end solution for acad
 
 ##  Architecture
 
-The system is built using a **microservices architecture**:
+The system is built using a **microservices architecture** to ensure scalability and maintainability:
 
-```
+```text
 ┌─────────────┐
 │   Client    │ (React + Vite)
 │  Port: 5173 │
 └──────┬──────┘
        │
        ▼
-┌─────────────────────────────────────────────┐
-│          API Gateway (Port 3000)            │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                 API Gateway (Port 3000)                  │
+└──────────────────────────────────────────────────────────┘
        │
-       ├──────────┬──────────┬──────────┬──────────┐
-       ▼          ▼          ▼          ▼          ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
-│ Identity │ │Conference│ │Submission│ │  Review  │
-│ Service  │ │ Service  │ │ Service  │ │ Service  │
-│Port: 3001│ │Port: 3002│ │Port: 3003│ │Port: 3004│
-└────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
-     │            │            │            │
-     └────────────┴────────────┴────────────┘
-                      ▼
-            ┌──────────────────┐
-            │   PostgreSQL     │
-            │  (4 Databases)   │
-            └──────────────────┘
+       ├──────────┬──────────┬──────────┬──────────┬──────────┐
+       ▼          ▼          ▼          ▼          ▼          ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│ Identity │ │Conference│ │Submission│ │  Review  │ │    AI    │
+│ Service  │ │ Service  │ │ Service  │ │ Service  │ │ Service  │
+│Port: 3001│ │Port: 3002│ │Port: 3003│ │Port: 3004│ │Port: 3005│
+└────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘
+     │            │            │            │            │
+     └────────────┴────────────┴────────────┴────────────┘
+                               ▼
+                     ┌──────────────────┐
+                     │    PostgreSQL    │
+                     │  (Micro-DBs)     │
+                     └──────────────────┘
 ```
-
 ### Service Responsibilities
 
-- **API Gateway**: Routes requests to appropriate microservices
-- **Identity Service**: User authentication, authorization, and user management
-- **Conference Service**: Conference creation, CFP management, and notifications
-- **Submission Service**: Paper submission and file management (via Supabase)
-- **Review Service**: Peer review workflow and decision management
+- API Gateway: Centralized entry point, routes requests to appropriate microservices.
+- Identity Service: User authentication (JWT), authorization, and user management.
+- Conference Service: Conference creation, CFP configurations, and track management.
+- Submission Service: Paper submission, versioning, and file management (via Supabase).
+- Review Service: Peer review workflow, assignments, grading, and decision management.
+- AI Service: AI-assisted grammar checking and abstract summarization for authors.
 
 ## ✨ Features
 
@@ -53,9 +53,10 @@ The system is built using a **microservices architecture**:
 
 ## 🛠️ Tech Stack
 
-* **Backend:** NestJS, PostgreSQL, TypeORM, Redis (Cache), Docker.
-* **Frontend:** React 19, TypeScript, TailwindCSS v4, Redux Toolkit, Vite.
-* **DevOps:** Docker & Docker Compose, GitHub Actions.
+* **Backend:** NestJS, Node.js, PostgreSQL, TypeORM, RESTful APIs.
+* **Frontend:** ReactJS, TypeScript, TailwindCSS, Redux Toolkit (RTK Query), Vite.
+* **DevOps:** Docker, Docker Compose, GitHub Actions (CI/CD), Vercel.
+* **Integrations:** Supabase (Cloud Storage), AI APIs.
 
 ---
 
@@ -65,6 +66,7 @@ Get the system running in 2 simple steps.
 ### 1. Environment Configuration (Important)
 Before running, create a .env file in the root directory (or copy from example if available):
 ```bash
+# --- APPLICATION ---
 # --- APPLICATION ---
 APP_NAME=UTH ConfMS
 APP_BASE_URL=http://localhost:5173
@@ -79,6 +81,7 @@ DB_DATABASE_IDENTITY=db_identity
 DB_DATABASE_CONFERENCE=db_conference
 DB_DATABASE_SUBMISSION=db_submission
 DB_DATABASE_REVIEW=db_review
+DB_DATABASE_AI=db_ai
 
 # --- JWT AUTH (Dev defaults) ---
 JWT_ACCESS_SECRET=uth-confms-dev-access-secret-123
@@ -87,13 +90,13 @@ JWT_REFRESH_SECRET=uth-confms-dev-refresh-secret-123
 JWT_REFRESH_EXPIRES_IN=7d
 
 # 1. Supabase (File Storage)
-SUPABASE_URL=
-SUPABASE_KEY=
+SUPABASE_URL=YOUR_SUPABASE_URL
+SUPABASE_KEY=YOUR_SUPABASE_KEY
 SUPABASE_BUCKET_NAME=submission
 
 # 2. Email (Gmail App Password)
-EMAIL_USER=
-EMAIL_PASS=
+EMAIL_USER=YOUR_EMAIL
+EMAIL_PASS=YOUR_APP_PASSWORD
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 
@@ -144,38 +147,37 @@ After starting the services:
 - **Conference Service**: http://localhost:3002
 - **Submission Service**: http://localhost:3003
 - **Review Service**: http://localhost:3004
+- **Al Service**: http://localhost:3005
 - **Swagger API Docs**: 
   - http://localhost:3001/api (Identity)
   - http://localhost:3002/api (Conference)
   - http://localhost:3003/api (Submission)
   - http://localhost:3004/api (Review)
+  - http://localhost:3005/api (AI)
 
 ## 📁 Project Structure
 
 ```
-uth-confms-private/
-├── Backend/                       # Backend microservices
-│   ├── api-gateway/              # API Gateway service
-│   ├── identity-service/         # Authentication & user management
-│   ├── conference-service/       # Conference management
-│   ├── submission-service/       # Paper submission handling
-│   └── review-service/           # Review workflow
+uth-confms/
+├── Backend/                       # Backend microservices workspace
+│   ├── api-gateway/              # Centralized API routing
+│   ├── identity-service/         # Authentication & User management
+│   ├── conference-service/       # Conference & Track management
+│   ├── submission-service/       # Submissions & Storage management
+│   ├── review-service/           # Review logic & Assignments
+│   └── ai-service/               # AI integration (Grammar, Summary)
 ├── Frontend/                      # Frontend React application
 │   ├── src/
-│   │   ├── api/                  # API client configurations
-│   │   ├── components/           # Reusable React components
-│   │   ├── pages/                # Page components
-│   │   │   ├── admin/           # Admin pages
-│   │   │   ├── auth/            # Authentication pages
-│   │   │   ├── reviewer/        # Reviewer dashboard
-│   │   │   └── student/         # Author/student pages
-│   │   ├── redux/               # Redux store & slices
-│   │   ├── routing/             # Route configurations
-│   │   └── utils/               # Utility functions
-├── database/                      # Database initialization scripts
-├── docker-compose.yml            # Docker orchestration
-├── package.json                  # Backend dependencies
-└── README.md                     # This file
+│   │   ├── api/                  # Axios & Interceptors
+│   │   ├── components/           # Reusable UI Components (Admin, Reviewer, Student)
+│   │   ├── pages/                # Role-based pages
+│   │   ├── redux/                # Store config & RTK Query APIs
+│   │   ├── routing/              # RoleProtectedRoute configurations
+│   │   └── utils/                # Constants & Helpers
+├── database/                      # Database initialization scripts (SQL)
+├── docker-compose.yml            # Docker orchestration config
+├── package.json                  # Workspace dependencies
+└── README.md                     # Project documentation
 ```
 
 ## Support
