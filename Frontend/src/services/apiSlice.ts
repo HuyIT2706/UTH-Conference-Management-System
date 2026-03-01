@@ -1,80 +1,74 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { API_BASE_URL } from '../utils/constants.js';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { API_BASE_URL } from '../utils/constants';
+import { Mutex } from 'async-mutex';
+import { tokenUtils } from '../utils/token';
+
+const mutex = new Mutex();
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers) => {
-    const token = localStorage.getItem('accessToken');
+    const token = tokenUtils.getAccessToken();
     if (token) {
-      headers.set('authorization', `Bearer ${token}`);
+      headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
   },
 });
 
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  const isLoginRequest = typeof args === 'object' && args.url === '/auth/login';
-  const isLogoutRequest = typeof args === 'object' && args.url === '/auth/logout';
-  const isChangePasswordRequest = typeof args === 'object' && args.url === '/users/change-password';
-  const isPublicRequest = typeof args === 'object' && 
-    (args.url?.startsWith('/public/') || 
-     args.url?.startsWith('/auth/verify-email') || 
-     args.url?.startsWith('/auth/get-verification-token') ||
-     args.url?.startsWith('/users/forgot-password') ||
-     args.url?.startsWith('/users/verify-reset-code') ||
-     args.url?.startsWith('/users/reset-password') ||
-     args.url?.startsWith('/users/get-reset-code'));
-  if (!isLoginRequest && !isLogoutRequest && !isPublicRequest) {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      return { 
-        error: { 
-          status: 'FETCH_ERROR', 
-          error: 'No token available - request skipped after logout',
-          data: { message: 'Authentication required' }
-        } 
-      };
-    }
-  }
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  // Bỏ qua chặn 401 với các endpoint này để không bị lặp vô tận (ví dụ: login sai pass cũng trả về 401)
+  const isAuthEndpoint = typeof args === 'object' && typeof args.url === 'string' && (
+      args.url.includes('/auth/login') ||
+      args.url.includes('/auth/logout') ||
+      args.url.includes('/users/change-password')
+  );
 
+  await mutex.waitForUnlock();
   let result = await baseQuery(args, api, extraOptions);
-
-  if (result.error && result.error.status === 401 && !isLoginRequest && !isLogoutRequest && !isChangePasswordRequest) {
-    const refreshToken = sessionStorage.getItem('refreshToken');
-    if (refreshToken) {
+  
+  if (result.error && result.error.status === 401 && !isAuthEndpoint) {
+    if (!mutex.isLocked()) {
+      const release = await mutex.acquire(); 
+      
       try {
-        const refreshResult = await baseQuery(
-          {
-            url: '/auth/refresh-token',
-            method: 'POST',
-            body: { refreshToken },
-          },
-          api,
-          extraOptions
-        );
+        const refreshToken = tokenUtils.getRefreshToken(); 
+        
+        if (refreshToken) {
+          const refreshResult = await baseQuery(
+            {
+              url: '/auth/refresh-token',
+              method: 'POST',
+              body: { refreshToken },
+            },
+            api,
+            extraOptions
+          );
 
-        if (refreshResult.data) {
-          const { accessToken, refreshToken: newRefreshToken } = refreshResult.data as {
-            accessToken: string;
-            refreshToken: string;
-          };
-          localStorage.setItem('accessToken', accessToken);
-          sessionStorage.setItem('refreshToken', newRefreshToken);
+          if (refreshResult.data) {
+            const data = refreshResult.data as { accessToken: string; refreshToken?: string };
+            tokenUtils.setTokens(data.accessToken, data.refreshToken || refreshToken);
 
-          result = await baseQuery(args, api, extraOptions);
+            result = await baseQuery(args, api, extraOptions);
+          } else {
+            tokenUtils.clearTokens();
+            window.dispatchEvent(new CustomEvent('auth:logout')); 
+          }
         } else {
-          localStorage.removeItem('accessToken');
-          sessionStorage.removeItem('refreshToken');
-          window.dispatchEvent(new CustomEvent('auth:logout'));
+           tokenUtils.clearTokens();
+           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
-      } catch (error) {
-        localStorage.removeItem('accessToken');
-        sessionStorage.removeItem('refreshToken');
-        window.dispatchEvent(new CustomEvent('auth:logout'));
+      } finally {
+        release(); 
       }
     } else {
-      localStorage.removeItem('accessToken');
-      window.dispatchEvent(new CustomEvent('auth:logout'));
+      await mutex.waitForUnlock();
+      result = await baseQuery(args, api, extraOptions);
     }
   }
 
@@ -83,16 +77,6 @@ const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
 
 export const apiSlice = createApi({
   reducerPath: 'api',
-  baseQuery: baseQueryWithReauth,
-  tagTypes: [
-    'User',
-    'Conference',
-    'Track',
-    'TrackMember',
-    'Submission',
-    'Review',
-    'Assignment',
-  ],
-  endpoints: () => ({}),
+  baseQuery: baseQueryWithReauth, 
+  endpoints: (builder) => ({}),
 });
-
