@@ -38,7 +38,7 @@ async function bootstrap() {
 
   const proxyOptions = {
     changeOrigin: true,
-    timeout: 30000, // 30 seconds timeout
+    timeout: 30000, 
     proxyTimeout: 30000,
     onProxyReq: (proxyReq: any, req: any, res: any) => {
       if (req.headers.origin) {
@@ -158,8 +158,6 @@ async function bootstrap() {
       ...proxyOptions,
     }),
   );
-
-  // Health check endpoint for gateway
   expressApp.get('/health', (req, res) => {
     res.json({
       status: 'ok',
@@ -167,8 +165,6 @@ async function bootstrap() {
       timestamp: new Date().toISOString(),
     });
   });
-
-  // Health check proxy endpoints for monitoring services
   expressApp.get(
     '/health/identity',
     createProxyMiddleware({

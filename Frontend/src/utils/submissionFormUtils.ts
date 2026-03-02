@@ -11,7 +11,7 @@ export const calculateDaysLeft = (deadline: string): number => {
 export const isValidFileType = (file: File): boolean => {
   const validTypes = [
     'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/msword', // .doc
     'application/zip', // .zip
   ];

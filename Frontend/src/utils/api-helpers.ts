@@ -1,9 +1,5 @@
 import type { ApiError } from '../types/api.types';
 
-/**
- * Format API error message for display
- * Handles RTK Query error structure: error.data.message
- */
 export const formatApiError = (error: unknown): string => {
   if (typeof error === 'string') {
     return error;
@@ -12,17 +8,13 @@ export const formatApiError = (error: unknown): string => {
   if (!error || typeof error !== 'object') {
     return 'An unexpected error occurred';
   }
-
   // RTK Query error structure: error.data.message
-  // Check for error.data (RTK Query wraps API response in data)
   if ('data' in error) {
     const data = (error as { data?: unknown }).data;
     if (data && typeof data === 'object') {
-      // Check for nested message in data
       if ('message' in data && typeof data.message === 'string') {
         return data.message;
       }
-      // Check if data itself is ApiError
       if ('message' in data && typeof (data as ApiError).message === 'string') {
         return (data as ApiError).message;
       }

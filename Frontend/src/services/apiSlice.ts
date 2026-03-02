@@ -23,10 +23,11 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   extraOptions
 ) => {
   // Bỏ qua chặn 401 với các endpoint này để không bị lặp vô tận (ví dụ: login sai pass cũng trả về 401)
-  const isAuthEndpoint = typeof args === 'object' && typeof args.url === 'string' && (
-      args.url.includes('/auth/login') ||
-      args.url.includes('/auth/logout') ||
-      args.url.includes('/users/change-password')
+  const url = typeof args === 'string' ? args : args.url;
+  const isAuthEndpoint = (
+      url.includes('/auth/login') ||
+      url.includes('/auth/logout') ||
+      url.includes('/users/change-password')
   );
 
   await mutex.waitForUnlock();
@@ -78,5 +79,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth, 
+  tagTypes: ['Conference', 'Track', 'TrackMember', 'Assignment', 'Submission', 'Review', 'User'],
   endpoints: (builder) => ({}),
 });

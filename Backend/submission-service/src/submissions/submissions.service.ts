@@ -89,6 +89,7 @@ export class SubmissionsService {
       throw new BadRequestException(`Lỗi khi upload file: ${error.message}`);
     }
   }
+  // Xóa file trên Supabase 
   async deleteFile(fileUrl: string): Promise<boolean> {
     if (!fileUrl) return false;
 
@@ -188,12 +189,12 @@ export class SubmissionsService {
         fileUrl,
         status: SubmissionStatus.SUBMITTED,
         authorId,
-        authorName: authorName || null, // Lưu tên từ JWT token
+        authorName: authorName || null,
         authorAffiliation: createDto.authorAffiliation || null,
         trackId: createDto.trackId,
         conferenceId: createDto.conferenceId,
         coAuthors: parsedCoAuthors,
-        submittedAt: new Date(), // Lưu thời gian nộp bài
+        submittedAt: new Date(), 
       });
 
       const savedSubmission = await queryRunner.manager.save(submission);
@@ -282,7 +283,7 @@ export class SubmissionsService {
           }
         }
       }
-
+      // Tạo version mới trước khi cập nhật submission
       const existingVersions = await queryRunner.manager.find(
         SubmissionVersion,
         {
@@ -290,7 +291,7 @@ export class SubmissionsService {
           select: ['versionNumber'],
         },
       );
-
+      // Tính versionNumber cho version mới
       const maxVersion = existingVersions.length
         ? Math.max(...existingVersions.map((v) => v.versionNumber))
         : 0;
@@ -304,7 +305,7 @@ export class SubmissionsService {
         fileUrl: submission.fileUrl,
         keywords: submission.keywords,
       });
-
+      // Nếu có file mới, upload và cập nhật fileUrl
       let finalFileUrl = submission.fileUrl;
       if (file) {
         newFileUrl = await this.uploadFile(file);
@@ -326,7 +327,7 @@ export class SubmissionsService {
           parsedCoAuthors = null;
         }
       }
-
+      //  Tạo người đồng hành thành công
       Object.assign(submission, {
         title: updateDto.title ?? submission.title,
         abstract: updateDto.abstract ?? submission.abstract,
@@ -361,6 +362,7 @@ export class SubmissionsService {
       }
       return result;
     } catch (error) {
+      // Nếu có lỗi, rollback transaction và xóa file mới nếu đã upload
       await queryRunner.rollbackTransaction();
       if (isNewFileUpload && newFileUrl) {
         await this.deleteFile(newFileUrl);
