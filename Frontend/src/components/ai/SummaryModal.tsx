@@ -42,7 +42,7 @@ const SummaryModal = ({ isOpen, onClose, submissionId, title, abstract, keywords
         setSummary(null);
       }
     } catch (err: any) {
-      if (err.statusCode !== 404) {
+      if (err.response?.status !== 404) {
         console.error(err);
         setError(err.message || 'Lỗi kết nối');
       }

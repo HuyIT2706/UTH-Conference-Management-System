@@ -10,15 +10,15 @@ const SESSION_CHECK_INTERVAL = 10000;
 
 
 let isCheckingSession = false;
+let isLoggingOutGlobal = false;
 
 export const useAuth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [hasToken, setHasToken] = useState(() => tokenUtils.hasToken());
-  const isLoggingOut = useRef(false);
   
   const { data, isLoading, error, refetch } = useGetMeQuery(undefined, {
-    skip: !hasToken || isLoggingOut.current, 
+    skip: !hasToken || isLoggingOutGlobal, 
   });
 
   useEffect(() => {
@@ -38,12 +38,14 @@ export const useAuth = () => {
   const [checkSessionMutation] = useCheckSessionMutation();
 
   const forceLogout = (message?: string) => {
-    if (isLoggingOut.current) return;
-    isLoggingOut.current = true;
+    if (isLoggingOutGlobal) return;
+    isLoggingOutGlobal = true;
     
     tokenUtils.clearTokens();
     setHasToken(false);
-    dispatch(apiSlice.util.resetApiState());
+    setTimeout(() => {
+      dispatch(apiSlice.util.resetApiState());
+    }, 0);
     navigate('/login', { replace: true });
     
     if (message) {
@@ -51,7 +53,7 @@ export const useAuth = () => {
     }
     
     setTimeout(() => {
-      isLoggingOut.current = false;
+      isLoggingOutGlobal = false;
     }, 1000);
   };
 
@@ -62,7 +64,7 @@ export const useAuth = () => {
 
     const checkSession = async () => {
       const refreshToken = tokenUtils.getRefreshToken();
-      if (!refreshToken || isLoggingOut.current || !isMounted || isCheckingSession) return;
+      if (!refreshToken || isLoggingOutGlobal || !isMounted || isCheckingSession) return;
 
       isCheckingSession = true;
       try {
@@ -87,7 +89,7 @@ export const useAuth = () => {
     };
   }, [hasToken]);
   const logout = async () => {
-    isLoggingOut.current = true;
+    isLoggingOutGlobal = true;
     const refreshToken = tokenUtils.getRefreshToken();
     if (refreshToken) {
       try {
@@ -97,8 +99,14 @@ export const useAuth = () => {
     }
     tokenUtils.clearTokens();
     setHasToken(false);
-    dispatch(apiSlice.util.resetApiState());
+    setTimeout(() => {
+      dispatch(apiSlice.util.resetApiState());
+    }, 0);
     navigate('/login', { replace: true });
+    
+    setTimeout(() => {
+      isLoggingOutGlobal = false;
+    }, 1000);
   };
 
   return {
