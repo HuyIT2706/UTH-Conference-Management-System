@@ -36,15 +36,19 @@ import { HealthController } from './health/health.controller';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const dbUrl = config.get<string>('DATABASE_URL');
+        const host = config.get<string>('DB_HOST') || 'localhost';
+        const port = Number(config.get<string>('DB_PORT')) || 5432;
+        const username = config.get<string>('DB_USERNAME') || 'admin';
+        const password = config.get<string>('DB_PASSWORD') || 'admin123';
+        const database = config.get<string>('DB_DATABASE') || 'db_conference';
+
         return {
           type: 'postgres' as const,
-          url: dbUrl,
-          host: !dbUrl ? (config.get<string>('DB_HOST') || 'localhost') : undefined,
-          port: !dbUrl ? (Number(config.get<string>('DB_PORT')) || 5432) : undefined,
-          username: !dbUrl ? (config.get<string>('DB_USERNAME') || 'admin') : undefined,
-          password: !dbUrl ? (config.get<string>('DB_PASSWORD') || 'admin123') : undefined,
-          database: !dbUrl ? (config.get<string>('DB_DATABASE') || 'db_conference') : undefined,
+          host,
+          port,
+          username,
+          password,
+          database,
           entities: [
             Conference,
             Track,
@@ -52,10 +56,8 @@ import { HealthController } from './health/health.controller';
             TrackMember,
             CfpSetting,
           ],
-          synchronize: false, 
-          ssl: {
-            rejectUnauthorized: false,
-          },
+          synchronize: true,
+        };
       },
     }),
     TypeOrmModule.forFeature([
