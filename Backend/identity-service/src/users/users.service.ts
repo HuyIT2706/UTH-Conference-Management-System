@@ -52,7 +52,7 @@ export class UsersService {
   // Tìm user theo email bao gồm cả những user đã bị xóa mềm
   async findByEmailIncludingDeleted(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email }, // No deletedAt filter - includes soft deleted
+      where: { email }, // 
       relations: ['roles'],
     });
   }

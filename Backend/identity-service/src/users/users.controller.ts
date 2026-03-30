@@ -322,6 +322,6 @@ export class UsersController {
       : undefined;
 
     await this.usersService.deleteUser(userId, authToken);
-    return { message: 'Xóa user thành công (soft delete)' };
+    return { message: 'Xóa user thành công' };
   }
 }

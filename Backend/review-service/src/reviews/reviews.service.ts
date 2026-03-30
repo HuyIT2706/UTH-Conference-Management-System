@@ -157,35 +157,7 @@ export class ReviewsService {
     });
   }
 
-  // Chấp nhận hoặc từ chối assignment
-  async updateAssignmentStatus(
-    assignmentId: number,
-    reviewerId: number,
-    status: AssignmentStatus.ACCEPTED | AssignmentStatus.REJECTED,
-  ): Promise<Assignment> {
-    const assignment = await this.assignmentRepository.findOne({
-      where: { id: assignmentId },
-    });
 
-    if (!assignment) {
-      throw new NotFoundException('Assignment không tồn tại');
-    }
-
-    if (assignment.reviewerId !== reviewerId) {
-      throw new ForbiddenException(
-        'Bạn không có quyền cập nhật assignment này',
-      );
-    }
-
-    if (assignment.status !== AssignmentStatus.PENDING) {
-      throw new BadRequestException(
-        'Assignment này đã được xử lý rồi, không thể thay đổi trạng thái',
-      );
-    }
-
-    assignment.status = status;
-    return this.assignmentRepository.save(assignment);
-  }
 
   // Reviewer nộp bài chấm (có thể tạo mới hoặc cập nhật nếu deadline chưa hết)
   async submitReview(

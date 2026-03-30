@@ -6,9 +6,7 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
   Post,
-  Put,
   ForbiddenException,
-  BadRequestException,
   UseGuards,
   Req,
   UnauthorizedException,
@@ -27,7 +25,7 @@ import type { Request } from 'express';
 import { ReviewsService } from './reviews.service';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
-import { AssignmentStatus } from './entities/assignment.entity';
+
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { JwtPayload } from '../auth/jwt.strategy';
 import { CreateDecisionDto } from './dto/create-decision.dto';
@@ -196,71 +194,7 @@ export class ReviewsController {
       data: submissions,
     };
   }
-  // Reviewer accept an assignment
-  @Put('assignments/:id/accept')
-  @ApiOperation({
-    summary: 'Reviewer chấp nhận assignment',
-    description: `Reviewer chấp nhận bài báo được gán để bắt đầu review. Status sẽ chuyển từ PENDING sang ACCEPTED.`,
-  })
-  @ApiParam({ name: 'id', description: 'ID của assignment' })
-  @ApiResponse({ status: 200, description: 'Chấp nhận assignment thành công' })
-  @ApiResponse({
-    status: 403,
-    description: 'Không có quyền hoặc không phải assignment của reviewer này',
-  })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy assignment' })
-  async acceptAssignment(
-    @Req() req: Request,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    const user = req.user as JwtPayload | undefined;
-    if (!user?.sub) {
-      throw new UnauthorizedException('Token không hợp lệ');
-    }
-    this.ensureIsReviewer(user);
-    const assignment = await this.reviewsService.updateAssignmentStatus(
-      id,
-      user.sub,
-      AssignmentStatus.ACCEPTED,
-    );
 
-    return {
-      message: 'Chấp nhận assignment thành công',
-      data: assignment,
-    };
-  }
-  @Put('assignments/:id/reject')
-  @ApiOperation({
-    summary: 'Reviewer từ chối assignment',
-    description: `Reviewer từ chối bài báo được gán. Status sẽ chuyển từ PENDING sang REJECTED.`,
-  })
-  @ApiParam({ name: 'id', description: 'ID của assignment' })
-  @ApiResponse({ status: 200, description: 'Từ chối assignment thành công' })
-  @ApiResponse({
-    status: 403,
-    description: 'Không có quyền hoặc không phải assignment của reviewer này',
-  })
-  @ApiResponse({ status: 404, description: 'Không tìm thấy assignment' })
-  async rejectAssignment(
-    @Req() req: Request,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    const user = req.user as JwtPayload | undefined;
-    if (!user?.sub) {
-      throw new UnauthorizedException('Token không hợp lệ');
-    }
-    this.ensureIsReviewer(user);
-    const assignment = await this.reviewsService.updateAssignmentStatus(
-      id,
-      user.sub,
-      AssignmentStatus.REJECTED,
-    );
-
-    return {
-      message: 'Từ chối assignment thành công',
-      data: assignment,
-    };
-  }
   @Post()
   @ApiOperation({
     summary: 'Reviewer nộp bài chấm',

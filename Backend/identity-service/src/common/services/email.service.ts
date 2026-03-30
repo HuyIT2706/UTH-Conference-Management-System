@@ -65,7 +65,6 @@ export class EmailService {
         message: error?.message,
         response: error?.response?.data,
       });
-      // KHÔNG throw để không làm hỏng flow chính (forgot password, verify, ...)
     }
   }
 
