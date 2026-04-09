@@ -22,11 +22,15 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
-    description: 'Họ và tên đầy đủ',
+    description: 'Họ và tên đầy đủ (từ 10 đến 50 ký tự)',
     example: 'Nguyễn Văn Reviewer',
+    minLength: 10,
+    maxLength: 50,
   })
   @IsString()
   @IsNotEmpty()
+  @MinLength(10)
+  @MaxLength(50)
   fullName: string;
 
   @ApiProperty({

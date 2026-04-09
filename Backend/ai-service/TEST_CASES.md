@@ -19,7 +19,7 @@ Tài liệu này tổng hợp toàn bộ các Test Cases (Integration Test Cases
 | ITC_1.9(BVA) | checkGrammar | Biên Enum phân biệt hoa thường | Gửi Body với type = "ABSTRACT" hoặc " Abstract ". | HTTP 400 Bad Request. Lỗi validation @IsIn. | Đã đăng nhập |
 | ITC_1.10(BVA) | checkGrammar | Chứa toàn khoảng trắng (Whitespace) | Gửi Body có text = "          " (10 khoảng trắng) và type đúng. | HTTP 400 (do bị Trim) hoặc AI báo không hiểu văn bản. | Đã đăng nhập |
 | ITC_1.11(BVA) | checkGrammar | Toàn Emoji hoặc ký tự UTF-8 dị biệt | Gửi Body có text chứa 100 ký tự emoji 😀😎. | HTTP 200 OK. AI không văng lỗi sập server mà tự trả về kết quả 0. | Đã đăng nhập |
-| ITC_1.12(BVA) | checkGrammar | Trường Type rỗng hoặc Null | Gửi Body có trường type = "" hoặc type = null. | HTTP 400 Bad Request. Lỗi validation Enum. | Đã đăng nhập |
+| ITC_1.12(BVA) | checkGrammar | Trường Type rỗng hoặc Null | Gửi Body có trường type = "" hoặc type = null. |     | Đã đăng nhập |
 | ITC_2.1 | summarize | Tự động tóm tắt bài nộp (Lần đầu) | Truyền submissionId hợp lệ, bài chưa được tóm tắt. | HTTP 200 OK. Trả về tóm tắt AI, và lưu DB. | Đã đăng nhập |
 | ITC_2.2 | summarize | Lấy tóm tắt từ DB (Check Cache) | Gọi lại API với đúng submissionId vừa tóm tắt. | HTTP 200 OK. Lấy từ Database nhanh chóng, không sinh bản ghi mới. | Bài đã tóm tắt |
 | ITC_2.3 | summarize | Yêu cầu thiếu Token xác thực | Không gọi kèm Bearer Token. | HTTP 401 Unauthorized. Báo lỗi không có quyền truy cập. | Không đăng nhập |
