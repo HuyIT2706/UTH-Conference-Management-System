@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { RoleName } from '../entities/role.entity';
 
@@ -24,6 +24,7 @@ export class CreateUserDto {
     example: 'Nguyễn Văn Reviewer',
   })
   @IsString()
+  @IsNotEmpty()
   fullName: string;
 
   @ApiProperty({
