@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SelfAssignDto {
@@ -16,5 +16,6 @@ export class SelfAssignDto {
   })
   @IsInt()
   @IsNotEmpty()
+  @Min(1)
   conferenceId: number;
 }
