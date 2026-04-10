@@ -11,6 +11,7 @@ import {
   Req,
   UnauthorizedException,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -534,6 +535,9 @@ export class ReviewsController {
     @Req() req: Request,
     @Param('id', ParseIntPipe) conferenceId: number,
   ) {
+    if (conferenceId <= 0) {
+      throw new BadRequestException('ID hội nghị phải là số nguyên dương hợp lệ (> 0)');
+    }
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
       throw new UnauthorizedException('Token không hợp lệ');
