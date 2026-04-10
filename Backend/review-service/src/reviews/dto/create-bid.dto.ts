@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PreferenceType } from '../entities/review-preference.entity';
 
@@ -17,6 +17,7 @@ export class CreateBidDto {
   })
   @IsInt()
   @IsNotEmpty()
+  @Min(1)
   conferenceId: number;
 
   @ApiProperty({
