@@ -562,6 +562,9 @@ export class ReviewsController {
   async getReviewerActivityStats(
     @Param('reviewerId', ParseIntPipe) reviewerId: number,
   ) {
+    if (reviewerId <= 0) {
+      throw new BadRequestException('ID reviewer phải là số nguyên dương hợp lệ (> 0)');
+    }
     const stats =
       await this.reviewsService.getReviewerActivityStats(reviewerId);
     return {
