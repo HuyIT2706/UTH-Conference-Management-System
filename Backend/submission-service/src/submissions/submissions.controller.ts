@@ -13,6 +13,7 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
   UnauthorizedException,
+  BadRequestException,
   HttpException,
   UseGuards,
   Req,
@@ -511,6 +512,9 @@ export class SubmissionsController {
   async getSubmissionIdsByTrackId(
     @Param('trackId', ParseIntPipe) trackId: number,
   ) {
+    if (trackId <= 0) {
+      throw new BadRequestException('ID track phải là số nguyên dương hợp lệ (> 0)');
+    }
     const submissionIds =
       await this.submissionsService.getSubmissionIdsByTrackId(trackId);
     return {

@@ -149,6 +149,24 @@ export class SubmissionsService {
       throw new BadRequestException('File là bắt buộc (PDF, DOCX hoặc ZIP)');
     }
 
+    // Kiểm tra trùng lặp bài nộp (cùng tác giả, cùng tiêu đề, cùng track, cùng hội nghị)
+    const duplicate = await this.submissionRepository.findOne({
+      where: {
+        title: createDto.title,
+        trackId: createDto.trackId,
+        conferenceId: createDto.conferenceId,
+        authorId: authorId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+    });
+
+    if (duplicate) {
+      throw new BadRequestException(
+        'Thất bại! Bạn đã nộp một bài báo với tiêu đề này trong Track này rồi.',
+      );
+    }
+
     // Check deadline trước khi nộp bài
     try {
       const deadlineCheck = await this.conferenceClient.checkDeadline(

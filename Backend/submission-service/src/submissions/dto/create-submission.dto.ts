@@ -4,6 +4,7 @@ import {
   IsInt,
   IsOptional,
   MaxLength,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -45,6 +46,7 @@ export class CreateSubmissionDto {
   @Type(() => Number)
   @IsInt()
   @IsNotEmpty()
+  @Min(1)
   trackId: number;
 
   @ApiProperty({
@@ -54,6 +56,7 @@ export class CreateSubmissionDto {
   @Type(() => Number)
   @IsInt()
   @IsNotEmpty()
+  @Min(1)
   conferenceId: number;
 
   @ApiProperty({

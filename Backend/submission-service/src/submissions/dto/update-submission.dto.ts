@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsInt, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -42,6 +42,7 @@ export class UpdateSubmissionDto {
   @Type(() => Number)
   @IsInt()
   @IsOptional()
+  @Min(1)
   trackId?: number;
 
   @ApiProperty({
