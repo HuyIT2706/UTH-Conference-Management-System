@@ -1,10 +1,12 @@
 import {
   IsDateString,
   IsEmail,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateConferenceDto {
@@ -14,8 +16,10 @@ export class UpdateConferenceDto {
     maxLength: 255,
     required: false,
   })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   @MaxLength(255)
   name?: string;
 

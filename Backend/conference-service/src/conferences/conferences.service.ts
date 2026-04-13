@@ -49,6 +49,20 @@ export class ConferencesService {
   ): Promise<Conference> {
     this.ensureValidDateRange(dto.startDate, dto.endDate);
 
+    const existing = await this.conferenceRepository.findOne({
+      where: {
+        name: dto.name,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+    });
+
+    if (existing) {
+      throw new BadRequestException(
+        'Tên hội nghị đã tồn tại với một hội nghị khác',
+      );
+    }
+
     const conference = this.conferenceRepository.create({
       name: dto.name,
       startDate: new Date(dto.startDate),
@@ -154,6 +168,17 @@ export class ConferencesService {
     const nextStart = dto.startDate ?? conference.startDate.toISOString();
     const nextEnd = dto.endDate ?? conference.endDate.toISOString();
     this.ensureValidDateRange(nextStart, nextEnd);
+
+    if (dto.name && dto.name !== conference.name) {
+      const existing = await this.conferenceRepository.findOne({
+        where: { name: dto.name, deletedAt: IsNull(), isActive: true },
+      });
+      if (existing) {
+        throw new BadRequestException(
+          'Tên hội nghị đã tồn tại với một hội nghị khác',
+        );
+      }
+    }
 
     Object.assign(conference, {
       name: dto.name ?? conference.name,
@@ -363,6 +388,18 @@ export class ConferencesService {
   }
   // Lấy tất cả các chủ đề của hội nghị
   async findAllTracks(conferenceId: number): Promise<Track[]> {
+    const conference = await this.conferenceRepository.findOne({
+      where: {
+        id: conferenceId,
+        deletedAt: IsNull(),
+        isActive: true,
+      },
+    });
+
+    if (!conference) {
+      throw new NotFoundException('Không tìm thấy hội nghị');
+    }
+
     return await this.trackRepository.find({
       where: {
         conferenceId,

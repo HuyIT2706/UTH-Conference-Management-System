@@ -1,4 +1,5 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTrackDto {
@@ -8,8 +9,10 @@ export class UpdateTrackDto {
     maxLength: 255,
     required: false,
   })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   @MaxLength(255)
   name?: string;
 }
