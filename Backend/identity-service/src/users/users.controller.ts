@@ -27,6 +27,10 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { GetResetCodeDto } from './dto/get-reset-code.dto';
+import { VerifyResetCodeDto } from './dto/verify-reset-code.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { RoleName } from './entities/role.entity';
 import * as bcrypt from 'bcrypt';
@@ -107,20 +111,20 @@ export class UsersController {
     status: 200,
     description: 'Đã gửi mã reset mật khẩu (luôn trả về 200 để bảo mật)',
   })
-  async forgotPassword(@Body('email') email: string) {
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
     console.log(
-      `[UsersController] Forgot password request received for email: ${email}`,
+      `[UsersController] Forgot password request received for email: ${dto.email}`,
     );
     try {
       // Service sẽ return ngay sau khi lưu token, email gửi ở background
-      await this.usersService.forgotPassword(email);
+      await this.usersService.forgotPassword(dto.email);
       console.log(
-        `[UsersController] Forgot password processed successfully for email: ${email}`,
+        `[UsersController] Forgot password processed successfully for email: ${dto.email}`,
       );
       return { message: 'Đã gửi mã reset mật khẩu tới email (nếu tồn tại)' };
     } catch (error: any) {
       console.error(
-        `[UsersController] Error in forgotPassword for email ${email}:`,
+        `[UsersController] Error in forgotPassword for email ${dto.email}:`,
         error,
       );
       // Vẫn trả về 200 để bảo mật (không tiết lộ email có tồn tại hay không)
@@ -143,8 +147,8 @@ export class UsersController {
     status: 404,
     description: 'User không tồn tại hoặc chưa có code',
   })
-  async getResetCode(@Query('email') email: string) {
-    const result = await this.usersService.getResetCodeByEmail(email);
+  async getResetCode(@Query() queryDto: GetResetCodeDto) {
+    const result = await this.usersService.getResetCodeByEmail(queryDto.email);
     return {
       message: 'Lấy reset code thành công',
       data: result,
@@ -155,11 +159,8 @@ export class UsersController {
   @ApiOperation({ summary: 'Xác minh mã reset mật khẩu' })
   @ApiResponse({ status: 200, description: 'Mã hợp lệ' })
   @ApiResponse({ status: 400, description: 'Mã không hợp lệ hoặc đã hết hạn' })
-  async verifyResetCode(
-    @Body('email') email: string,
-    @Body('code') code: string,
-  ) {
-    const isValid = await this.usersService.verifyResetCode(email, code);
+  async verifyResetCode(@Body() dto: VerifyResetCodeDto) {
+    const isValid = await this.usersService.verifyResetCode(dto.email, dto.code);
     if (!isValid) {
       throw new UnauthorizedException(
         'Mã reset mật khẩu không hợp lệ hoặc đã hết hạn',
@@ -173,12 +174,8 @@ export class UsersController {
     summary: 'Đặt lại password',
     description: 'Đặt lại password khi quên pass',
   })
-  async resetPassword(
-    @Body('email') email: string,
-    @Body('code') code: string,
-    @Body('newPassword') newPassword: string,
-  ) {
-    await this.usersService.resetPassword(email, code, newPassword);
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.usersService.resetPassword(dto.email, dto.code, dto.newPassword);
     return { message: 'Reset mật khẩu thành công' };
   }
 

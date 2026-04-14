@@ -19,6 +19,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { GetVerificationTokenDto } from './dto/get-verification-token.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UsersService } from '../users/users.service';
@@ -95,8 +97,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Xác minh email thành công' })
   @ApiResponse({ status: 400, description: 'Tài khoản đã được xác minh rồi' })
   @ApiResponse({ status: 401, description: 'Mã không hợp lệ hoặc đã hết hạn' })
-  async verifyEmail(@Body('token') code: string) {
-    const result = await this.authService.verifyEmail(code);
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    const result = await this.authService.verifyEmail(dto.token);
     return result;
   }
   // Lấy verification code
@@ -114,8 +116,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Lấy token thành công' })
   @ApiResponse({ status: 400, description: 'Email đã được xác minh rồi' })
   @ApiResponse({ status: 404, description: 'User không tồn tại' })
-  async getVerificationToken(@Query('email') email: string) {
-    const result = await this.authService.getVerificationTokenByEmail(email);
+  async getVerificationToken(@Query() queryDto: GetVerificationTokenDto) {
+    const result = await this.authService.getVerificationTokenByEmail(queryDto.email);
 
     return {
       message: 'Đã gửi mã kích hoạt tài khoản tới email (tồn tại)',

@@ -7,6 +7,7 @@ export class CreateUserDto {
     description: 'Email của user',
     example: 'reviewer@example.com',
   })
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 
@@ -38,6 +39,7 @@ export class CreateUserDto {
     enum: RoleName,
     example: RoleName.REVIEWER,
   })
+  @IsNotEmpty()
   @IsEnum(RoleName)
   role: RoleName;
 }
