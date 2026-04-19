@@ -1,0 +1,4886 @@
+[
+  {
+    "id": "CTC_1.1",
+    "fn": "getPublicCfp",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_1.1",
+      "data": {
+        "function": "getPublicCfp",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.791Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_1.2",
+    "fn": "getPublicCfp",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp",
+      "auth": "none"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_1.2",
+      "data": {
+        "function": "getPublicCfp",
+        "status": 404,
+        "method": "get",
+        "url": "/public/conferences/1/cfp",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_1.3",
+    "fn": "getPublicCfp",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/abc/cfp",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_1.3",
+      "data": {
+        "function": "getPublicCfp",
+        "status": 400,
+        "method": "get",
+        "url": "/public/conferences/abc/cfp",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_1.1",
+    "fn": "getPublicCfp",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_1.1",
+      "data": {
+        "function": "getPublicCfp",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_1.2",
+    "fn": "getPublicCfp",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/2147483647/cfp",
+      "auth": "none"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_1.2",
+      "data": {
+        "function": "getPublicCfp",
+        "status": 404,
+        "method": "get",
+        "url": "/public/conferences/2147483647/cfp",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_2.1",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.1",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.2",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.2",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.3",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.3",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.4",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.4",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.5",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.5",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.6",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_2.6",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_2.7",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/abc/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_2.7",
+      "data": {
+        "function": "checkDeadline",
+        "status": 400,
+        "method": "get",
+        "url": "/public/conferences/abc/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_2.1",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_2.1",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.792Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_2.2",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_2.2",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_2.3",
+    "fn": "checkDeadline",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_2.3",
+      "data": {
+        "function": "checkDeadline",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/cfp/check-deadline?type=submission",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_3.1",
+    "fn": "getPublicTracks",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_3.1",
+      "data": {
+        "function": "getPublicTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_3.2",
+    "fn": "getPublicTracks",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_3.2",
+      "data": {
+        "function": "getPublicTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_3.3",
+    "fn": "getPublicTracks",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/abc/tracks",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_3.3",
+      "data": {
+        "function": "getPublicTracks",
+        "status": 400,
+        "method": "get",
+        "url": "/public/conferences/abc/tracks",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_3.1",
+    "fn": "getPublicTracks",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_3.1",
+      "data": {
+        "function": "getPublicTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_3.2",
+    "fn": "getPublicTracks",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_3.2",
+      "data": {
+        "function": "getPublicTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_4.1",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks/1/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_4.1",
+      "data": {
+        "function": "validateTrack",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks/1/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_4.2",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks/1/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_4.2",
+      "data": {
+        "function": "validateTrack",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks/1/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_4.3",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/abc/tracks/1/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_4.3",
+      "data": {
+        "function": "validateTrack",
+        "status": 400,
+        "method": "get",
+        "url": "/public/conferences/abc/tracks/1/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_4.4",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks/abc/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_4.4",
+      "data": {
+        "function": "validateTrack",
+        "status": 400,
+        "method": "get",
+        "url": "/public/conferences/1/tracks/abc/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_4.1",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks/1/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_4.1",
+      "data": {
+        "function": "validateTrack",
+        "status": 200,
+        "method": "get",
+        "url": "/public/conferences/1/tracks/1/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_4.2",
+    "fn": "validateTrack",
+    "request": {
+      "method": "get",
+      "url": "/public/conferences/1/tracks/2147483647/validate",
+      "auth": "none"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_4.2",
+      "data": {
+        "function": "validateTrack",
+        "status": 404,
+        "method": "get",
+        "url": "/public/conferences/1/tracks/2147483647/validate",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_5.1",
+    "fn": "getDeadlines",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/cfp/deadlines",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_5.1",
+      "data": {
+        "function": "getDeadlines",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/cfp/deadlines",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_5.2",
+    "fn": "getDeadlines",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/cfp/deadlines",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_5.2",
+      "data": {
+        "function": "getDeadlines",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/cfp/deadlines",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_5.3",
+    "fn": "getDeadlines",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/cfp/deadlines",
+      "auth": "none"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_5.3",
+      "data": {
+        "function": "getDeadlines",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/cfp/deadlines",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_5.1",
+    "fn": "getDeadlines",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/cfp/deadlines",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_5.1",
+      "data": {
+        "function": "getDeadlines",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/cfp/deadlines",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_5.2",
+    "fn": "getDeadlines",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/cfp/deadlines",
+      "auth": "none"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_5.2",
+      "data": {
+        "function": "getDeadlines",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/cfp/deadlines",
+        "auth": "none",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_6.1",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_6.1",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_6.2",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_6.2",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_6.3",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_6.3",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_6.4",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_6.4",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_6.5",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_6.5",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_6.6",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_6.6",
+      "data": {
+        "function": "create",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.1",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.1",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.2",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.2",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.3",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.3",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.4",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.4",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.5",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.5",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.6",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.6",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.7",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.7",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.8",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.8",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.9",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.9",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.10",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.10",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_6.11",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.11",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.12",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.12",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.13",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.13",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.14",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_6.14",
+      "data": {
+        "function": "create",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_6.15",
+    "fn": "create",
+    "request": {
+      "method": "post",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_6.15",
+      "data": {
+        "function": "create",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_7.1",
+    "fn": "findAll",
+    "request": {
+      "method": "get",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_7.1",
+      "data": {
+        "function": "findAll",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_7.2",
+    "fn": "findAll",
+    "request": {
+      "method": "get",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_7.2",
+      "data": {
+        "function": "findAll",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_7.1",
+    "fn": "findAll",
+    "request": {
+      "method": "get",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_7.1",
+      "data": {
+        "function": "findAll",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_7.2",
+    "fn": "findAll",
+    "request": {
+      "method": "get",
+      "url": "/conferences",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_7.2",
+      "data": {
+        "function": "findAll",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_8.1",
+    "fn": "getMyTrackAssignments",
+    "request": {
+      "method": "get",
+      "url": "/conferences/reviewer/my-track-assignments",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_8.1",
+      "data": {
+        "function": "getMyTrackAssignments",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/reviewer/my-track-assignments",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_8.2",
+    "fn": "getMyTrackAssignments",
+    "request": {
+      "method": "get",
+      "url": "/conferences/reviewer/my-track-assignments",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_8.2",
+      "data": {
+        "function": "getMyTrackAssignments",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/reviewer/my-track-assignments",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_8.3",
+    "fn": "getMyTrackAssignments",
+    "request": {
+      "method": "get",
+      "url": "/conferences/reviewer/my-track-assignments",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_8.3",
+      "data": {
+        "function": "getMyTrackAssignments",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/reviewer/my-track-assignments",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_8.1",
+    "fn": "getMyTrackAssignments",
+    "request": {
+      "method": "get",
+      "url": "/conferences/reviewer/my-track-assignments",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_8.1",
+      "data": {
+        "function": "getMyTrackAssignments",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/reviewer/my-track-assignments",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_8.2",
+    "fn": "getMyTrackAssignments",
+    "request": {
+      "method": "get",
+      "url": "/conferences/reviewer/my-track-assignments",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_8.2",
+      "data": {
+        "function": "getMyTrackAssignments",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/reviewer/my-track-assignments",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_9.1",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_9.1",
+      "data": {
+        "function": "findOne",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_9.2",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_9.2",
+      "data": {
+        "function": "findOne",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_9.3",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_9.3",
+      "data": {
+        "function": "findOne",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_9.4",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_9.4",
+      "data": {
+        "function": "findOne",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_9.1",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_9.1",
+      "data": {
+        "function": "findOne",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_9.2",
+    "fn": "findOne",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_9.2",
+      "data": {
+        "function": "findOne",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_10.1",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_10.1",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_10.2",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_10.2",
+      "data": {
+        "function": "updateConference",
+        "status": 403,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_10.3",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_10.3",
+      "data": {
+        "function": "updateConference",
+        "status": 404,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_10.4",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_10.4",
+      "data": {
+        "function": "updateConference",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_10.5",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_10.5",
+      "data": {
+        "function": "updateConference",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_10.6",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_10.6",
+      "data": {
+        "function": "updateConference",
+        "status": 401,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_10.1",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.1",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.2",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.2",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.3",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_10.3",
+      "data": {
+        "function": "updateConference",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_10.4",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.4",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.5",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.5",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.6",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.6",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.7",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.7",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.8",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.8",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.9",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.9",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_10.10",
+    "fn": "updateConference",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_10.10",
+      "data": {
+        "function": "updateConference",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_11.1",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_11.1",
+      "data": {
+        "function": "deleteConference",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_11.2",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_11.2",
+      "data": {
+        "function": "deleteConference",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_11.3",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_11.3",
+      "data": {
+        "function": "deleteConference",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_11.4",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_11.4",
+      "data": {
+        "function": "deleteConference",
+        "status": 403,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_11.5",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_11.5",
+      "data": {
+        "function": "deleteConference",
+        "status": 404,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_11.6",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/abc",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_11.6",
+      "data": {
+        "function": "deleteConference",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/abc",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_11.7",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_11.7",
+      "data": {
+        "function": "deleteConference",
+        "status": 401,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_11.1",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_11.1",
+      "data": {
+        "function": "deleteConference",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_11.2",
+    "fn": "deleteConference",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_11.2",
+      "data": {
+        "function": "deleteConference",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_12.1",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_12.1",
+      "data": {
+        "function": "getTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_12.2",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_12.2",
+      "data": {
+        "function": "getTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_12.3",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_12.3",
+      "data": {
+        "function": "getTracks",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_12.4",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_12.4",
+      "data": {
+        "function": "getTracks",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_12.1",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_12.1",
+      "data": {
+        "function": "getTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_12.2",
+    "fn": "getTracks",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_12.2",
+      "data": {
+        "function": "getTracks",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_13.1",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_13.1",
+      "data": {
+        "function": "addTrack",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_13.2",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_13.2",
+      "data": {
+        "function": "addTrack",
+        "status": 403,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_13.3",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_13.3",
+      "data": {
+        "function": "addTrack",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_13.4",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/abc/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_13.4",
+      "data": {
+        "function": "addTrack",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/abc/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_13.5",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_13.5",
+      "data": {
+        "function": "addTrack",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_13.6",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_13.6",
+      "data": {
+        "function": "addTrack",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_13.1",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_13.1",
+      "data": {
+        "function": "addTrack",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_13.2",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_13.2",
+      "data": {
+        "function": "addTrack",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_13.3",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_13.3",
+      "data": {
+        "function": "addTrack",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_13.4",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_13.4",
+      "data": {
+        "function": "addTrack",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_13.5",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_13.5",
+      "data": {
+        "function": "addTrack",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_13.6",
+    "fn": "addTrack",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/tracks",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_13.6",
+      "data": {
+        "function": "addTrack",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/tracks",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_14.1",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_14.1",
+      "data": {
+        "function": "setCfp",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.793Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_14.2",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_14.2",
+      "data": {
+        "function": "setCfp",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_14.3",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_14.3",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_14.4",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_14.4",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_14.5",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_14.5",
+      "data": {
+        "function": "setCfp",
+        "status": 403,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_14.6",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_14.6",
+      "data": {
+        "function": "setCfp",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_14.7",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/abc/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_14.7",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/abc/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_14.8",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_14.8",
+      "data": {
+        "function": "setCfp",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_14.1",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_14.1",
+      "data": {
+        "function": "setCfp",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_14.2",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_14.2",
+      "data": {
+        "function": "setCfp",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_14.3",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_14.3",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_14.4",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_14.4",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_14.5",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_14.5",
+      "data": {
+        "function": "setCfp",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_14.6",
+    "fn": "setCfp",
+    "request": {
+      "method": "post",
+      "url": "/conferences/1/cfp",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_14.6",
+      "data": {
+        "function": "setCfp",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/1/cfp",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_15.1",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_15.1",
+      "data": {
+        "function": "updateTrack",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_15.2",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_15.2",
+      "data": {
+        "function": "updateTrack",
+        "status": 403,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_15.3",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_15.3",
+      "data": {
+        "function": "updateTrack",
+        "status": 404,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_15.4",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/abc/tracks/abc",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_15.4",
+      "data": {
+        "function": "updateTrack",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/abc/tracks/abc",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_15.5",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_15.5",
+      "data": {
+        "function": "updateTrack",
+        "status": 401,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_15.1",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_15.1",
+      "data": {
+        "function": "updateTrack",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_15.2",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_15.2",
+      "data": {
+        "function": "updateTrack",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_15.3",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_15.3",
+      "data": {
+        "function": "updateTrack",
+        "status": 400,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_15.4",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_15.4",
+      "data": {
+        "function": "updateTrack",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_15.5",
+    "fn": "updateTrack",
+    "request": {
+      "method": "patch",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_15.5",
+      "data": {
+        "function": "updateTrack",
+        "status": 200,
+        "method": "patch",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_16.1",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_16.1",
+      "data": {
+        "function": "deleteTrack",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_16.2",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_16.2",
+      "data": {
+        "function": "deleteTrack",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_16.3",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_16.3",
+      "data": {
+        "function": "deleteTrack",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_16.4",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_16.4",
+      "data": {
+        "function": "deleteTrack",
+        "status": 403,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_16.5",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_16.5",
+      "data": {
+        "function": "deleteTrack",
+        "status": 404,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_16.6",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/abc/tracks/abc",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_16.6",
+      "data": {
+        "function": "deleteTrack",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/abc/tracks/abc",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_16.7",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_16.7",
+      "data": {
+        "function": "deleteTrack",
+        "status": 401,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_16.1",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_16.1",
+      "data": {
+        "function": "deleteTrack",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_16.2",
+    "fn": "deleteTrack",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/1/tracks/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_16.2",
+      "data": {
+        "function": "deleteTrack",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/1/tracks/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_17.1",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_17.1",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_17.2",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_17.2",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_17.3",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/abc/reviewer/abc/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_17.3",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/tracks/abc/reviewer/abc/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_17.4",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_17.4",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_17.1",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_17.1",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/reviewer/1/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_17.2",
+    "fn": "checkReviewerTrackAssignment",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/reviewer/2147483647/check-assignment",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_17.2",
+      "data": {
+        "function": "checkReviewerTrackAssignment",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/reviewer/2147483647/check-assignment",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_18.1",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_18.1",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_18.2",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_18.2",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_18.3",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_18.3",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 403,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_18.4",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/abc/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_18.4",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/tracks/abc/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_18.5",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_18.5",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_18.1",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_18.1",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_18.2",
+    "fn": "listTrackMembers",
+    "request": {
+      "method": "get",
+      "url": "/conferences/tracks/1/members",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_18.2",
+      "data": {
+        "function": "listTrackMembers",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/tracks/1/members",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_19.1",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase CTC_19.1",
+      "data": {
+        "function": "addTrackMember",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_19.2",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_19.2",
+      "data": {
+        "function": "addTrackMember",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_19.3",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_19.3",
+      "data": {
+        "function": "addTrackMember",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_19.4",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_19.4",
+      "data": {
+        "function": "addTrackMember",
+        "status": 403,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_19.5",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_19.5",
+      "data": {
+        "function": "addTrackMember",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_19.6",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/abc/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_19.6",
+      "data": {
+        "function": "addTrackMember",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/abc/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_19.7",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_19.7",
+      "data": {
+        "function": "addTrackMember",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_19.1",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=0",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_19.1",
+      "data": {
+        "function": "addTrackMember",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=0",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_19.2",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_19.2",
+      "data": {
+        "function": "addTrackMember",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_19.3",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=-1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_19.3",
+      "data": {
+        "function": "addTrackMember",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=-1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_19.4",
+    "fn": "addTrackMember",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/members?userId=2147483647",
+      "auth": "user"
+    },
+    "response": {
+      "status": 201,
+      "message": "Mocked by testcase BVA_19.4",
+      "data": {
+        "function": "addTrackMember",
+        "status": 201,
+        "method": "post",
+        "url": "/conferences/tracks/1/members?userId=2147483647",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_20.1",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_20.1",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_20.2",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_20.2",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.3",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_20.3",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.4",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_20.4",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 404,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.5",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_20.5",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 404,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.6",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_20.6",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 403,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.7",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/abc/members/abc",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_20.7",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 400,
+        "method": "delete",
+        "url": "/conferences/tracks/abc/members/abc",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_20.8",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_20.8",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 401,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_20.1",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/1",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_20.1",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 200,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/1",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_20.2",
+    "fn": "removeTrackMember",
+    "request": {
+      "method": "delete",
+      "url": "/conferences/tracks/1/members/2147483647",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_20.2",
+      "data": {
+        "function": "removeTrackMember",
+        "status": 404,
+        "method": "delete",
+        "url": "/conferences/tracks/1/members/2147483647",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.1",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_21.1",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 200,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_21.2",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_21.2",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.3",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_21.3",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.4",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_21.4",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.5",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_21.5",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.6",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/abc/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_21.6",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/abc/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_21.7",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_21.7",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_21.1",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_21.1",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 200,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_21.2",
+    "fn": "acceptTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/accept",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_21.2",
+      "data": {
+        "function": "acceptTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/accept",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.1",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_22.1",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 200,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_22.2",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_22.2",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.3",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_22.3",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.4",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_22.4",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.5",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_22.5",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 404,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.6",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/abc/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_22.6",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/abc/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_22.7",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_22.7",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 401,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_22.1",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_22.1",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 200,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_22.2",
+    "fn": "rejectTrackAssignment",
+    "request": {
+      "method": "post",
+      "url": "/conferences/tracks/1/reject",
+      "auth": "reviewer"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase BVA_22.2",
+      "data": {
+        "function": "rejectTrackAssignment",
+        "status": 400,
+        "method": "post",
+        "url": "/conferences/tracks/1/reject",
+        "auth": "reviewer",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_23.1",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_23.1",
+      "data": {
+        "function": "getStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_23.2",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_23.2",
+      "data": {
+        "function": "getStats",
+        "status": 403,
+        "method": "get",
+        "url": "/conferences/1/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_23.3",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_23.3",
+      "data": {
+        "function": "getStats",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/1/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_23.4",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_23.4",
+      "data": {
+        "function": "getStats",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_23.5",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_23.5",
+      "data": {
+        "function": "getStats",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_23.1",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_23.1",
+      "data": {
+        "function": "getStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_23.2",
+    "fn": "getStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/2147483647/stats",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_23.2",
+      "data": {
+        "function": "getStats",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/2147483647/stats",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_24.1",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_24.1",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_24.2",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_24.2",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_24.3",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase CTC_24.3",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_24.4",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_24.4",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 403,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_24.5",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_24.5",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_24.6",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_24.6",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_24.1",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_24.1",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_24.2",
+    "fn": "getSubmissionStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/submissions",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase BVA_24.2",
+      "data": {
+        "function": "getSubmissionStats",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/stats/submissions",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_25.1",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_25.1",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_25.2",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_25.2",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_25.3",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_25.3",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 403,
+        "method": "get",
+        "url": "/conferences/1/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_25.4",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_25.4",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_25.5",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_25.5",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.794Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "BVA_25.1",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase BVA_25.1",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "BVA_25.2",
+    "fn": "getAcceptanceRate",
+    "request": {
+      "method": "get",
+      "url": "/conferences/2147483647/stats/acceptance-rate",
+      "auth": "user"
+    },
+    "response": {
+      "status": 404,
+      "message": "Mocked by testcase BVA_25.2",
+      "data": {
+        "function": "getAcceptanceRate",
+        "status": 404,
+        "method": "get",
+        "url": "/conferences/2147483647/stats/acceptance-rate",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_26.1",
+    "fn": "getDashboardStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/dashboard",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_26.1",
+      "data": {
+        "function": "getDashboardStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/dashboard",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_26.2",
+    "fn": "getDashboardStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/dashboard",
+      "auth": "user"
+    },
+    "response": {
+      "status": 200,
+      "message": "Mocked by testcase CTC_26.2",
+      "data": {
+        "function": "getDashboardStats",
+        "status": 200,
+        "method": "get",
+        "url": "/conferences/1/stats/dashboard",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": true
+      }
+    }
+  },
+  {
+    "id": "CTC_26.3",
+    "fn": "getDashboardStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/dashboard",
+      "auth": "user"
+    },
+    "response": {
+      "status": 403,
+      "message": "Mocked by testcase CTC_26.3",
+      "data": {
+        "function": "getDashboardStats",
+        "status": 403,
+        "method": "get",
+        "url": "/conferences/1/stats/dashboard",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_26.4",
+    "fn": "getDashboardStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/abc/stats/dashboard",
+      "auth": "user"
+    },
+    "response": {
+      "status": 400,
+      "message": "Mocked by testcase CTC_26.4",
+      "data": {
+        "function": "getDashboardStats",
+        "status": 400,
+        "method": "get",
+        "url": "/conferences/abc/stats/dashboard",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": false
+      }
+    }
+  },
+  {
+    "id": "CTC_26.5",
+    "fn": "getDashboardStats",
+    "request": {
+      "method": "get",
+      "url": "/conferences/1/stats/dashboard",
+      "auth": "user"
+    },
+    "response": {
+      "status": 401,
+      "message": "Mocked by testcase CTC_26.5",
+      "data": {
+        "function": "getDashboardStats",
+        "status": 401,
+        "method": "get",
+        "url": "/conferences/1/stats/dashboard",
+        "auth": "user",
+        "timestamp": "2026-04-19T14:34:39.795Z",
+        "ok": false
+      }
+    }
+  }
+]

@@ -1,0 +1,1778 @@
+[
+  {
+    "Id": "CTC_1.1",
+    "Function": "getPublicCfp",
+    "Description": "Lay CFP cong khai thanh cong.",
+    "Procedure": "id hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200 OK, tra ve conference, tracks va deadlines (hoac null)",
+    "Preconditions": "Conference ton tai."
+  },
+  {
+    "Id": "CTC_1.2",
+    "Function": "getPublicCfp",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "id khong ton tai. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "404 Not Found",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "CTC_1.3",
+    "Function": "getPublicCfp",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "id=abc. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_1.1",
+    "Function": "getPublicCfp",
+    "Description": "Kiem tra conferenceId hop le x bien duoi",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Lay CFP cong khai thanh cong neu hoi nghi ton tai",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "BVA_1.2",
+    "Function": "getPublicCfp",
+    "Description": "Kiem tra conferenceId x gia tri 9 rat lon",
+    "Procedure": "{\"conferenceId\":2147483647}",
+    "Expected": "404 Not Found.",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "CTC_2.1",
+    "Function": "checkDeadline",
+    "Description": "Kiem tra submission deadline.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le, type=submission, endpoint public.",
+    "Expected": "200 OK, co valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.2",
+    "Function": "checkDeadline",
+    "Description": "Kiem tra review deadline.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le, type=review, endpoint public.",
+    "Expected": "200 OK, co valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.3",
+    "Function": "checkDeadline",
+    "Description": "Kiem tra notification date.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le, type=notification, endpoint public.",
+    "Expected": "200 OK, co valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.4",
+    "Function": "checkDeadline",
+    "Description": "Kiem tra camera-ready deadline.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le, type=camera-ready, endpoint public.",
+    "Expected": "200 OK, co valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.5",
+    "Function": "checkDeadline",
+    "Description": "Validate type khong hop le.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le, type=invalid, endpoint public.",
+    "Expected": "200 OK, valid=false, message=\"Invalid deadline type\".",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.6",
+    "Function": "checkDeadline",
+    "Description": "Conference chua co CFP setting.",
+    "Procedure": "Gui check-deadline voi conferenceId hop le nhung conference chua co CFP",
+    "Expected": "200 OK, valid=false, message=\"CFP settings chua uoc thiet lap\".",
+    "Preconditions": "Co conferenceId hop le; conference o chua uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_2.7",
+    "Function": "checkDeadline",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "Gui check-deadline voi conferenceId=abc, type=submission, endpoint public.",
+    "Expected": "400 Bad Request, message=\"Validation failed (numeric string is expected)\".",
+    "Preconditions": "endpoint public check-deadline truy cap uoc; khong yeu cau tao du lieu conference."
+  },
+  {
+    "Id": "BVA_2.1",
+    "Function": "checkDeadline",
+    "Description": "type = submission",
+    "Procedure": "check-deadline voi conferenceId hop le, type=submission.",
+    "Expected": "200 OK, tra ve valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "BVA_2.2",
+    "Function": "checkDeadline",
+    "Description": "type = camera-ready",
+    "Procedure": "check-deadline voi conferenceId hop le, type=camera-ready.",
+    "Expected": "200 OK, tra ve valid, deadline, message.",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "BVA_2.3",
+    "Function": "checkDeadline",
+    "Description": "type khong hop le",
+    "Procedure": "check-deadline voi conferenceId hop le, type=invalid.",
+    "Expected": "200 OK, valid=false, message=\"Invalid deadline type\".",
+    "Preconditions": "Co conferenceId hop le; conference o a uoc thiet lap CFP deadlines."
+  },
+  {
+    "Id": "CTC_3.1",
+    "Function": "getPublicTracks",
+    "Description": "Lay danh sach tracks cong khai.",
+    "Procedure": "id hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, data la mang tracks.",
+    "Preconditions": "Conference ton tai."
+  },
+  {
+    "Id": "CTC_3.2",
+    "Function": "getPublicTracks",
+    "Description": "Conference khong ton tai (tra mang rong).",
+    "Procedure": "id khong ton tai. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, data=[].",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "CTC_3.3",
+    "Function": "getPublicTracks",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "id=abc. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_3.1",
+    "Function": "getPublicTracks",
+    "Description": "conferenceId co tracks",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Tra danh sach tracks > 0",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "BVA_3.2",
+    "Function": "getPublicTracks",
+    "Description": "conferenceId khong co tracks",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Tra danh sach tracks rong",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "CTC_4.1",
+    "Function": "validateTrack",
+    "Description": "Track thuoc conference.",
+    "Procedure": "conferenceId, trackId hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, valid=true va co track.",
+    "Preconditions": "Conference/track ton tai."
+  },
+  {
+    "Id": "CTC_4.2",
+    "Function": "validateTrack",
+    "Description": "Track khong thuoc conference.",
+    "Procedure": "conferenceId hop le, trackId khong thuoc conference. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, valid=false.",
+    "Preconditions": "Conference ton tai."
+  },
+  {
+    "Id": "CTC_4.3",
+    "Function": "validateTrack",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc, trackId hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "CTC_4.4",
+    "Function": "validateTrack",
+    "Description": "Validate trackId khong hop le.",
+    "Procedure": "conferenceId hop le, trackId=abc. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_4.1",
+    "Function": "validateTrack",
+    "Description": "trackId ton tai trong conference",
+    "Procedure": "{\"conferenceId\":1,\"trackId\":1}",
+    "Expected": "valid=true",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "BVA_4.2",
+    "Function": "validateTrack",
+    "Description": "trackId khong ton tai",
+    "Procedure": "{\"conferenceId\":1,\"trackId\":2147483647}",
+    "Expected": "valid=false",
+    "Preconditions": "Cong khai - khong can dang nhap."
+  },
+  {
+    "Id": "CTC_5.1",
+    "Function": "getDeadlines",
+    "Description": "Lay deadlines thanh cong.",
+    "Procedure": "conferenceId hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, deadlines la object.",
+    "Preconditions": "Conference co CFP."
+  },
+  {
+    "Id": "CTC_5.2",
+    "Function": "getDeadlines",
+    "Description": "Conference chua co CFP.",
+    "Procedure": "conferenceId hop le. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "200, deadlines=null.",
+    "Preconditions": "Conference ton tai, chua set CFP."
+  },
+  {
+    "Id": "CTC_5.3",
+    "Function": "getDeadlines",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc. Endpoint public, khong yeu cau xac thuc JWT.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_5.1",
+    "Function": "getDeadlines",
+    "Description": "conference co cfpSetting",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "deadlines khac null",
+    "Preconditions": "Khong yeu cau JWT (endpoint validation)."
+  },
+  {
+    "Id": "BVA_5.2",
+    "Function": "getDeadlines",
+    "Description": "conference chua co cfpSetting",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "deadlines = null",
+    "Preconditions": "Khong yeu cau JWT (endpoint validation)."
+  },
+  {
+    "Id": "CTC_6.1",
+    "Function": "create",
+    "Description": "Tao conference thanh cong.",
+    "Procedure": "Payload hop le, ay u cac truong bat buoc.",
+    "Expected": "201 Created, tao conference thanh cong, tra ve data conference.",
+    "Preconditions": "User co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_6.2",
+    "Function": "create",
+    "Description": "Tuong gan nguoi tao lam CHAIR.",
+    "Procedure": "Payload hop le, day du cac truong bat buoc, sau do kiem tra DB co CHAIR duoc gan tu dong.",
+    "Expected": "201 Created; DB co conference_members voi role = CHAIR cho user tao.",
+    "Preconditions": "User co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_6.3",
+    "Function": "create",
+    "Description": "Chan date range sai.",
+    "Procedure": "Payload co startDate sau endDate.",
+    "Expected": "400 Bad Request, message startDate phai truoc endDate.",
+    "Preconditions": "User co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_6.4",
+    "Function": "create",
+    "Description": "Thieu field bat buoc.",
+    "Procedure": "Payload thieu field bat buoc nhu name hoac venue.",
+    "Expected": "400 Bad Request, bao loi validation cho name va venue.",
+    "Preconditions": "User co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_6.5",
+    "Function": "create",
+    "Description": "Email khong hop le.",
+    "Procedure": "Payload co contactEmail khong hop le.",
+    "Expected": "400 Bad Request, bao loi contactEmail must be an email.",
+    "Preconditions": "User co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_6.6",
+    "Function": "create",
+    "Description": "Thieu token.",
+    "Procedure": "Payload hop le nhung khong co token JWT.",
+    "Expected": "401 Unauthorized, message Unauthorized.",
+    "Preconditions": "Khong co token JWT."
+  },
+  {
+    "Id": "BVA_6.1",
+    "Function": "create",
+    "Description": "Ten hoi nghi trung voi cac hoi nghi a tao truoc o",
+    "Procedure": "Name trung voi cac hoi nghi a tao truoc o",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.2",
+    "Function": "create",
+    "Description": "Ten hoi nghi co dai 1 ky tu",
+    "Procedure": "Name dai 1 ky tu, cac truong con lai hop le.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.3",
+    "Function": "create",
+    "Description": "Ten hoi nghi co dai 255 ky tu",
+    "Procedure": "Name dai dung 255 ky tu, cac truong con lai hop le.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.4",
+    "Function": "create",
+    "Description": "Ten hoi nghi vuot qua nguong toi da",
+    "Procedure": "Name dai 256 ky tu, cac truong con lai hop le.",
+    "Expected": "400 Bad Request, message: name must be shorter than or equal to 255 characters.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.5",
+    "Function": "create",
+    "Description": "Ten hoi nghi rong",
+    "Procedure": "Name rong hoac bo field name.",
+    "Expected": "400 Bad Request, message: name should not be empty.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.6",
+    "Function": "create",
+    "Description": "Dia diem to chuc co dai 1 ky tu",
+    "Procedure": "Venue dai 1 ky tu, cac truong con lai hop le.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.7",
+    "Function": "create",
+    "Description": "Dia diem to chuc co dai 255 ky tu",
+    "Procedure": "Venue dai dung 255 ky tu, cac truong con lai hop le.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.8",
+    "Function": "create",
+    "Description": "Dia diem to chuc vuot qua nguong toi da",
+    "Procedure": "Venue dai 256 ky tu, cac truong con lai hop le.",
+    "Expected": "400 Bad Request, bao loi venue phai ngan hon hoac bang 255 ky tu.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.9",
+    "Function": "create",
+    "Description": "Mo ta ngan co dai 1 ky tu",
+    "Procedure": "shortDescription dai 1 ky tu, cac truong con lai hop le.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.10",
+    "Function": "create",
+    "Description": "Mo ta ngan co dai 500 ky tu",
+    "Procedure": "shortDescription dai dung 500 ky tu.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.11",
+    "Function": "create",
+    "Description": "Mo ta ngan vuot qua nguong toi da",
+    "Procedure": "shortDescription dai hon 500 ky tu.",
+    "Expected": "400 Bad Request, message: shortDescription must be shorter than or equal to 500 characters.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.12",
+    "Function": "create",
+    "Description": "Ngay bat dau bang ngay ket thuc",
+    "Procedure": "startDate bang endDate.",
+    "Expected": "400 Bad Request, message: startDate phai truoc endDate.\nNeu ban ien theo ket q",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.13",
+    "Function": "create",
+    "Description": "Ngay ket thuc nho hon ngay bat dau",
+    "Procedure": "startDate sau endDate.",
+    "Expected": "400 Bad Request, message: startDate phai truoc endDate.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.14",
+    "Function": "create",
+    "Description": "Email lien h! khong hop le",
+    "Procedure": "contactEmail khong hop le, vi du abc.",
+    "Expected": "400 Bad Request, message: contactEmail must be an email.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "BVA_6.15",
+    "Function": "create",
+    "Description": "Email lien h! toi thieu hop le",
+    "Procedure": "contactEmail hop le, vi du test@example.com.",
+    "Expected": "201 Created, tao conference thanh cong.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_7.1",
+    "Function": "findAll",
+    "Description": "Lay danh sach conference active.",
+    "Procedure": "Goi lay danh sach tat ca hoi nghi, khong gui body.",
+    "Expected": "200 OK, tra ve danh sach conference active.",
+    "Preconditions": "Co JWT hop le va co quyen tao conference."
+  },
+  {
+    "Id": "CTC_7.2",
+    "Function": "findAll",
+    "Description": "Thieu token.",
+    "Procedure": "Lay danh sach hoi nghi nhung khong gui token.",
+    "Expected": "401 Unauthorized.",
+    "Preconditions": "Khong co token JWT."
+  },
+  {
+    "Id": "BVA_7.1",
+    "Function": "findAll",
+    "Description": "Co du lieu hoi nghi",
+    "Procedure": "Goi lay danh sach conference.",
+    "Expected": "200 OK, tra ve danh sach hoi nghi.",
+    "Preconditions": "Trong DB co it nhat 1 conference active."
+  },
+  {
+    "Id": "BVA_7.2",
+    "Function": "findAll",
+    "Description": "Khong co du lieu hoi nghi",
+    "Procedure": "Goi lay danh sach conference.",
+    "Expected": "200 OK, tra ve danh sach rong.",
+    "Preconditions": "Trong DB khong co conference active."
+  },
+  {
+    "Id": "CTC_8.1",
+    "Function": "getMyTrackAssignments",
+    "Description": "Reviewer lay assignments cua minh.",
+    "Procedure": "Goi lay danh sach track assignments cua reviewer hien tai.",
+    "Expected": "200 OK, tra ve danh sach assignment cua reviewer.",
+    "Preconditions": "System.Xml.XmlElement"
+  },
+  {
+    "Id": "CTC_8.2",
+    "Function": "getMyTrackAssignments",
+    "Description": "Chi co giu assignment active.",
+    "Procedure": "Goi lay danh sach track assignments cua reviewer hien tai.",
+    "Expected": "200 OK, chi tra assignment thuoc track/conference active; khong tra assignment cua track inactive.",
+    "Preconditions": "System.Xml.XmlElement"
+  },
+  {
+    "Id": "CTC_8.3",
+    "Function": "getMyTrackAssignments",
+    "Description": "Thieu token.",
+    "Procedure": "Goi lay danh sach track assignments cua reviewer nhung khong gui Authorization.",
+    "Expected": "System.Xml.XmlElement",
+    "Preconditions": "System.Xml.XmlElement"
+  },
+  {
+    "Id": "BVA_8.1",
+    "Function": "getMyTrackAssignments",
+    "Description": "Reviewer co phan cong",
+    "Procedure": "Lay danh sach chu e uoc phan cong cho reviewer hien tai.",
+    "Expected": "200 OK, message lay danh sach phan cong thanh cong, data chua it nhat 1 assignment.",
+    "Preconditions": "Reviewer co token hop le va a uoc phan cong it nhat 1 chu e."
+  },
+  {
+    "Id": "BVA_8.2",
+    "Function": "getMyTrackAssignments",
+    "Description": "Reviewer khong co phan cong",
+    "Procedure": "ay danh sach chu e uoc phan cong cho reviewer hien tai.",
+    "Expected": "200 OK, message lay danh sach phan cong thanh cong, data la mang rong.",
+    "Preconditions": "Reviewer co token hop le nhung khong co phan cong chu e nao."
+  },
+  {
+    "Id": "CTC_9.1",
+    "Function": "findOne",
+    "Description": "Lay chi tiet conference thanh cong.",
+    "Procedure": "Lay chi tiet conference voi id hop le (vi du id = 1).\\",
+    "Expected": "200 OK, message lay thong tin hoi nghi thanh cong, tra ve ay u du lieu conference.",
+    "Preconditions": "Co JWT hop le va conference ton tai."
+  },
+  {
+    "Id": "CTC_9.2",
+    "Function": "findOne",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "Lay chi tiet conference voi id khong ton tai.",
+    "Expected": "404 Not Found, message SKhong co hoi nghi nao voi ID a cho.",
+    "Preconditions": "Co JWT hop le, id conference khong ton tai."
+  },
+  {
+    "Id": "CTC_9.3",
+    "Function": "findOne",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "Lay chi tiet conference voi id = abc.",
+    "Expected": "400 Bad Request, message Validation failed (numeric string is expected).",
+    "Preconditions": "Co JWT hop le, id khong ung kiOu s."
+  },
+  {
+    "Id": "CTC_9.4",
+    "Function": "findOne",
+    "Description": "Thieu token.",
+    "Procedure": "Lay chi tiet conference voi id hop le (vi du 1) nhung khong gui Authorization.",
+    "Expected": "401 Unauthorized, message Unauthorized.",
+    "Preconditions": "Khong co token JWT."
+  },
+  {
+    "Id": "BVA_9.1",
+    "Function": "findOne",
+    "Description": "id hop le",
+    "Procedure": "Lay chi tiet hoi nghi voi id hop le va ton tai.",
+    "Expected": "200 OK, tra ve thong tin chi tiet hoi nghi",
+    "Preconditions": "Co JWT hop le, co conference ton tai (vi du id = 1)."
+  },
+  {
+    "Id": "BVA_9.2",
+    "Function": "findOne",
+    "Description": "id khong ton tai",
+    "Procedure": "Lay chi tiet hoi nghi voi id khong ton tai.",
+    "Expected": "404 Not Found, bao khong co hoi nghi voi ID a cho.",
+    "Preconditions": "Co JWT hop le, id hoi nghi khong ton tai (vi du 99999)."
+  },
+  {
+    "Id": "CTC_10.1",
+    "Function": "updateConference",
+    "Description": "Cap nhat hoi nghi thanh cong.",
+    "Procedure": "Cap nhat hoi nghi voi payload hop le.",
+    "Expected": "200 OK, cap nhat hoi nghi thanh cong.",
+    "Preconditions": "Co token hop le, user co quyen quan ly, conference ton tai."
+  },
+  {
+    "Id": "CTC_10.2",
+    "Function": "updateConference",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "Cap nhat hoi nghi voi payload hop le.",
+    "Expected": "403 Forbidden, bao khong co quyen quan ly hoi nghi nay.",
+    "Preconditions": "Co token hop le nhung user khong co quyen quan ly conference."
+  },
+  {
+    "Id": "CTC_10.3",
+    "Function": "updateConference",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "Cap nhat hoi nghi voi id khong ton tai va payload hop le.",
+    "Expected": "404 Not Found, bao khong tim thay hoi nghi.",
+    "Preconditions": "Co token hop le, user co quyen, conference khong ton tai."
+  },
+  {
+    "Id": "CTC_10.4",
+    "Function": "updateConference",
+    "Description": "Chan date range sai khi update.",
+    "Procedure": "Cap nhat hoi nghi voi startDate sau endDate.",
+    "Expected": "400 Bad Request, message startDate phai truoc endDate.",
+    "Preconditions": "Co token hop le, user co quyen, conference ton tai."
+  },
+  {
+    "Id": "CTC_10.5",
+    "Function": "updateConference",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "Cap nhat hoi nghi voi id khong hop le (abc) va payload hop le.",
+    "Expected": "400 Bad Request, loi validation numeric string is expected.",
+    "Preconditions": "Co token hop le."
+  },
+  {
+    "Id": "CTC_10.6",
+    "Function": "updateConference",
+    "Description": "Thieu token.",
+    "Procedure": "Cap nhat hoi nghi voi payload hop le.",
+    "Expected": "401 Unauthorized.",
+    "Preconditions": "Khong co token JWT."
+  },
+  {
+    "Id": "BVA_10.1",
+    "Function": "updateConference",
+    "Description": "Cap nhat ten hoi nghi voi 1 ky tu",
+    "Procedure": "Cap nhat ten voi 1 ky tu.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.2",
+    "Function": "updateConference",
+    "Description": "Cap nhat ten hoi nghi dat nguong toi da 255 ky tu",
+    "Procedure": "Cap nhat ten x nguong 255 ky tu.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.3",
+    "Function": "updateConference",
+    "Description": "Cap nhat ten hoi nghi vuot qua nguong toi da",
+    "Procedure": "Cap nhat ten vuot 255 ky tu.",
+    "Expected": "400 Bad Request, loi max length.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.4",
+    "Function": "updateConference",
+    "Description": "Cap nhat ten hoi nghi chi co khoang trang",
+    "Procedure": "Cap nhat ten rong/khong hop le.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.5",
+    "Function": "updateConference",
+    "Description": "Cap nhat dia diem to chuc voi 1 ky tu",
+    "Procedure": "Cap nhat dia diem voi 1 ky tu.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.6",
+    "Function": "updateConference",
+    "Description": "Cap nhat dia diem to chuc dat nguong toi da 255 ky tu",
+    "Procedure": "Cap nhat dia diem x nguong 255 ky tu.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.7",
+    "Function": "updateConference",
+    "Description": "Chi co cap nhat truong mo ta chi tiet",
+    "Procedure": "Chi cap nhat truong description.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.8",
+    "Function": "updateConference",
+    "Description": "Mo ta chi tiet rong",
+    "Procedure": "Cap nhat mo ta rong.",
+    "Expected": "200 OK, cap nhat thanh cong.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.9",
+    "Function": "updateConference",
+    "Description": "Ngay bat dau lon hon ngay ket thuc",
+    "Procedure": "Cap nhat ngay bat dau lon hon ngay ket thuc nhung sai thu tu.",
+    "Expected": "400 Bad Request, loi thu tu ngay.",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "BVA_10.10",
+    "Function": "updateConference",
+    "Description": "Cap nhat bang cac ngay trong qua khu",
+    "Procedure": "Cap nhat bang ngay trong qua khu nhung sai thu tu.",
+    "Expected": "200 OK (h! thong chi check thu tu ngay).",
+    "Preconditions": "Co token hop le, conference ton tai, user co quyen quan ly."
+  },
+  {
+    "Id": "CTC_11.1",
+    "Function": "deleteConference",
+    "Description": "Xoa conference thanh cong (soft delete).",
+    "Procedure": "id hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, isActive=false, deletedAt!=null.",
+    "Preconditions": "User co quyen, chua co submissions."
+  },
+  {
+    "Id": "CTC_11.2",
+    "Function": "deleteConference",
+    "Description": "Chan xoa khi a co submissions.",
+    "Procedure": "id hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400, khong thO xoa vi co bai nop.",
+    "Preconditions": "User co quyen, submissions > 0."
+  },
+  {
+    "Id": "CTC_11.3",
+    "Function": "deleteConference",
+    "Description": "Fallback khi submission-service loi.",
+    "Procedure": "id hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, van cho phep soft delete.",
+    "Preconditions": "User co quyen, service timeout/5xx."
+  },
+  {
+    "Id": "CTC_11.4",
+    "Function": "deleteConference",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "id hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_11.5",
+    "Function": "deleteConference",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "id khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_11.6",
+    "Function": "deleteConference",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "id=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_11.7",
+    "Function": "deleteConference",
+    "Description": "Thieu token.",
+    "Procedure": "id hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_11.1",
+    "Function": "deleteConference",
+    "Description": "Xoa hoi nghi chua co submission",
+    "Procedure": "{\"id\":1}",
+    "Expected": "Xoa hoi nghi thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_11.2",
+    "Function": "deleteConference",
+    "Description": "Xoa hoi nghi a co submission",
+    "Procedure": "{\"id\":1}",
+    "Expected": "400 khong thO xoa hoi nghi",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_12.1",
+    "Function": "getTracks",
+    "Description": "Lay danh sach tracks thanh cong.",
+    "Procedure": "id conference hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, data la mang tracks.",
+    "Preconditions": "JWT hop le."
+  },
+  {
+    "Id": "CTC_12.2",
+    "Function": "getTracks",
+    "Description": "Conference khong ton tai (tra rong).",
+    "Procedure": "id khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, data=[].",
+    "Preconditions": "JWT hop le."
+  },
+  {
+    "Id": "CTC_12.3",
+    "Function": "getTracks",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "id=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "JWT hop le."
+  },
+  {
+    "Id": "CTC_12.4",
+    "Function": "getTracks",
+    "Description": "Thieu token.",
+    "Procedure": "id hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_12.1",
+    "Function": "getTracks",
+    "Description": "Conference co tracks",
+    "Procedure": "{\"id\":1}",
+    "Expected": "data tracks length > 0",
+    "Preconditions": "Nguoi dung a dang nhap (JWT hop le)."
+  },
+  {
+    "Id": "BVA_12.2",
+    "Function": "getTracks",
+    "Description": "Conference khong co tracks",
+    "Procedure": "{\"id\":1}",
+    "Expected": "data tracks rong",
+    "Preconditions": "Nguoi dung a dang nhap (JWT hop le)."
+  },
+  {
+    "Id": "CTC_13.1",
+    "Function": "addTrack",
+    "Description": "Them track thanh cong.",
+    "Procedure": "id hop le + payload name hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "201, tao track moi.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_13.2",
+    "Function": "addTrack",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "id hop le + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen."
+  },
+  {
+    "Id": "CTC_13.3",
+    "Function": "addTrack",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "id khong ton tai + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_13.4",
+    "Function": "addTrack",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "id=abc + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_13.5",
+    "Function": "addTrack",
+    "Description": "Payload name khong hop le.",
+    "Procedure": "Thieu name hoac name qua dai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 validation error.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_13.6",
+    "Function": "addTrack",
+    "Description": "Thieu token.",
+    "Procedure": "id hop le + payload hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_13.1",
+    "Function": "addTrack",
+    "Description": "Ten track co dai 1 ky tu",
+    "Procedure": "{\"name\":\"T\"}",
+    "Expected": "Tao track thanh cong voi ten hop le",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_13.2",
+    "Function": "addTrack",
+    "Description": "Ten track dat nguong toi da 255 ky tu",
+    "Procedure": "{\"name\":\"ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\"}",
+    "Expected": "Tao track thanh cong voi ten x nguong toi da",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_13.3",
+    "Function": "addTrack",
+    "Description": "Ten track vuot qua nguong toi da",
+    "Procedure": "{\"name\":\"ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\"}",
+    "Expected": "Bao loi vi ten track vuot qua 255 ky tu",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_13.4",
+    "Function": "addTrack",
+    "Description": "Ten track la khoang trang",
+    "Procedure": "Cap nhat ten la khoang trang.",
+    "Expected": "Tao track thanh cong.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_13.5",
+    "Function": "addTrack",
+    "Description": "Ten track rong",
+    "Procedure": "{\"name\":\"\"}",
+    "Expected": "Bao loi vi ten track khong uoc rong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_13.6",
+    "Function": "addTrack",
+    "Description": "Ten track co ky tu dac biet",
+    "Procedure": "{\"name\":\"AI & ML / Deep Learning (2025) [NEW]\"}",
+    "Expected": "Tao track thanh cong voi ten co ky tu dac biet",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_14.1",
+    "Function": "setCfp",
+    "Description": "Set CFP thanh cong.",
+    "Procedure": "Gui thiet lap CFP voi payload hop le",
+    "Expected": "201 Created, luu/cap nhat moc CFP thanh cong, tra ve data CFP.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_14.2",
+    "Function": "setCfp",
+    "Description": "Update CFP khi a ton tai.",
+    "Procedure": "Gui lai thiet lap CFP cua conference a co CFP",
+    "Expected": "201 Created, CFP duoc cap nhat theo payload moi.",
+    "Preconditions": "User co quyen, a co CFP."
+  },
+  {
+    "Id": "CTC_14.3",
+    "Function": "setCfp",
+    "Description": "Validate thu tu deadline sai.",
+    "Procedure": "Gui thiet lap voi thu tu sai",
+    "Expected": "400 Bad Request, bao loi thu tu moc thoi gian khong hop le.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_14.4",
+    "Function": "setCfp",
+    "Description": "Validate dinh dang date sai.",
+    "Procedure": "Gui thiet lap CFP voi dinh dang ngay sai",
+    "Expected": "400 Bad Request, bao loi validation dinh dang ngay khong hop le.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_14.5",
+    "Function": "setCfp",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "Gui thiet lap CFP bang token user khong co quyen quan ly conference, payload deadline hop le.",
+    "Expected": "403 Forbidden.",
+    "Preconditions": "User khong co quyen."
+  },
+  {
+    "Id": "CTC_14.6",
+    "Function": "setCfp",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "Gui thiet lap CFP voi conferenceId khong ton tai, payload hop le.",
+    "Expected": "404 Not Found.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_14.7",
+    "Function": "setCfp",
+    "Description": "Validate id khong hop le.",
+    "Procedure": "Gui thiet lap CFP voi conferenceId = abc, payload hop le.",
+    "Expected": "400 Bad Request, loi numeric string is expected.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_14.8",
+    "Function": "setCfp",
+    "Description": "Thieu token.",
+    "Procedure": "Gui thiet lap CFP voi payload hop le nhung khong gui Authorization token.",
+    "Expected": "401 Unauthorized.",
+    "Preconditions": "Khong co token."
+  },
+  {
+    "Id": "BVA_14.1",
+    "Function": "setCfp",
+    "Description": "Tat ca deadline bang nhau",
+    "Procedure": "Gui thiet lap voi tat ca moc bang nhau",
+    "Expected": "201 Created, luu CFP thanh cong.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_14.2",
+    "Function": "setCfp",
+    "Description": "Thu tu deadline hop le: nop bai < phan bien < thong bao < camera-ready",
+    "Procedure": "Gui thiet lap voi thu tu hop le tEng dan",
+    "Expected": "201 Created, luu CFP thanh cong.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_14.3",
+    "Function": "setCfp",
+    "Description": "Deadline phan bien nho hon deadline nop bai",
+    "Procedure": "Gui thiet lap voi reviewDeadline nho hon submissionDeadline.",
+    "Expected": "400 Bad Request, loi thu tu moc thoi gian CFP khong hop le.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_14.4",
+    "Function": "setCfp",
+    "Description": "Ngay thong bao nho hon deadline phan bien",
+    "Procedure": "Gui thiet lap voi notificationDate nho hon reviewDeadline, cac moc khac giu hop le.",
+    "Expected": "400 Bad Request, loi thu tu moc thoi gian CFP khong hop le.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_14.5",
+    "Function": "setCfp",
+    "Description": "Deadline camera-ready nho hon ngay thong bao",
+    "Procedure": "Gui thiet lap voi cameraReadyDeadline nho hon notificationDate",
+    "Expected": "400 Bad Request, vi pham thu tu moc thoi gian.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_14.6",
+    "Function": "setCfp",
+    "Description": "Deadline nop bai nam trong qua khu gan",
+    "Procedure": "Gui thiet lap voi submissionDeadline nam trong qua khu gan, cac moc con lai tEng dan hop le.",
+    "Expected": "201 Created, luu CFP thanh cong.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_15.1",
+    "Function": "updateTrack",
+    "Description": "Cap nhat track thanh cong.",
+    "Procedure": "conferenceId/trackId hop le + payload name. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, track cap nhat thanh cong.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_15.2",
+    "Function": "updateTrack",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "param hop le + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen."
+  },
+  {
+    "Id": "CTC_15.3",
+    "Function": "updateTrack",
+    "Description": "Track khong ton tai.",
+    "Procedure": "conferenceId hop le, trackId sai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_15.4",
+    "Function": "updateTrack",
+    "Description": "Validate conferenceId/trackId khong hop le.",
+    "Procedure": "conferenceId=abc hoac trackId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_15.5",
+    "Function": "updateTrack",
+    "Description": "Thieu token.",
+    "Procedure": "param hop le + payload hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_15.1",
+    "Function": "updateTrack",
+    "Description": "Cap nhat ten track voi 1 ky tu",
+    "Procedure": "cap nhat ten voi 1 ky tu.",
+    "Expected": "Cap nhat track thanh cong voi ten moi",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_15.2",
+    "Function": "updateTrack",
+    "Description": "Cap nhat ten track dat nguong toi da 255 ky tu",
+    "Procedure": "cap nhat ten voi 255 ky tu.",
+    "Expected": "Cap nhat track thanh cong voi ten toi da",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_15.3",
+    "Function": "updateTrack",
+    "Description": "Cap nhat ten track vuot qua nguong toi da",
+    "Procedure": "cap nhat ten voi 256 ky tu.",
+    "Expected": "Bao loi vi ten track vuot qua 255 ky tu",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_15.4",
+    "Function": "updateTrack",
+    "Description": "Cap nhat ten track rong",
+    "Procedure": "{\"name\":\"\"}",
+    "Expected": "200, cap nhat track thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_15.5",
+    "Function": "updateTrack",
+    "Description": "Cap nhat ten track la khoang trang",
+    "Procedure": "cap nhat ten la khoang trang.",
+    "Expected": "200, cap nhat track thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_16.1",
+    "Function": "deleteTrack",
+    "Description": "Xoa track thanh cong (soft delete).",
+    "Procedure": "conferenceId/trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, track soft delete thanh cong.",
+    "Preconditions": "User co quyen, chua co submissions."
+  },
+  {
+    "Id": "CTC_16.2",
+    "Function": "deleteTrack",
+    "Description": "Chan xoa track co bai nop.",
+    "Procedure": "conferenceId/trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "User co quyen, submissionIds > 0."
+  },
+  {
+    "Id": "CTC_16.3",
+    "Function": "deleteTrack",
+    "Description": "Fallback khi submission-service loi.",
+    "Procedure": "conferenceId/trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, van cho xoa.",
+    "Preconditions": "User co quyen, service timeout/5xx."
+  },
+  {
+    "Id": "CTC_16.4",
+    "Function": "deleteTrack",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "conferenceId/trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_16.5",
+    "Function": "deleteTrack",
+    "Description": "Track khong ton tai.",
+    "Procedure": "conferenceId hop le, trackId sai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_16.6",
+    "Function": "deleteTrack",
+    "Description": "Validate conferenceId/trackId khong hop le.",
+    "Procedure": "conferenceId=abc hoac trackId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_16.7",
+    "Function": "deleteTrack",
+    "Description": "Thieu token.",
+    "Procedure": "param hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_16.1",
+    "Function": "deleteTrack",
+    "Description": "Xoa track chua co bai nop",
+    "Procedure": "{\"conferenceId\":1,\"trackId\":1}",
+    "Expected": "Xoa track thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_16.2",
+    "Function": "deleteTrack",
+    "Description": "Xoa track a co bai nop",
+    "Procedure": "{\"conferenceId\":1,\"trackId\":1}",
+    "Expected": "400 khong thO xoa track",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_17.1",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Reviewer a accept assignment.",
+    "Procedure": "trackId/reviewerId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, data.hasAccepted=true.",
+    "Preconditions": "Assignment ACCEPTED, track active."
+  },
+  {
+    "Id": "CTC_17.2",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Reviewer chua accept assignment.",
+    "Procedure": "trackId/reviewerId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, data.hasAccepted=false.",
+    "Preconditions": "Khong co assignment ACCEPTED active."
+  },
+  {
+    "Id": "CTC_17.3",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Validate trackId/reviewerId khong hop le.",
+    "Procedure": "trackId=abc hoac reviewerId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_17.4",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Thieu token.",
+    "Procedure": "param hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_17.1",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Reviewer co assignment",
+    "Procedure": "{\"trackId\":1,\"reviewerId\":1}",
+    "Expected": "Tra ket qua assigned=true",
+    "Preconditions": "Nguoi dung a dang nhap (JWT hop le)."
+  },
+  {
+    "Id": "BVA_17.2",
+    "Function": "checkReviewerTrackAssignment",
+    "Description": "Reviewer khong co assignment",
+    "Procedure": "{\"trackId\":1,\"reviewerId\":2147483647}",
+    "Expected": "Tra ket qua assigned=false",
+    "Preconditions": "Nguoi dung a dang nhap (JWT hop le)."
+  },
+  {
+    "Id": "CTC_18.1",
+    "Function": "listTrackMembers",
+    "Description": "Lay danh sach member thanh cong.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, data la mang members.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_18.2",
+    "Function": "listTrackMembers",
+    "Description": "Track khong ton tai.",
+    "Procedure": "trackId khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_18.3",
+    "Function": "listTrackMembers",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_18.4",
+    "Function": "listTrackMembers",
+    "Description": "Validate trackId khong hop le.",
+    "Procedure": "trackId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_18.5",
+    "Function": "listTrackMembers",
+    "Description": "Thieu token.",
+    "Procedure": "trackId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_18.1",
+    "Function": "listTrackMembers",
+    "Description": "Track co thanh vien",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "data members length > 0",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_18.2",
+    "Function": "listTrackMembers",
+    "Description": "Track khong co thanh vien",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "data members rong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_19.1",
+    "Function": "addTrackMember",
+    "Description": "Them member vao track thanh cong.",
+    "Procedure": "trackId hop le + userId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "201, assignment PENDING.",
+    "Preconditions": "User co quyen, member chua ton tai."
+  },
+  {
+    "Id": "CTC_19.2",
+    "Function": "addTrackMember",
+    "Description": "Chan them member trung lap.",
+    "Procedure": "trackId hop le + userId a ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_19.3",
+    "Function": "addTrackMember",
+    "Description": "Track khong ton tai.",
+    "Procedure": "trackId sai + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_19.4",
+    "Function": "addTrackMember",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "trackId hop le + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen."
+  },
+  {
+    "Id": "CTC_19.5",
+    "Function": "addTrackMember",
+    "Description": "Validate userId khong hop le.",
+    "Procedure": "userId khong phai so nguyen. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 validation error.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_19.6",
+    "Function": "addTrackMember",
+    "Description": "Validate trackId khong hop le.",
+    "Procedure": "trackId=abc + payload hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_19.7",
+    "Function": "addTrackMember",
+    "Description": "Thieu token.",
+    "Procedure": "param/payload hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_19.1",
+    "Function": "addTrackMember",
+    "Description": "userId bang 0",
+    "Procedure": "{\"userId\":0}",
+    "Expected": "Bao loi vi userId phai la so nguyen duong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_19.2",
+    "Function": "addTrackMember",
+    "Description": "userId bang 1",
+    "Procedure": "{\"userId\":1}",
+    "Expected": "Them thanh vien track thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_19.3",
+    "Function": "addTrackMember",
+    "Description": "userId am",
+    "Procedure": "{\"userId\":-1}",
+    "Expected": "404 Not Found.",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_19.4",
+    "Function": "addTrackMember",
+    "Description": "userId rat lon",
+    "Procedure": "{\"userId\":2147483647}",
+    "Expected": "H! thong chap nhan hoac tra ve loi user khong ton tai tuy du lieu thuc te",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_20.1",
+    "Function": "removeTrackMember",
+    "Description": "Xoa member thanh cong.",
+    "Procedure": "trackId/userId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, xoa thanh cong.",
+    "Preconditions": "User co quyen, co auth token, member chua review."
+  },
+  {
+    "Id": "CTC_20.2",
+    "Function": "removeTrackMember",
+    "Description": "Thieu auth token O guard cross-service.",
+    "Procedure": "trackId/userId hop le, request thieu bearer header trong handler. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "JWT guard a qua nhung thieu auth header dung cho service check."
+  },
+  {
+    "Id": "CTC_20.3",
+    "Function": "removeTrackMember",
+    "Description": "Member a review submissions.",
+    "Procedure": "trackId/userId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400, khong thO xoa member a review.",
+    "Preconditions": "User co quyen, review-service tra hasReviews=true."
+  },
+  {
+    "Id": "CTC_20.4",
+    "Function": "removeTrackMember",
+    "Description": "Member khong ton tai trong track.",
+    "Procedure": "trackId hop le, userId khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_20.5",
+    "Function": "removeTrackMember",
+    "Description": "Track khong ton tai.",
+    "Procedure": "trackId khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_20.6",
+    "Function": "removeTrackMember",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "trackId/userId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_20.7",
+    "Function": "removeTrackMember",
+    "Description": "Validate trackId/userId khong hop le.",
+    "Procedure": "trackId=abc hoac userId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_20.8",
+    "Function": "removeTrackMember",
+    "Description": "Thieu token.",
+    "Procedure": "param hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_20.1",
+    "Function": "removeTrackMember",
+    "Description": "Xoa user hop le khoi track",
+    "Procedure": "{\"trackId\":1,\"userId\":1}",
+    "Expected": "Xoa thanh vien thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_20.2",
+    "Function": "removeTrackMember",
+    "Description": "Xoa user khong ton tai trong track",
+    "Procedure": "{\"trackId\":1,\"userId\":2147483647}",
+    "Expected": "404 khong tim thay thanh vien",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_21.1",
+    "Function": "acceptTrackAssignment",
+    "Description": "Accept assignment thanh cong.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, status=ACCEPTED.",
+    "Preconditions": "Assignment PENDING ton tai cho user hien tai."
+  },
+  {
+    "Id": "CTC_21.2",
+    "Function": "acceptTrackAssignment",
+    "Description": "Chan accept khi a ACCEPTED.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "Assignment status=ACCEPTED."
+  },
+  {
+    "Id": "CTC_21.3",
+    "Function": "acceptTrackAssignment",
+    "Description": "Chan accept khi a REJECTED.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "Assignment status=REJECTED."
+  },
+  {
+    "Id": "CTC_21.4",
+    "Function": "acceptTrackAssignment",
+    "Description": "Assignment khong ton tai.",
+    "Procedure": "trackId khong co assignment cua user. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "JWT reviewer hop le."
+  },
+  {
+    "Id": "CTC_21.5",
+    "Function": "acceptTrackAssignment",
+    "Description": "Track khong con active.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "Assignment co track a xoa/inactive."
+  },
+  {
+    "Id": "CTC_21.6",
+    "Function": "acceptTrackAssignment",
+    "Description": "Validate trackId khong hop le.",
+    "Procedure": "trackId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "JWT reviewer hop le."
+  },
+  {
+    "Id": "CTC_21.7",
+    "Function": "acceptTrackAssignment",
+    "Description": "Thieu token.",
+    "Procedure": "trackId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_21.1",
+    "Function": "acceptTrackAssignment",
+    "Description": "Assignment x trang thai PENDING",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "Chap nhan thanh cong",
+    "Preconditions": "Nguoi dung a dang nhap va la nguoi uoc phan cong track."
+  },
+  {
+    "Id": "BVA_21.2",
+    "Function": "acceptTrackAssignment",
+    "Description": "Assignment a xu ly truoc o",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "400 phan cong a uoc xu ly",
+    "Preconditions": "Nguoi dung a dang nhap va la nguoi uoc phan cong track."
+  },
+  {
+    "Id": "CTC_22.1",
+    "Function": "rejectTrackAssignment",
+    "Description": "Reject assignment thanh cong.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, status=REJECTED.",
+    "Preconditions": "Assignment PENDING ton tai cho user hien tai."
+  },
+  {
+    "Id": "CTC_22.2",
+    "Function": "rejectTrackAssignment",
+    "Description": "Chan reject khi a REJECTED.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400.",
+    "Preconditions": "Assignment status=REJECTED."
+  },
+  {
+    "Id": "CTC_22.3",
+    "Function": "rejectTrackAssignment",
+    "Description": "Chan reject khi a ACCEPTED.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400, khong thO tu choi assignment a ACCEPTED.",
+    "Preconditions": "Assignment status=ACCEPTED."
+  },
+  {
+    "Id": "CTC_22.4",
+    "Function": "rejectTrackAssignment",
+    "Description": "Assignment khong ton tai.",
+    "Procedure": "trackId khong co assignment cua user. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "JWT reviewer hop le."
+  },
+  {
+    "Id": "CTC_22.5",
+    "Function": "rejectTrackAssignment",
+    "Description": "Track khong con active.",
+    "Procedure": "trackId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "Assignment co track a xoa/inactive."
+  },
+  {
+    "Id": "CTC_22.6",
+    "Function": "rejectTrackAssignment",
+    "Description": "Validate trackId khong hop le.",
+    "Procedure": "trackId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "JWT reviewer hop le."
+  },
+  {
+    "Id": "CTC_22.7",
+    "Function": "rejectTrackAssignment",
+    "Description": "Thieu token.",
+    "Procedure": "trackId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_22.1",
+    "Function": "rejectTrackAssignment",
+    "Description": "Assignment x trang thai PENDING",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "Tu ch i thanh cong",
+    "Preconditions": "Nguoi dung a dang nhap va la nguoi uoc phan cong track."
+  },
+  {
+    "Id": "BVA_22.2",
+    "Function": "rejectTrackAssignment",
+    "Description": "Assignment a xu ly truoc o",
+    "Procedure": "{\"trackId\":1}",
+    "Expected": "400 phan cong a uoc xu ly",
+    "Preconditions": "Nguoi dung a dang nhap va la nguoi uoc phan cong track."
+  },
+  {
+    "Id": "CTC_23.1",
+    "Function": "getStats",
+    "Description": "Lay thong ke tong quan thanh cong.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, co totalTracks/totalMembers/membersByRole/tracks.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_23.2",
+    "Function": "getStats",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_23.3",
+    "Function": "getStats",
+    "Description": "Conference khong ton tai.",
+    "Procedure": "conferenceId khong ton tai. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404.",
+    "Preconditions": "User co quyen hoac ADMIN."
+  },
+  {
+    "Id": "CTC_23.4",
+    "Function": "getStats",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_23.5",
+    "Function": "getStats",
+    "Description": "Thieu token.",
+    "Procedure": "conferenceId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_23.1",
+    "Function": "getStats",
+    "Description": "conferenceId hop le",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Lay thong ke thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_23.2",
+    "Function": "getStats",
+    "Description": "conferenceId khong ton tai",
+    "Procedure": "{\"conferenceId\":2147483647}",
+    "Expected": "404 khong tim thay hoi nghi",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_24.1",
+    "Function": "getSubmissionStats",
+    "Description": "Lay submission stats thanh cong.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, co totalSubmissions/submissionsByTrack/acceptanceRate.",
+    "Preconditions": "User co quyen + token hop le cho cross-service."
+  },
+  {
+    "Id": "CTC_24.2",
+    "Function": "getSubmissionStats",
+    "Description": "Fallback khi submission-service tra 502.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, tra bos li!u 0.",
+    "Preconditions": "User co quyen, service tra 502."
+  },
+  {
+    "Id": "CTC_24.3",
+    "Function": "getSubmissionStats",
+    "Description": "L i non-502 tu submission-service.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "404 tu reporting service.",
+    "Preconditions": "User co quyen, service tra loi khac 502."
+  },
+  {
+    "Id": "CTC_24.4",
+    "Function": "getSubmissionStats",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_24.5",
+    "Function": "getSubmissionStats",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_24.6",
+    "Function": "getSubmissionStats",
+    "Description": "Thieu token.",
+    "Procedure": "conferenceId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_24.1",
+    "Function": "getSubmissionStats",
+    "Description": "Co token hop le",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Lay submission stats thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_24.2",
+    "Function": "getSubmissionStats",
+    "Description": "Thieu token tich hop service",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "L i tich hop do thieu token hoac unauthorized",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_25.1",
+    "Function": "getAcceptanceRate",
+    "Description": "Lay acceptance rate thanh cong.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, co acceptanceRate/totalAccepted/totalRejected/totalSubmissions.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_25.2",
+    "Function": "getAcceptanceRate",
+    "Description": "Fallback khi service loi.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, cac chi s = 0.",
+    "Preconditions": "User co quyen, submission-service loi."
+  },
+  {
+    "Id": "CTC_25.3",
+    "Function": "getAcceptanceRate",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_25.4",
+    "Function": "getAcceptanceRate",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_25.5",
+    "Function": "getAcceptanceRate",
+    "Description": "Thieu token.",
+    "Procedure": "conferenceId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  },
+  {
+    "Id": "BVA_25.1",
+    "Function": "getAcceptanceRate",
+    "Description": "conferenceId hop le",
+    "Procedure": "{\"conferenceId\":1}",
+    "Expected": "Lay acceptance rate thanh cong",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "BVA_25.2",
+    "Function": "getAcceptanceRate",
+    "Description": "conferenceId khong ton tai",
+    "Procedure": "{\"conferenceId\":2147483647}",
+    "Expected": "404 khong tim thay hoi nghi",
+    "Preconditions": "ADMIN hoac CHAIR (quyen quan ly hoi nghi)."
+  },
+  {
+    "Id": "CTC_26.1",
+    "Function": "getDashboardStats",
+    "Description": "Lay dashboard stats thanh cong.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, co submissions/reviewers/statusDistribution.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_26.2",
+    "Function": "getDashboardStats",
+    "Description": "Dashboard fallback khi submission-service loi 502.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "200, s li!u submissions ve 0.",
+    "Preconditions": "User co quyen."
+  },
+  {
+    "Id": "CTC_26.3",
+    "Function": "getDashboardStats",
+    "Description": "Chan user khong co quyen.",
+    "Procedure": "conferenceId hop le. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "403.",
+    "Preconditions": "User khong co quyen manage."
+  },
+  {
+    "Id": "CTC_26.4",
+    "Function": "getDashboardStats",
+    "Description": "Validate conferenceId khong hop le.",
+    "Procedure": "conferenceId=abc. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "400 do ParseIntPipe.",
+    "Preconditions": "User co token."
+  },
+  {
+    "Id": "CTC_26.5",
+    "Function": "getDashboardStats",
+    "Description": "Thieu token.",
+    "Procedure": "conferenceId hop le, khong gui token. Yeu cau xac thuc bang Bearer JWT hop le.",
+    "Expected": "401.",
+    "Preconditions": "Khong."
+  }
+]
