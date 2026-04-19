@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTrackDto {
   @ApiProperty({
-    description: 'Tên của track',
+    description: 'Tên chủ đề (track)',
     example: 'Artificial Intelligence & Machine Learning',
     maxLength: 255,
   })

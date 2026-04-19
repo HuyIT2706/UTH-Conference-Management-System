@@ -22,21 +22,23 @@ export class CreateConferenceDto {
   name: string;
 
   @ApiProperty({
-    description: 'Ngày bắt đầu (ISO 8601)',
+    description: 'Ngày bắt đầu của hội nghị (ISO 8601)',
     example: '2025-06-01T09:00:00Z',
+    format: 'date-time',
   })
   @IsDateString()
   startDate: string;
 
   @ApiProperty({
-    description: 'Ngày kết thúc (ISO 8601)',
+    description: 'Ngày kết thúc của hội nghị (ISO 8601)',
     example: '2025-06-03T18:00:00Z',
+    format: 'date-time',
   })
   @IsDateString()
   endDate: string;
 
   @ApiProperty({
-    description: 'Địa điểm tổ chức',
+    description: 'Địa điểm tổ chức hội nghị',
     example: 'HCMC University of Transport',
     maxLength: 255,
   })
@@ -46,8 +48,8 @@ export class CreateConferenceDto {
   venue: string;
 
   @ApiProperty({
-    description: 'Mô tả chi tiết về hội nghị',
-    example: 'International Conference on Transportation and Logistics 2025...',
+    description: 'Mô tả chi tiết hiển thị trên trang hội nghị',
+    example: 'Hội nghị quốc tế về giao thông và logistics do UTH tổ chức.',
     required: false,
   })
   @IsString()
@@ -55,8 +57,8 @@ export class CreateConferenceDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Mô tả ngắn gọn cho trang CFP (tối đa 500 ký tự)',
-    example: 'Join us for the premier conference on transportation research...',
+    description: 'Mô tả ngắn hiển thị trên CFP và danh sách hội nghị (tối đa 500 ký tự)',
+    example: 'Hội nghị thường niên về nghiên cứu giao thông, logistics và công nghệ ứng dụng.',
     maxLength: 500,
     required: false,
   })
@@ -66,8 +68,9 @@ export class CreateConferenceDto {
   shortDescription?: string;
 
   @ApiProperty({
-    description: 'Email liên hệ cho hội nghị',
+    description: 'Email liên hệ của ban tổ chức hội nghị',
     example: 'conference@uth.edu.vn',
+    format: 'email',
     required: false,
   })
   @IsEmail()
