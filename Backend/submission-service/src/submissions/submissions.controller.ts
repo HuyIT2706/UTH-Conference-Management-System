@@ -17,6 +17,7 @@ import {
   HttpException,
   UseGuards,
   Req,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -387,6 +388,7 @@ export class SubmissionsController {
   }
 
   @Post(':id/camera-ready')
+  @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Upload camera-ready version',
@@ -430,7 +432,7 @@ export class SubmissionsController {
     }
 
     if (!file) {
-      throw new UnauthorizedException('File là bắt buộc');
+      throw new BadRequestException('File là bắt buộc');
     }
 
     const submission = await this.submissionsService.uploadCameraReady(
