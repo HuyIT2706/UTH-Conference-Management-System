@@ -17,6 +17,7 @@ import {
   HttpException,
   UseGuards,
   Req,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -304,6 +305,18 @@ export class SubmissionsController {
       authToken,
     );
 
+    if (!submission || submission.deletedAt || submission.isActive === false) {
+      throw new NotFoundException('Không tìm thấy submission');
+    }
+
+    if (
+      submission.authorId !== user.sub &&
+      !user.roles?.includes('admin') &&
+      !user.roles?.includes('chair')
+    ) {
+      throw new ForbiddenException('Không có quyền xem submission này');
+    }
+
     return {
       message: 'Lấy chi tiết bài dự thi thành công',
       data: submission,
@@ -387,6 +400,7 @@ export class SubmissionsController {
   }
 
   @Post(':id/camera-ready')
+  @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({
     summary: 'Upload camera-ready version',
@@ -408,6 +422,7 @@ export class SubmissionsController {
       required: ['file'],
     },
   })
+  @HttpCode(200)
   @ApiResponse({ status: 200, description: 'Upload camera-ready thành công' })
   @ApiResponse({
     status: 400,
@@ -430,7 +445,7 @@ export class SubmissionsController {
     }
 
     if (!file) {
-      throw new UnauthorizedException('File là bắt buộc');
+      throw new BadRequestException('File là bắt buộc');
     }
 
     const submission = await this.submissionsService.uploadCameraReady(
@@ -472,6 +487,26 @@ export class SubmissionsController {
     const user = req.user as JwtPayload | undefined;
     if (!user?.sub) {
       throw new UnauthorizedException('Token không hợp lệ');
+    }
+
+    const submission = await this.submissionsService.findOne(
+      id,
+      user.sub,
+      user.roles || [],
+      undefined,
+      undefined,
+    );
+
+    if (!submission || submission.deletedAt || submission.isActive === false) {
+      throw new NotFoundException('Không tìm thấy submission');
+    }
+
+    if (
+      submission.authorId !== user.sub &&
+      !user.roles?.includes('admin') &&
+      !user.roles?.includes('chair')
+    ) {
+      throw new ForbiddenException('Không có quyền xem reviews của submission này');
     }
 
     const reviews = await this.submissionsService.getAnonymizedReviews(
